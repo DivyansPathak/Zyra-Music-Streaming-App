@@ -1,0 +1,12 @@
+package com.zyra.music.zyra.data.remote.dto
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class PlaylistDto(
+    val id: Long? = null, // Nullable when creating a new playlist
+    @SerialName("user_id")
+    val userId: String? = null,
+    val name: String
+)
