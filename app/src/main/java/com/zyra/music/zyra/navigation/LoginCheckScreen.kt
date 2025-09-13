@@ -39,12 +39,12 @@ fun LoginCheckScreen(
             when(status){
                 is SessionStatus.Authenticated -> {
                     Log.d("LoginCheck", "User is Authenticated. Navigating to SearchScreen.")
-                    navController.navigate(Route.HomeScreen){
-                        popUpTo(Route.LoginCheckScreen){inclusive = true}
+                    navController.navigate(Route.HomeScreen.title){
+                        popUpTo(Route.LoginCheckScreen.title){inclusive = true}
                     }
                 }
                 is SessionStatus.NotAuthenticated ->{
-                    navController.navigate(Route.LoginScreen){
+                    navController.navigate(Route.LoginScreen.title){
                         popUpTo(Route.LoginCheckScreen){inclusive = true}
                     }
                 }

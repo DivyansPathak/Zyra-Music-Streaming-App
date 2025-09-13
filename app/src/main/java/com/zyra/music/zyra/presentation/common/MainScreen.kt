@@ -50,15 +50,18 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination?.route
 
+
     Log.d("MainScreen", "$currentDestination")
-    val isPlayerScreen =
-        currentDestination?.startsWith("com.zyra.music.zyra.navigation.Route.PlayerScreen") == true
+    val isPlayerScreen = currentDestination == Route.PlayerScreen.title
+//        currentDestination?.startsWith(playerRouteString ?: "") == true
 
     val isBottomBarVisible = when {
-        currentDestination?.startsWith("com.zyra.music.zyra.navigation.Route.HomeScreen") == true -> true
-        currentDestination?.startsWith("com.zyra.music.zyra.navigation.Route.SearchScreen") == true -> true
-        currentDestination?.startsWith("com.zyra.music.zyra.navigation.Route.ProfileScreen") == true -> true
-        currentDestination?.startsWith("com.zyra.music.zyra.navigation.Route.PlayListScreen") == true -> true
+//        currentDestination?.startsWith("com.zyra.music.zyra.navigation.Route.PlaylistScreen") == true -> true
+
+        currentDestination == Route.HomeScreen.title -> true
+        currentDestination == Route.SearchScreen.title -> true
+        currentDestination?.startsWith("com.zyra.music.zyra.navigation.Route.PlaylistScreen") == true -> true
+        currentDestination == Route.ProfileScreen.title -> true
         else -> false
     }
 
@@ -129,7 +132,7 @@ fun MainScreen() {
 //                                    navController.navigate(Route.PlayerScreen(jsonTrack = trackJson)) {
 //
 //                                    }
-                                    navController.navigate(Route.PlayerScreen)
+                                    navController.navigate(Route.PlayerScreen.title)
                                 },
                                 duration = formatDurationLong(state.totalDuration),
                                 currentDuration = formatDurationLong(state.currentPosition)
@@ -137,7 +140,8 @@ fun MainScreen() {
                         }
                     }
                     BottomNavigationBar(
-                        navController = navController
+                        navController = navController,
+                        currentDestination = currentDestination
                     )
                 }
             }
@@ -162,7 +166,7 @@ fun MainScreen() {
 //                    navController.navigate(Route.PlayerScreen(jsonTrack = trackJson))
 
                     mainMusicViewModel.playRadioForSong(clickedTrack = track)
-                    navController.navigate(Route.PlayerScreen)
+                    navController.navigate(Route.PlayerScreen.title)
                 }
             )
 

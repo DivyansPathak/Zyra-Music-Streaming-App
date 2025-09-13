@@ -36,17 +36,17 @@ fun NavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = Route.LoginCheckScreen,
+        startDestination = Route.LoginCheckScreen.title,
         enterTransition = {fadeIn()},
         exitTransition = {fadeOut()},
     ) {
-        composable<Route.LoginCheckScreen>{
+        composable(Route.LoginCheckScreen.title){
            LoginCheckScreen(navController = navController)
         }
-        composable<Route.LoginScreen>{
+        composable(Route.LoginScreen.title){
             LoginScreen(navController = navController)
         }
-        composable<Route.HomeScreen> {
+        composable(Route.HomeScreen.title) {
             val vieModel : HomeViewModel = koinViewModel()
             val state by vieModel.uiState.collectAsStateWithLifecycle()
             HomeScreen(
@@ -55,7 +55,7 @@ fun NavGraph(
                 onPlaylistClick = {}
             )
         }
-        composable<Route.PlayerScreen>{ backStackEntry->
+        composable(Route.PlayerScreen.title){ backStackEntry->
 //            val state by musicViewModel.uiState.collectAsStateWithLifecycle()
 //            PlayerScreen(
 //                state = state,
@@ -76,7 +76,7 @@ fun NavGraph(
             )
 
         }
-        composable<Route.SearchScreen>{
+        composable(Route.SearchScreen.title){
             val viewModel : SearchViewModel = koinViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -101,7 +101,7 @@ fun NavGraph(
                 }
             )
         }
-        composable<Route.ProfileScreen> {
+        composable(Route.ProfileScreen.title) {
 //            ProfileScreen()
         }
         composable<Route.PlayListScreen> {

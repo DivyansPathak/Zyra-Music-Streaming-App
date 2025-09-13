@@ -16,7 +16,6 @@ data class NewPlayerState(
     val repeatMode : RepeatMode = RepeatMode.OFF,
     val shuffleModeEnabled : Boolean = false,
     val isFavorite : Boolean = false,
-//    val isCurrentlyFavorite : Boolean = false,
     val errorMessage : String? = null,
     val queue : List<TrackFullOne> = emptyList(),
     val favoriteIds : Set<String> = emptySet(),
