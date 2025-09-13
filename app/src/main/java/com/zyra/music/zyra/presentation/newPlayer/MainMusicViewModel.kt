@@ -7,10 +7,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import coil3.Uri
 import com.google.common.util.concurrent.MoreExecutors
 import com.zyra.music.zyra.data.remote.SupabaseClient.supabase
 import com.zyra.music.zyra.domain.model.TrackFullOne
@@ -139,7 +141,7 @@ class MainMusicViewModel(
         }
     }
 
-    // This is the core logic for the timer.
+
     private fun startSleepTimer(durationInMillis: Long) {
         // Cancel any previous timer before starting a new one.
         sleepTimer?.cancel()
@@ -167,8 +169,6 @@ class MainMusicViewModel(
         _uiState.update { it.copy(sleepTimeRemaining = durationInMillis) }
     }
 
-    // --- ADDED ---
-    // A helper function to handle the "End of Track" case.
     private fun setTimerToEndOfTrack() {
         val remainingTime = _uiState.value.totalDuration - _uiState.value.currentPosition
         if (remainingTime > 0) {
@@ -187,7 +187,7 @@ class MainMusicViewModel(
             is NewPlayerAction.SeekTo -> {
                 mediaController?.seekTo(action.position.toLong())
 
-                if (sleepTimer != null && uiState.value.sleepTimeRemaining != null) {
+                if (sleepTimer != null && (uiState.value.sleepTimeRemaining != null && uiState.value.isEndTrackTimerActive)) {
                     val remainingTime = uiState.value.totalDuration - action.position.toLong()
                     if (remainingTime > 0) {
                         startSleepTimer(remainingTime)
@@ -235,17 +235,19 @@ class MainMusicViewModel(
             NewPlayerAction.RemoveDownloadFromCurrentTrack -> _uiState.value.currentTrack?.let { }
 
             is NewPlayerAction.SetSleepTimer -> {
+                _uiState.update { it.copy(isEndTrackTimerActive = false)}
                 val durationInMillis = action.durationInMinutes * 60 * 1000
                 startSleepTimer(durationInMillis)
             }
 
             is NewPlayerAction.SetSleepTimerToEndOfTrack -> {
+                _uiState.update { it.copy(isEndTrackTimerActive = true)}
                 setTimerToEndOfTrack()
             }
 
             is NewPlayerAction.CancelSleepTimer -> {
                 sleepTimer?.cancel()
-                _uiState.update { it.copy(sleepTimeRemaining = null) }
+                _uiState.update { it.copy(sleepTimeRemaining = null, isEndTrackTimerActive = false) }
                 sleepTimer = null
             }
 
@@ -307,6 +309,7 @@ class MainMusicViewModel(
         viewModelScope.launch {
             when (val result = repository.getUpNext(track.videoId)) {
                 is Result.Success -> queueManager.replaceUpComingQueue(mediaController, result.data)
+
                 is Result.Failure -> Log.e(TAG, "Error fetching recommendations : ${result.error}")
             }
         }
@@ -325,7 +328,7 @@ class MainMusicViewModel(
         }
     }
 
-    // A helper function to call from fetchUserFavorites
+
     private fun updateIsFavoriteStatus() {
         val currentTrackId = _uiState.value.currentTrack?.videoId ?: return
         val isFavorite = _uiState.value.favoriteIds.contains(currentTrackId)

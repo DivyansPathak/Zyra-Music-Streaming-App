@@ -146,6 +146,7 @@ fun PlayerScreenN(
                     width = Dimension.fillToConstraints
                 },
                 isFavorite = state.isFavorite,
+                isEndTrackTimer = state.isEndTrackTimerActive,
                 onFavoriteClick = { onAction(NewPlayerAction.ToggleFavorite) },
                 onShareClick = { onAction(NewPlayerAction.Share) },
                 onAddToPlaylistClick = {},
@@ -250,11 +251,11 @@ fun ControlPanel(
     onDownLoadClick: () -> Unit,
     setSleepTimer: (Long) -> Unit,
     setSleepTimerCurrentTrack: () -> Unit,
-    cancelTimer: () -> Unit
+    cancelTimer: () -> Unit,
+    isEndTrackTimer: Boolean
 ) {
 
     var showDropMenu by remember { mutableStateOf(false) }
-
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -299,6 +300,7 @@ fun ControlPanel(
                     onClick = {
                         setSleepTimerCurrentTrack()
                         showDropMenu = false
+
                     }
                 )
                 DropdownMenuItem(
@@ -306,6 +308,7 @@ fun ControlPanel(
                     onClick = {
                         setSleepTimer(15)
                         showDropMenu = false
+
                     }
                 )
                 DropdownMenuItem(

@@ -16,13 +16,17 @@ import androidx.media3.session.MediaSessionService
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
 import com.zyra.music.zyra.domain.repository.SongRepository
+import com.zyra.music.zyra.domain.utils.Result
 import com.zyra.music.zyra.domain.utils.onSuccess
 import com.zyra.music.zyra.exoplayer.utils.CacheUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 
 private const val TAG = "MusicService"
@@ -42,34 +46,47 @@ class MusicService : MediaSessionService() {
             controller: MediaSession.ControllerInfo,
             mediaItems: List<MediaItem>
         ): ListenableFuture<List<MediaItem>> {
-            // 1. Create a SettableFuture. This is our "promise" to the media session.
+
             val future: SettableFuture<List<MediaItem>> = SettableFuture.create()
 
-            // 2. Launch the coroutine to do the network work.
+            val youtubeBase = "https://www.youtube.com/watch?v="
+
             serviceScope.launch {
                 try {
-                    val updatedMediaItems = mutableListOf<MediaItem>()
-                    mediaItems.forEach { mediaItem ->
-                        val youtubeUrl = mediaItem.mediaId
-                        val youtubeBase = "https://www.youtube.com/watch?v="
-                        Log.d(TAG, "Fetching stream URL for: $youtubeUrl")
-                        songRepository.getSong(youtubeBase+youtubeUrl).onSuccess { songResult ->
-                            Log.d(TAG, "Successfully got stream URL: ${songResult.streamUrl}")
-                            val newItem = mediaItem.buildUpon()
-                                .setUri(songResult.streamUrl)
-                                .build()
-                            updatedMediaItems.add(newItem)
+                    val differentMediaItems = mediaItems.map { mediaItem ->
+                        async(Dispatchers.IO) {
+                            Log.d(TAG, "Fetching the url of ${mediaItem.mediaMetadata.title}")
+                            songRepository.getSong(youtubeBase + mediaItem.mediaId)
                         }
                     }
-                    // 3. Once the loop is done, fulfill the promise by setting the future's result.
+
+                    val songResults = differentMediaItems.awaitAll()
+
+                    val updatedMediaItems = mediaItems.zip(songResults) { mediaItem, songResult ->
+                        when (songResult) {
+                            is Result.Success -> {
+                                mediaItem.buildUpon()
+                                    .setUri(songResult.data.streamUrl)
+                                    .build()
+                            }
+
+                            is Result.Failure -> {
+                                Log.e(
+                                    TAG,
+                                    "Error fetching song for ${mediaItem.mediaMetadata.title}"
+                                )
+                                mediaItem
+                            }
+                        }
+                    }
+
                     future.set(updatedMediaItems)
                 } catch (e: Exception) {
-                    // If something goes wrong, set an exception on the future.
-                    Log.e(TAG, "Error fetching stream URLs", e)
+                    Log.e(TAG, "Error fetching stream URLs : ${e.message}", e)
                     future.setException(e)
                 }
             }
-            // 4. Immediately return the future. The MediaSession will now wait for it to be completed.
+
             return future
         }
     }
@@ -101,7 +118,6 @@ class MusicService : MediaSessionService() {
             .build()
 
 
-
         val player: Player = ExoPlayer.Builder(this)
             .setLoadControl(loadControl)
             .setMediaSourceFactory(mediaSourceFactory)
@@ -121,8 +137,70 @@ class MusicService : MediaSessionService() {
             release()
             mediaSession = null
         }
-        serviceScope.cancel() // Cancel the coroutine scope
+        serviceScope.cancel()
         super.onDestroy()
     }
 
 }
+
+
+//            val isNewQueue = mediaSession.player.mediaItemCount == 0
+//
+//            if(isNewQueue){
+//            serviceScope.launch {
+//
+////                val firstItem = mediaItems.firstOrNull() ?: return@launch
+//
+////                Log.d(TAG, "Fetching stream URL for tapped song :${firstItem.mediaMetadata.title}")
+////                songRepository.getSong("https://www.youtube.com/watch?v=${firstItem.mediaId}").onSuccess { songResult ->
+////                    val updatedFirstItem = firstItem.buildUpon().setUri(songResult.streamUrl).build()
+////                    mediaSession.player.replaceMediaItem(0,updatedFirstItem)
+////                }
+////
+////                for (i in 1 until mediaItems.size){
+////                    val mediaItem = mediaItems[i]
+////                    Log.d(TAG, "Fetching stream URL for:${mediaItem.mediaMetadata.title}")
+////                    songRepository.getSong("https://www.youtube.com/watch?v=${mediaItem.mediaId}").onSuccess { songResult ->
+////                        val updateItem = mediaItem.buildUpon().setUri(songResult.streamUrl).build()
+////                        mediaSession.player.replaceMediaItem(i,updateItem)
+////                    }
+////                }
+//                val updatedItems = mediaItems.toMutableList()
+//
+//                if (mediaItems.isNotEmpty()){
+//                    val firstItem = mediaItems[0]
+//                    Log.d(TAG, "Fetching stream URL for tapped song :${firstItem.mediaMetadata.title}")
+//                    val firstSongResult = songRepository.getSong(youtubeUrl+firstItem.mediaId)
+//                    firstSongResult.onSuccess { songResult ->
+//                        updatedItems[0] = firstItem.buildUpon().setUri(songResult.streamUrl).build()
+//                    }
+//                }
+//                future.set(updatedItems)
+//
+//                mediaItems.drop(1).forEachIndexed{index,mediaItem ->
+//                    Log.d(TAG, "Fetching stream URL for:${mediaItem.mediaMetadata.title}")
+//                    val mediaItemResult = songRepository.getSong(youtubeUrl+mediaItem.mediaId)
+//                    mediaItemResult.onSuccess { songResult ->
+//                        val updated = mediaItem.buildUpon().setUri(songResult.streamUrl).build()
+//                        withContext(Dispatchers.Main){
+//                            mediaSession.player.replaceMediaItem(index +1,updated)
+//                        }
+//                    }
+//                }
+//            }
+//            } else{
+//                Log.d(TAG, "Handling an ADD request to the existing queue")
+//                val startIndex = mediaSession.player.mediaItemCount
+//                future.set(mediaItems)
+//                serviceScope.launch(Dispatchers.IO){
+//                    mediaItems.forEachIndexed { index, mediaItem ->
+//                        Log.d(TAG,"Background fetching for Added song : ${mediaItem.mediaMetadata.title}")
+//                        songRepository.getSong(youtubeUrl+mediaItem.mediaId).onSuccess { songResult ->
+//                            val updated = mediaItem.buildUpon().setUri(songResult.streamUrl).build()
+//                            withContext(Dispatchers.Main) {
+//                                mediaSession.player.replaceMediaItem(startIndex,updated)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
