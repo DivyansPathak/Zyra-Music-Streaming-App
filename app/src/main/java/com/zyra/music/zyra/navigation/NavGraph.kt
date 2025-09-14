@@ -6,11 +6,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.presentation.home.HomeScreen
 import com.zyra.music.zyra.presentation.home.HomeViewModel
@@ -30,41 +32,80 @@ fun NavGraph(
     musicViewModel: MusicViewModel,
     navController: NavHostController,
 //    onSongClick : (SingleTrack) -> Unit,
-    onSongClick : (TrackFullOne) -> Unit,
+    onSongClick: (TrackFullOne) -> Unit,
     mainMusicViewModel: MainMusicViewModel
-    ) {
+) {
 
     NavHost(
         navController = navController,
         startDestination = Route.LoginCheckScreen.title,
-        enterTransition = {fadeIn()},
-        exitTransition = {fadeOut()},
+        enterTransition = { fadeIn() },
+        exitTransition = { fadeOut() },
     ) {
-        composable(Route.LoginCheckScreen.title){
-           LoginCheckScreen(navController = navController)
+        composable(Route.LoginCheckScreen.title) {
+            LoginCheckScreen(navController = navController)
         }
-        composable(Route.LoginScreen.title){
+        composable(Route.LoginScreen.title) {
             LoginScreen(navController = navController)
         }
-        composable(Route.HomeScreen.title) {
-            val vieModel : HomeViewModel = koinViewModel()
-            val state by vieModel.uiState.collectAsStateWithLifecycle()
-            HomeScreen(
-                navController = navController,
-                state = state,
-                onPlaylistClick = {}
-            )
-        }
-        composable(Route.PlayerScreen.title){ backStackEntry->
-//            val state by musicViewModel.uiState.collectAsStateWithLifecycle()
-//            PlayerScreen(
-//                state = state,
-//                onAction = musicViewModel::onAction,
-//                eventFlow = musicViewModel.uiEvent,
-//                navigateToBack = {
-//                    navController.popBackStack()
+
+        navigation(
+            startDestination = Route.HomeScreen.title,
+            route = Route.MainGraph.title
+        ) {
+            composable(Route.HomeScreen.title) { backStackEntry ->
+
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Route.MainGraph.title)
+                }
+
+                val vieModel: HomeViewModel = koinViewModel(viewModelStoreOwner = parentEntry)
+                val state by vieModel.uiState.collectAsStateWithLifecycle()
+                HomeScreen(
+                    navController = navController,
+                    state = state,
+                    onPlaylistClick = {}
+                )
+            }
+
+            composable(Route.SearchScreen.title) { backStackEntry ->
+
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Route.MainGraph.title)
+                }
+
+                val viewModel: SearchViewModel = koinViewModel(viewModelStoreOwner = parentEntry)
+                val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+                SearchScreenN(
+                    state = state,
+                    onAction = viewModel::onAction,
+                    navController = navController,
+                    onSongClick = onSongClick
+//                onSongClick = { clickedTrack->,
+////                    musicViewModel.playSongAddCreateQueue(clickedTrack = clickedTrack)
+////                    val trackJson = Json.encodeToString(SingleTrack.serializer(),clickedTrack)
+////                    navController.navigate(Route.PlayerScreen(jsonTrack = trackJson))
+//
 //                }
-//            )
+                    , onNextPlayClick = { track ->
+//                    mainMusicViewModel
+                        mainMusicViewModel.addSongToPlayNext(track)
+                    },
+                    addToQueueClick = { track ->
+//                    musicViewModel.addSongToEndOfQueue(track)
+                        mainMusicViewModel.addSongToQueue(track)
+                    }
+                )
+            }
+            composable(Route.ProfileScreen.title) {
+//            ProfileScreen()
+            }
+            composable<Route.PlayListScreen> {
+//            PlayListScreen()
+            }
+        }
+        composable(Route.PlayerScreen.title) { backStackEntry ->
             val state by mainMusicViewModel.uiState.collectAsStateWithLifecycle()
             PlayerScreenN(
                 state = state,
@@ -76,37 +117,6 @@ fun NavGraph(
             )
 
         }
-        composable(Route.SearchScreen.title){
-            val viewModel : SearchViewModel = koinViewModel()
-            val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-            SearchScreenN(
-                state = state,
-                onAction = viewModel::onAction,
-                navController = navController,
-                onSongClick = onSongClick
-//                onSongClick = { clickedTrack->,
-////                    musicViewModel.playSongAddCreateQueue(clickedTrack = clickedTrack)
-////                    val trackJson = Json.encodeToString(SingleTrack.serializer(),clickedTrack)
-////                    navController.navigate(Route.PlayerScreen(jsonTrack = trackJson))
-//
-//                }
-                ,onNextPlayClick = {track ->
-//                    mainMusicViewModel
-                    mainMusicViewModel.addSongToPlayNext(track)
-                                  },
-                addToQueueClick = {track ->
-//                    musicViewModel.addSongToEndOfQueue(track)
-                    mainMusicViewModel.addSongToQueue(track)
-                }
-            )
-        }
-        composable(Route.ProfileScreen.title) {
-//            ProfileScreen()
-        }
-        composable<Route.PlayListScreen> {
-//            PlayListScreen()
-        }
-
-        }
     }
+}

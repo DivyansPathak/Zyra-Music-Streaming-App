@@ -25,6 +25,7 @@ import com.zyra.music.zyra.exoplayer.NewMusicQueueManager
 import com.zyra.music.zyra.presentation.playerScreen.RepeatMode
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -235,19 +236,24 @@ class MainMusicViewModel(
             NewPlayerAction.RemoveDownloadFromCurrentTrack -> _uiState.value.currentTrack?.let { }
 
             is NewPlayerAction.SetSleepTimer -> {
-                _uiState.update { it.copy(isEndTrackTimerActive = false)}
+                _uiState.update { it.copy(isEndTrackTimerActive = false) }
                 val durationInMillis = action.durationInMinutes * 60 * 1000
                 startSleepTimer(durationInMillis)
             }
 
             is NewPlayerAction.SetSleepTimerToEndOfTrack -> {
-                _uiState.update { it.copy(isEndTrackTimerActive = true)}
+                _uiState.update { it.copy(isEndTrackTimerActive = true) }
                 setTimerToEndOfTrack()
             }
 
             is NewPlayerAction.CancelSleepTimer -> {
                 sleepTimer?.cancel()
-                _uiState.update { it.copy(sleepTimeRemaining = null, isEndTrackTimerActive = false) }
+                _uiState.update {
+                    it.copy(
+                        sleepTimeRemaining = null,
+                        isEndTrackTimerActive = false
+                    )
+                }
                 sleepTimer = null
             }
 
@@ -263,6 +269,8 @@ class MainMusicViewModel(
             updateStateFromController()
             handleProactiveFetching()
 
+            val trackForThumbnail = _uiState.value.currentTrack
+            fetchHighQualityThumbnail(trackForThumbnail)
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -302,6 +310,29 @@ class MainMusicViewModel(
                 Log.d(TAG, "Queue nearing end. Proactively fetching recommendation ")
                 fetchRecommendationsAndUpdateQueue(track)
             }
+        }
+    }
+
+    private fun fetchHighQualityThumbnail(track: TrackFullOne?) {
+        val currentTrack = track ?: return
+
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.getHighQualityThumbnail(currentTrack.videoId)
+                .onSuccess { highThumbnail ->
+                    if (_uiState.value.currentTrack?.videoId == currentTrack.videoId) {
+                        _uiState.update {
+                            it.copy(
+                                currentTrack = it.currentTrack?.copy(thumbnail = highThumbnail)
+                            )
+                        }
+                        Log.d(TAG, "High quality thumbnail fetched: ${currentTrack.title}")
+                    } else {
+                        Log.d(TAG, "Fetched very late for ${currentTrack.title}")
+                    }
+                }
+                .onFailure { error ->
+                    Log.e(TAG, "Error fetching high quality thumbnail: $error")
+                }
         }
     }
 

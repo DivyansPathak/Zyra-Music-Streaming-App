@@ -9,6 +9,11 @@ sealed interface Route {
     val title : String
 
     @Serializable
+    data object MainGraph : Route { // <-- Add this
+        override val title: String = "MainGraph"
+    }
+
+    @Serializable
     data object LoginCheckScreen : Route{
         override val title: String = "LoginCheckScreen"
     }

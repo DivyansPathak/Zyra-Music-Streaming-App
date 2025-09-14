@@ -13,14 +13,15 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.zyra.music.zyra.navigation.Route
 
 
 @Composable
 fun BottomNavigationBar(
     modifier: Modifier = Modifier,
     navController: NavController,
-    currentDestination : String?
-    ) {
+    currentDestination: String?
+) {
 
     val items = listOf(
         BottomNavItems.Home,
@@ -39,26 +40,30 @@ fun BottomNavigationBar(
 //                selected = current?.hierarchy?.any { it.route == item.route } == true,
                 selected = isSelected,
                 onClick = {
-                    Log.d("BottomNavigationBar", "Current: $currentDestination, Target: $routeString, Selected: $isSelected")
+                    Log.d(
+                        "BottomNavigationBar",
+                        "Current: $currentDestination, Target: $routeString, Selected: $isSelected"
+                    )
 
                     // Only navigate if we're not already on the target screen
                     if (!isSelected) {
                         navController.navigate(item.route) {
-                            launchSingleTop = true
-
-                            popUpTo(navController.graph.findStartDestination().id) {
+                            popUpTo(Route.MainGraph.title) {
                                 saveState = true
                             }
-
+                            launchSingleTop = true
                             restoreState = true
+
                         }
                     }
                 },
                 icon = {
-                    Icon(painter = painterResource(id = item.icon),
-                        contentDescription = item.label)
+                    Icon(
+                        painter = painterResource(id = item.icon),
+                        contentDescription = item.label
+                    )
                 },
-                label = {Text(text = item.label)}
+                label = { Text(text = item.label) }
             )
         }
     }

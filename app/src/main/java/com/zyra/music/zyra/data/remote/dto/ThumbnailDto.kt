@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ThumbnailDto(
-    @SerialName("")
+    @SerialName("url")
     val thumbnailUrl: String,
 )

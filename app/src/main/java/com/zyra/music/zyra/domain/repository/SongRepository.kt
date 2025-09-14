@@ -14,6 +14,7 @@ interface SongRepository{
 
     suspend fun searchSongFromYt(query : String) : Result<List<TrackFullOne>, DataError>
     suspend fun getUpNext(videoId : String) : Result<List<TrackFullOne>, DataError>
+    suspend fun getHighQualityThumbnail(videoId : String) : Result<String, DataError>
 
     suspend fun getSearchSuggestions(query : String) : Result<List<String>, DataError>
 

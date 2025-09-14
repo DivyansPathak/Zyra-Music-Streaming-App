@@ -4,6 +4,7 @@ import com.zyra.music.zyra.data.remote.SupabaseClient.supabase
 import com.zyra.music.zyra.data.remote.dto.FavoriteDto
 import com.zyra.music.zyra.data.remote.dto.SearchRequestBody
 import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
+import com.zyra.music.zyra.data.remote.dto.ThumbnailDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.data.utils.BASE_URL
 import com.zyra.music.zyra.data.utils.YT_BASE_URL
@@ -86,18 +87,21 @@ class RemoteSongDataSourceImpl(
         }
     }
 
+    override suspend fun getThumbnail(videoId: String): Result<ThumbnailDto, DataError> {
+        return withContext(Dispatchers.IO) {
+            safeCall<ThumbnailDto>{
+                httpClient.get (urlString = "$YT_BASE_URL/thumbnail"){
+                    parameter("video_id", videoId)
+                }
+            }
+        }
+    }
+
     override suspend fun getFavoriteIds(): Result<Set<String>, DataError> {
         return safeSupabaseCall {
-            // We select only the 'song_id' column for network efficiency.
-//            val favorites = supabase.from("favorites")
-//                .select { columns(Columns.list("song_id")) } // Correct way to select specific columns
-//                .decodeList<FavoriteDto>()
-
             val favorites = supabase.from("favorites")
-//                .select(columns = Columns.list("song_id"))
                 .select()
                 .decodeList<FavoriteDto>()
-
             // Map the resulting list of DTOs to a simple Set of Strings.
             favorites.map { it.songId }.toSet()
         }
