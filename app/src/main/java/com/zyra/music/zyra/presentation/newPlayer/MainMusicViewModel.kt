@@ -270,7 +270,7 @@ class MainMusicViewModel(
             handleProactiveFetching()
 
             val trackForThumbnail = _uiState.value.currentTrack
-            fetchHighQualityThumbnail(trackForThumbnail)
+//            fetchHighQualityThumbnail(trackForThumbnail)
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -322,7 +322,8 @@ class MainMusicViewModel(
                     if (_uiState.value.currentTrack?.videoId == currentTrack.videoId) {
                         _uiState.update {
                             it.copy(
-                                currentTrack = it.currentTrack?.copy(thumbnail = highThumbnail)
+//                                currentTrack = it.currentTrack?.copy(thumbnail = highThumbnail)
+//                                highQualityThumbnail = highThumbnail
                             )
                         }
                         Log.d(TAG, "High quality thumbnail fetched: ${currentTrack.title}")

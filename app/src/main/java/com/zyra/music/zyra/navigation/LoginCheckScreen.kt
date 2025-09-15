@@ -45,7 +45,7 @@ fun LoginCheckScreen(
                 }
                 is SessionStatus.NotAuthenticated ->{
                     navController.navigate(Route.LoginScreen.title){
-                        popUpTo(Route.LoginCheckScreen){inclusive = true}
+                        popUpTo(Route.LoginCheckScreen.title){inclusive = true}
                     }
                 }
                 else -> Unit

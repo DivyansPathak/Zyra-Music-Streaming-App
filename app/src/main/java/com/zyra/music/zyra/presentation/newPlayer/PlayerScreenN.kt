@@ -68,6 +68,8 @@ fun PlayerScreenN(
     navigateToBack: () -> Unit
 ) {
 
+
+
     GradientScreenContainer(imagerUrl = state.currentTrack?.thumbnail) {
         var showQueueSheet by remember { mutableStateOf(false) }
 
