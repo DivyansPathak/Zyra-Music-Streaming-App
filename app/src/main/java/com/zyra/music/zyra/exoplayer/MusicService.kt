@@ -3,21 +3,18 @@ package com.zyra.music.zyra.exoplayer
 import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultAllocator
-import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
 import com.zyra.music.zyra.domain.repository.SongRepository
 import com.zyra.music.zyra.domain.utils.Result
-import com.zyra.music.zyra.domain.utils.onSuccess
 import com.zyra.music.zyra.exoplayer.utils.CacheUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +23,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 
 private const val TAG = "MusicService"
@@ -37,7 +33,7 @@ class MusicService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
     private val songRepository: SongRepository by inject()
 
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // The MediaSession.Callback is the key to linking our repository to the player.
     private val callback = object : MediaSession.Callback {

@@ -1,5 +1,6 @@
 package com.zyra.music.zyra.data.remote
 
+import com.zyra.music.zyra.data.remote.dto.PrePlaylistDto
 import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
 import com.zyra.music.zyra.data.remote.dto.ThumbnailDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
@@ -24,5 +25,8 @@ interface RemoteSongDataSource {
     suspend fun addFavorite(videoId: String) : Result<Unit, DataError>
     suspend fun removeFavorite(videoId : String) : Result<Unit, DataError>
 
+    // PrePlaylist
+    suspend fun getPrePlaylist(genre : String?) : Result<List<PrePlaylistDto>, DataError>
+    suspend fun getPlaylistById(id : String) : Result<PrePlaylistDto, DataError>
 
 }

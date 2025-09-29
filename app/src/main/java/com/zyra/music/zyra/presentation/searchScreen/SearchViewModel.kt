@@ -110,10 +110,6 @@ class SearchViewModel(
                 // Handle track click
                 Log.i(TAG, "Track clicked: ${action.track.title}")
 
-//                viewModelScope.launch {
-//                    val trackJson = Json.encodeToString(action.track)
-//                    _navigationEvent.send(Route.PlayerScreen(jsonTrack = trackJson))
-//                }
             }
 
             is SearchAction.OnImeSearchClick -> {
@@ -139,33 +135,6 @@ class SearchViewModel(
     }
 
     private fun executeSearch(query: String) {
-
-//        viewModelScope.launch {
-//            Log.d(TAG, "1. Executing search for query: '$query'")
-//            _uiState.update { it.copy(isLoading = true) }
-//            songRepository.searchSong(query = query)
-//                .onSuccess { tracks ->
-//                    Log.i(TAG, "5. SUCCESS: Found ${tracks.size} tracks.")
-//                    _uiState.update {
-//                        it.copy(
-//                            isLoading = false,
-//                            searchResults = tracks,
-//                            error = null
-//                        )
-//                    }
-//                }
-//                .onFailure { failure ->
-//                    Log.e(TAG, "5. FAILURE: Search failed. Error: $failure")
-//                    _uiState.update {
-//                        it.copy(
-//                            isLoading = false,
-//                            error = failure.getErrorMessage()
-//                        )
-//                    }
-//                }
-//
-//        }
-
         viewModelScope.launch {
             Log.d(TAG, "1. Executing search for query: '$query'")
             _uiState.update {

@@ -98,18 +98,6 @@ class SongRepositoryImpl(
         }
     }
 
-    override suspend fun getHighQualityThumbnail(videoId: String): Result<String, DataError> {
-        val result = remoteSongDataSource.getThumbnail(videoId = videoId)
-        Log.d(TAG,"thumbnail for $videoId is $result")
-        return when(result){
-            is Result.Success -> {
-                val thumbnailUrl = result.data.thumbnailUrl
-                Result.Success(thumbnailUrl)
-            }
-            is Result.Failure -> result
-        }
-    }
-
     override suspend fun getSearchSuggestions(query: String): Result<List<String>, DataError> {
         return remoteSongDataSource.getSearchSuggestions(query = query)
     }
@@ -125,6 +113,8 @@ class SongRepositoryImpl(
     override suspend fun removeFavorite(videoId: String): Result<Unit, DataError> {
         return remoteSongDataSource.removeFavorite(videoId = videoId)
     }
+
+
 
 }
 

@@ -31,6 +31,7 @@ private const val TAG = "GradientScreenContainer"
 fun GradientScreenContainer(
     modifier: Modifier = Modifier,
     imagerUrl: String?,
+    alphaValue : Float = 0.6f,
     content: @Composable () -> Unit
 ) {
 
@@ -83,7 +84,7 @@ fun GradientScreenContainer(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        dominantColor?.copy(alpha = 0.6f) ?: Color.Transparent,
+                        dominantColor?.copy(alpha = alphaValue) ?: Color.Transparent,
                         defaultBackgroundColor
                     )
                 )

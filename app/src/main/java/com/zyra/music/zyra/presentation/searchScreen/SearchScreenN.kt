@@ -13,12 +13,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -35,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -189,7 +192,8 @@ fun SongRow(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onSongClick)
+            .clickable(onClick = onSongClick),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
 
         Row(
@@ -227,13 +231,20 @@ fun SongRow(
 
                         )
                 )
-                Text(
-                    text = "${track.artistName.orEmpty()} । ${formatDurationLong(track.duration)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-
-                )
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = track.artistName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = " | ${formatDurationLong(track.duration)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                    )
+                }
             }
             Box {
                 IconButton(onClick = { isMenuExpanded = true }) {

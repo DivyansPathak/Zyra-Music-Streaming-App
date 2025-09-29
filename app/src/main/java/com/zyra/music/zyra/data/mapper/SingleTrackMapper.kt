@@ -1,6 +1,7 @@
 package com.zyra.music.zyra.data.mapper
 
 import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
+import com.zyra.music.zyra.data.remote.dto.TrackDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.domain.model.SingleTrack
 import com.zyra.music.zyra.domain.model.TrackFullOne
@@ -25,3 +26,17 @@ private fun TrackFullOneDto.toTrackFullOne() = TrackFullOne(
     albumId = this.albumId.toString(),
 )
 fun List<TrackFullOneDto>.toTrackFullOneList() = map { it.toTrackFullOne() }
+
+
+fun TrackDto.toTrackFullOneDto(): TrackFullOneDto {
+    return TrackFullOneDto(
+        title = this.title,
+        artistName = this.artistName ?: "Unknown Artist",
+        videoId = this.videoId,
+        thumbnail = this.thumbnailUrl ?: "", // Convert from thumbnailUrl
+        duration = this.duration ?: 0,
+        artistId = null, // Set to null or get from another source
+        albumName = null,
+        albumId = null
+    )
+}

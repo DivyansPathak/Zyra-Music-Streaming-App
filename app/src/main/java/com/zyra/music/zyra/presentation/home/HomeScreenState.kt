@@ -4,6 +4,6 @@ import com.zyra.music.zyra.domain.model.HomeSection
 
 data class HomeScreenState(
     val sections: List<HomeSection> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val error: String? = null
 )

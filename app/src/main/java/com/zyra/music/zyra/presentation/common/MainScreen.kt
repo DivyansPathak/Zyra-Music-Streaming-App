@@ -152,8 +152,8 @@ fun MainScreen() {
             NavGraph(
                 navController = navController,
 //                paddingValues = paddingValues,
-                musicViewModel = musicViewModel,
-                modifier = Modifier.weight(1f),
+//                musicViewModel = musicViewModel,
+//                modifier = Modifier.weight(1f),
                 mainMusicViewModel = mainMusicViewModel,
                 onSongClick = { track ->
 

@@ -5,6 +5,6 @@ data class PlayList(
     val title : String,
     val subtitle : String,
     val thumbnail : String,
-    val songs : List<SingleTrack> = emptyList(),
+    val songs : List<TrackFullOne> = emptyList(),
     val genre : String
 )

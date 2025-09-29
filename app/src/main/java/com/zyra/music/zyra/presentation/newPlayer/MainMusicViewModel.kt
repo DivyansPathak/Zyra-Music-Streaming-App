@@ -53,6 +53,8 @@ class MainMusicViewModel(
 
     private var sleepTimer: CountDownTimer? = null
 
+    private var needToFetchUpNext : Boolean = false
+
     init {
         Log.d(TAG, "ViewModel init")
         val sessionToken = SessionToken(context, ComponentName(context, MusicService::class.java))
@@ -122,10 +124,12 @@ class MainMusicViewModel(
     fun playRadioForSong(clickedTrack: TrackFullOne) {
         _uiState.update { it.copy(playbackMode = PlaybackMode.RADIO, isManuallyTriggered = true) }
         queueManager.setQueueAndPlay(mediaController, tracks = listOf(clickedTrack), startIndex = 0)
-        viewModelScope.launch {
-            delay(1500L)
-            fetchRecommendationsAndUpdateQueue(clickedTrack)
-        }
+
+        needToFetchUpNext = true
+
+//        viewModelScope.launch {
+//            fetchRecommendationsAndUpdateQueue(clickedTrack)
+//        }
     }
 
     fun addSongToPlayNext(track: TrackFullOne) {
@@ -264,13 +268,21 @@ class MainMusicViewModel(
         _uiState.update { it.copy(isManuallyTriggered = false) }
     }
 
+    private fun resetSleepTimerIfNeeded() {
+        // Check if the special "End of Track" timer is active
+        if (uiState.value.isEndTrackTimerActive) {
+            Log.d(TAG, "Track changed with an active end-of-track timer. Resetting timer now.")
+            // Re-calculate and start the timer for the NEW track
+            setTimerToEndOfTrack()
+        }
+    }
+
     private val playerListener = object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             updateStateFromController()
             handleProactiveFetching()
+            resetSleepTimerIfNeeded()
 
-            val trackForThumbnail = _uiState.value.currentTrack
-//            fetchHighQualityThumbnail(trackForThumbnail)
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -286,6 +298,15 @@ class MainMusicViewModel(
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             updateStateFromController()
+
+            if(isPlaying && needToFetchUpNext){
+
+                Log.d(TAG, "Player is stable and playing. Now fetching recommendations.")
+                _uiState.value.currentTrack?.let { fetchRecommendationsAndUpdateQueue(it) }
+
+                // Reset the flag so this doesn't run again on a simple pause/resume.
+                needToFetchUpNext = false
+            }
         }
 
         override fun onRepeatModeChanged(repeatMode: Int) {
@@ -310,30 +331,6 @@ class MainMusicViewModel(
                 Log.d(TAG, "Queue nearing end. Proactively fetching recommendation ")
                 fetchRecommendationsAndUpdateQueue(track)
             }
-        }
-    }
-
-    private fun fetchHighQualityThumbnail(track: TrackFullOne?) {
-        val currentTrack = track ?: return
-
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.getHighQualityThumbnail(currentTrack.videoId)
-                .onSuccess { highThumbnail ->
-                    if (_uiState.value.currentTrack?.videoId == currentTrack.videoId) {
-                        _uiState.update {
-                            it.copy(
-//                                currentTrack = it.currentTrack?.copy(thumbnail = highThumbnail)
-//                                highQualityThumbnail = highThumbnail
-                            )
-                        }
-                        Log.d(TAG, "High quality thumbnail fetched: ${currentTrack.title}")
-                    } else {
-                        Log.d(TAG, "Fetched very late for ${currentTrack.title}")
-                    }
-                }
-                .onFailure { error ->
-                    Log.e(TAG, "Error fetching high quality thumbnail: $error")
-                }
         }
     }
 

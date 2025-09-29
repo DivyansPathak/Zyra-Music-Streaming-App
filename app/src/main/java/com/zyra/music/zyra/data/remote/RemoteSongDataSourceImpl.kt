@@ -2,11 +2,13 @@ package com.zyra.music.zyra.data.remote
 
 import com.zyra.music.zyra.data.remote.SupabaseClient.supabase
 import com.zyra.music.zyra.data.remote.dto.FavoriteDto
+import com.zyra.music.zyra.data.remote.dto.PrePlaylistDto
 import com.zyra.music.zyra.data.remote.dto.SearchRequestBody
 import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
 import com.zyra.music.zyra.data.remote.dto.ThumbnailDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.data.utils.BASE_URL
+import com.zyra.music.zyra.data.utils.PRE_PLAYLIST_URL
 import com.zyra.music.zyra.data.utils.YT_BASE_URL
 import com.zyra.music.zyra.domain.utils.DataError
 import com.zyra.music.zyra.domain.utils.Result
@@ -33,7 +35,7 @@ class RemoteSongDataSourceImpl(
 ) : RemoteSongDataSource {
     private val TAG = "YTDL"
     override suspend fun searchSong(query: String): Result<List<SingleTrackDto>, DataError> {
-        return withContext(Dispatchers.IO){
+        return withContext(Dispatchers.IO) {
             safeCall<List<SingleTrackDto>> {
                 httpClient.get(urlString = "$BASE_URL/search") {
                     parameter("query", "$query song")
@@ -70,16 +72,17 @@ class RemoteSongDataSourceImpl(
             safeCall<List<TrackFullOneDto>> {
                 httpClient.get(urlString = "$YT_BASE_URL/search") {
                     parameter("query", query)
-                    parameter("limit",10)
+                    parameter("limit", 10)
                 }
             }
         }
 
     }
+
     override suspend fun getUpNext(videoId: String): Result<List<TrackFullOneDto>, DataError> {
-        return withContext (Dispatchers.IO){
+        return withContext(Dispatchers.IO) {
             safeCall<List<TrackFullOneDto>> {
-                httpClient.get (urlString = "$YT_BASE_URL/upnext"){
+                httpClient.get(urlString = "$YT_BASE_URL/upnext") {
                     parameter("video_id", videoId)
                     parameter("limit", 15)
                 }
@@ -89,8 +92,8 @@ class RemoteSongDataSourceImpl(
 
     override suspend fun getThumbnail(videoId: String): Result<ThumbnailDto, DataError> {
         return withContext(Dispatchers.IO) {
-            safeCall<ThumbnailDto>{
-                httpClient.get (urlString = "$YT_BASE_URL/thumbnail"){
+            safeCall<ThumbnailDto> {
+                httpClient.get(urlString = "$YT_BASE_URL/thumbnail") {
                     parameter("video_id", videoId)
                 }
             }
@@ -108,7 +111,7 @@ class RemoteSongDataSourceImpl(
     }
 
     override suspend fun addFavorite(videoId: String): Result<Unit, DataError> {
-      // Use the new helper. The lambda contains only the Supabase call.
+        // Use the new helper. The lambda contains only the Supabase call.
         return safeSupabaseCall {
             val currentUser = supabase.auth.currentUserOrNull()
                 ?: throw IllegalStateException("User must be logged in.")
@@ -134,17 +137,18 @@ class RemoteSongDataSourceImpl(
     }
 
     override suspend fun getSearchSuggestions(query: String): Result<List<String>, DataError> {
-        if(query.isBlank()){
+        if (query.isBlank()) {
             return Result.Success(emptyList())
         }
         return withContext(Dispatchers.IO) {
             try {
                 // 1. Make the network call and get the raw response as text
-                val responseBody = httpClient.get("https://suggestqueries.google.com/complete/search") {
-                    parameter("client", "firefox")
-                    parameter("ds", "yt")
-                    parameter("q", query)
-                }.bodyAsText()
+                val responseBody =
+                    httpClient.get("https://suggestqueries.google.com/complete/search") {
+                        parameter("client", "firefox")
+                        parameter("ds", "yt")
+                        parameter("q", query)
+                    }.bodyAsText()
 
                 // 2. Perform your custom JSON parsing
                 val jsonArray = Json.parseToJsonElement(responseBody).jsonArray
@@ -164,13 +168,35 @@ class RemoteSongDataSourceImpl(
                     is UnknownHostException, is UnresolvedAddressException -> {
                         Result.Failure(DataError.NoInternet)
                     }
+
                     is SocketTimeoutException -> {
                         Result.Failure(DataError.RequestTimeOut)
                     }
+
                     else -> {
                         Result.Failure(DataError.UnknownError(e.message))
                     }
                 }
+            }
+        }
+    }
+
+    override suspend fun getPrePlaylist(genre: String?): Result<List<PrePlaylistDto>, DataError> {
+        return withContext(Dispatchers.IO) {
+            safeCall<List<PrePlaylistDto>> {
+                httpClient.get(urlString = "$PRE_PLAYLIST_URL/playlists") {
+                    genre?.let {
+                        parameter("genre", it)
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun getPlaylistById(id: String): Result<PrePlaylistDto, DataError> {
+        return withContext(Dispatchers.IO) {
+            safeCall<PrePlaylistDto> {
+                httpClient.get(urlString = "$PRE_PLAYLIST_URL/playlists/$id")
             }
         }
     }

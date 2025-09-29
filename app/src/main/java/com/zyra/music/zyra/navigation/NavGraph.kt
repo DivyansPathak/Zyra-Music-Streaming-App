@@ -28,10 +28,7 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavGraph(
-    modifier: Modifier = Modifier,
-    musicViewModel: MusicViewModel,
     navController: NavHostController,
-//    onSongClick : (SingleTrack) -> Unit,
     onSongClick: (TrackFullOne) -> Unit,
     mainMusicViewModel: MainMusicViewModel
 ) {
@@ -64,7 +61,10 @@ fun NavGraph(
                 HomeScreen(
                     navController = navController,
                     state = state,
-                    onPlaylistClick = {}
+                    onPlaylistClick = {},
+                    onRefresh = {
+                        vieModel.refresh()
+                    }
                 )
             }
 
@@ -82,18 +82,10 @@ fun NavGraph(
                     onAction = viewModel::onAction,
                     navController = navController,
                     onSongClick = onSongClick
-//                onSongClick = { clickedTrack->,
-////                    musicViewModel.playSongAddCreateQueue(clickedTrack = clickedTrack)
-////                    val trackJson = Json.encodeToString(SingleTrack.serializer(),clickedTrack)
-////                    navController.navigate(Route.PlayerScreen(jsonTrack = trackJson))
-//
-//                }
                     , onNextPlayClick = { track ->
-//                    mainMusicViewModel
                         mainMusicViewModel.addSongToPlayNext(track)
                     },
                     addToQueueClick = { track ->
-//                    musicViewModel.addSongToEndOfQueue(track)
                         mainMusicViewModel.addSongToQueue(track)
                     }
                 )

@@ -6,7 +6,9 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.zyra.music.zyra.data.remote.HttpClientFactory
 import com.zyra.music.zyra.data.remote.RemoteSongDataSource
 import com.zyra.music.zyra.data.remote.RemoteSongDataSourceImpl
+import com.zyra.music.zyra.data.repository.PlaylistRepositoryImpl
 import com.zyra.music.zyra.data.repository.SongRepositoryImpl
+import com.zyra.music.zyra.domain.repository.PlaylistRepository
 import com.zyra.music.zyra.domain.repository.SongRepository
 import com.zyra.music.zyra.exoplayer.MusicQueueManager
 import com.zyra.music.zyra.exoplayer.NewMusicQueueManager
@@ -31,6 +33,7 @@ val koinModule = module {
     singleOf(::NewMusicQueueManager)
     singleOf(::RemoteSongDataSourceImpl).bind<RemoteSongDataSource>()
     singleOf(::SongRepositoryImpl).bind<SongRepository>()
+    singleOf(::PlaylistRepositoryImpl).bind<PlaylistRepository>()
 
     @androidx.media3.common.util.UnstableApi
     viewModel {

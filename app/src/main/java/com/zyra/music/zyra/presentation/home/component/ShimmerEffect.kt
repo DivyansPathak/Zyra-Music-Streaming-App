@@ -24,7 +24,7 @@ fun ShimmerEffect(modifier: Modifier = Modifier,
                   shimmerColor : Color = MaterialTheme.colorScheme.surface
 ) {
 
-    val shimmerColor = listOf<Color>(
+    val shimmerColors = listOf<Color>(
         shimmerColor.copy(alpha = 0.6f),
         shimmerColor.copy(alpha = 0.2f),
         shimmerColor.copy(alpha = 0.6f),
@@ -40,7 +40,7 @@ fun ShimmerEffect(modifier: Modifier = Modifier,
         label = "Transition Animation"
     )
     val brush = Brush.linearGradient(
-        colors = shimmerColor,
+        colors = shimmerColors,
         start = Offset.Zero,
         end = Offset(x = transitionAnimation.value, y = transitionAnimation.value)
     )
