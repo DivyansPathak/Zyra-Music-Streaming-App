@@ -36,6 +36,19 @@ class PlaylistRepositoryImpl(
     }
 
     override suspend fun getPlaylistById(playlistId: String): PlayList? {
-        TODO("Not yet implemented")
+        Log.d(TAG, "1. Asking DataSource for songs with query: '$playlistId'")
+        val result = remoteSongDataSource.getPlaylistById(id = playlistId)
+        Log.d(TAG, "2. Got result from DataSource: $result")
+        return when(result) {
+            is Result.Success ->{
+                val playlistDto = result.data
+                Log.i(TAG, "3. Mapped ${playlistDto.id} DTO to Domain model successfully.")
+                playlistDto.toPlaylist()
+            }
+            is Result.Failure ->{
+                Log.e(TAG, "3. Failed to fetch playlists: ${result.error}")
+                null
+            }
+        }
     }
 }

@@ -6,26 +6,29 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface Route {
 
-    val title : String
+
+    val isBottomBarVisible : Boolean
+        get() = false
 
     @Serializable
     data object MainGraph : Route { // <-- Add this
-        override val title: String = "MainGraph"
+
+        override val isBottomBarVisible: Boolean = true
+
     }
 
     @Serializable
     data object LoginCheckScreen : Route{
-        override val title: String = "LoginCheckScreen"
     }
 
     @Serializable
     data object LoginScreen : Route{
-        override val title: String = "LoginScreen"
+
     }
 
     @Serializable
     data object HomeScreen : Route{
-        override val title: String = "HomeScreen"
+        override val isBottomBarVisible: Boolean = true
     }
 
 //    @Serializable
@@ -35,22 +38,22 @@ sealed interface Route {
 
     @Serializable
     data object PlayerScreen: Route{
-        override val title: String = "PlayerScreen"
-    }
-
-    @Serializable
-    data object SearchScreen : Route{
-        override val title: String = "SearchScreen"
     }
 
 //    @Serializable
-//    data object SearchScreenN : Route{
-//        override val title: String = "SearchScreenN"
+//    data object SearchScreen : Route{
+//        override val isBottomBarVisible: Boolean = true
+//
 //    }
 
     @Serializable
+    data object SearchScreenN : Route{
+    }
+
+    @Serializable
     data object ProfileScreen : Route{
-        override val title: String = "Profile"
+        override val isBottomBarVisible: Boolean = true
+
     }
 
     @Serializable
@@ -58,6 +61,13 @@ sealed interface Route {
         val id : String,
         val type : PlayListType,
     ) : Route{
-        override val title: String = "Library"
+        override val isBottomBarVisible: Boolean = true
+
     }
+
+//    @Serializable
+//    data class PlaylistDetailScreen(val identifier : PlayListIdentifier) : Route{
+//        override val isBottomBarVisible: Boolean = true
+//
+//    }
 }

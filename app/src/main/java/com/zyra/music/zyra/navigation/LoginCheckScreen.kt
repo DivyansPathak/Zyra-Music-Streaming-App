@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
@@ -39,13 +40,13 @@ fun LoginCheckScreen(
             when(status){
                 is SessionStatus.Authenticated -> {
                     Log.d("LoginCheck", "User is Authenticated. Navigating to SearchScreen.")
-                    navController.navigate(Route.HomeScreen.title){
-                        popUpTo(Route.LoginCheckScreen.title){inclusive = true}
+                    navController.navigate(Route.HomeScreen){
+                        popUpTo(Route.LoginCheckScreen){inclusive = true}
                     }
                 }
                 is SessionStatus.NotAuthenticated ->{
-                    navController.navigate(Route.LoginScreen.title){
-                        popUpTo(Route.LoginCheckScreen.title){inclusive = true}
+                    navController.navigate(Route.LoginScreen){
+                        popUpTo(Route.LoginCheckScreen){inclusive = true}
                     }
                 }
                 else -> Unit

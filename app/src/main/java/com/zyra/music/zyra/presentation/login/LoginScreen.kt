@@ -64,8 +64,8 @@ fun LoginScreen(
             isLoading = loading
         },
         onSignInSuccess = {
-            navController.navigate(Route.HomeScreen.title){
-                popUpTo(Route.LoginScreen.title){inclusive = true}
+            navController.navigate(Route.HomeScreen){
+                popUpTo(Route.LoginScreen){inclusive = true}
             }
             Toast.makeText(context, "Sign In Successful!", Toast.LENGTH_LONG).show()
         },
