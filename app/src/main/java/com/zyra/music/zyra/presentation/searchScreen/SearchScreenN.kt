@@ -58,7 +58,7 @@ import com.zyra.music.zyra.presentation.utils.formatDurationLong
 fun SearchScreenN(
     state: SearchState,
     onAction: (SearchAction) -> Unit,
-    navController: NavController,
+    onBackClick: () -> Unit,
     onSongClick: (TrackFullOne) -> Unit,
     onNextPlayClick: (TrackFullOne) -> Unit,
     addToQueueClick: (TrackFullOne) -> Unit
@@ -74,7 +74,7 @@ fun SearchScreenN(
             query = state.query,
             onQueryChange = { newQuery -> onAction(SearchAction.OnQueryChange(newQuery)) },
             onTrailingIconClick = { onAction(SearchAction.OnClearQuery) },
-            onBackClick = { navController.popBackStack() },
+            onBackClick = {onBackClick() },
             onImeSearchClick = { newQuery -> onAction(SearchAction.OnImeSearchClick(newQuery)) }
         )
         HorizontalDivider(

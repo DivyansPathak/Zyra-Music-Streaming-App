@@ -38,17 +38,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.zyra.music.zyra.R
 import com.zyra.music.zyra.presentation.login.component.CustomTextBox
-import com.zyra.music.zyra.navigation.Route
 import com.zyra.music.zyra.presentation.login.supabase.rememberSupabaseAuthState
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
+    onLoginSuccess : () -> Unit
+
 
 ) {
     val context = LocalContext.current
@@ -64,9 +62,7 @@ fun LoginScreen(
             isLoading = loading
         },
         onSignInSuccess = {
-            navController.navigate(Route.HomeScreen.title){
-                popUpTo(Route.LoginScreen.title){inclusive = true}
-            }
+            onLoginSuccess
             Toast.makeText(context, "Sign In Successful!", Toast.LENGTH_LONG).show()
         },
         onSignInFailed = { error ->

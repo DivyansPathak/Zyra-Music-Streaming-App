@@ -5,22 +5,16 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.util.query
 import com.zyra.music.zyra.domain.repository.SongRepository
 import com.zyra.music.zyra.domain.utils.getErrorMessage
 import com.zyra.music.zyra.domain.utils.onFailure
 import com.zyra.music.zyra.domain.utils.onSuccess
-import com.zyra.music.zyra.navigation.Route
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import org.schabi.newpipe.extractor.timeago.patterns.vi
 
 private const val TAG = "SearchViewModel"
 
@@ -31,8 +25,8 @@ class SearchViewModel(
     private val _uiState = MutableStateFlow(SearchState())
     val uiState = _uiState.asStateFlow()
 
-    private val _navigationEvent = Channel<Route>()
-    val navigationEvent = _navigationEvent.receiveAsFlow()
+//    private val _navigationEvent = Channel<Route>()
+//    val navigationEvent = _navigationEvent.receiveAsFlow()
 
     var searchJob: Job? = null
 

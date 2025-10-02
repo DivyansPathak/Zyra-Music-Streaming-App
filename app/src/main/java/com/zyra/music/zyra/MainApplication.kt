@@ -18,7 +18,6 @@ class MainApplication : Application(){
         // Initialize the NewPipe Extractor library once when the app starts.
         // This sets up the extractor to use your custom KtorDownloader for all its network requests.
         NewPipe.init(KtorDownloader.getInstance(), localization)
-
         // Initialize Koin for dependency injection.
         startKoin {
             androidLogger()

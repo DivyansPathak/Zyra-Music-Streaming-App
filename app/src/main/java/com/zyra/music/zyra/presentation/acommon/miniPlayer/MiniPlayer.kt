@@ -1,4 +1,4 @@
-package com.zyra.music.zyra.presentation.playerScreen.miniPlayer
+package com.zyra.music.zyra.presentation.acommon.miniPlayer
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.basicMarquee

@@ -1,5 +1,3 @@
-import com.android.build.api.artifact.ArtifactKind
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -13,12 +11,9 @@ plugins {
 
 }
 
-//configurations.all {
-//    it.exclude(group = "com.intellij", module = "annotations")
-//}
 android {
     namespace = "com.zyra.music.zyra"
-    compileSdk = 35
+    compileSdk = 36
 
 
 
@@ -124,5 +119,10 @@ dependencies {
 
     implementation("com.github.teamnewpipe:NewPipeExtractor:0.24.8")
 
-//    implementation("com.google.accompanist:accompanist-navigation-animation:2.8.0-alpha01")
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.androidx.material3.adaptive.navigation3)
+    implementation(libs.kotlinx.serialization.core)
+
 }

@@ -18,6 +18,7 @@ object SupabaseClient {
     ){
         install(Postgrest)
         install(Auth){
+
             alwaysAutoRefresh = true
             autoLoadFromStorage = true
         }

@@ -35,7 +35,7 @@ val koinModule = module {
     singleOf(::SongRepositoryImpl).bind<SongRepository>()
     singleOf(::PlaylistRepositoryImpl).bind<PlaylistRepository>()
 
-    @androidx.media3.common.util.UnstableApi
+    @UnstableApi
     viewModel {
         MusicViewModel(get(), get(), androidContext())
     }

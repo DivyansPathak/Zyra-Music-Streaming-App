@@ -178,7 +178,7 @@ class MusicService : MediaSessionService() {
 //                    val mediaItemResult = songRepository.getSong(youtubeUrl+mediaItem.mediaId)
 //                    mediaItemResult.onSuccess { songResult ->
 //                        val updated = mediaItem.buildUpon().setUri(songResult.streamUrl).build()
-//                        withContext(Dispatchers.Main){
+//                        withContext(Dispatchers.MainGraph){
 //                            mediaSession.player.replaceMediaItem(index +1,updated)
 //                        }
 //                    }
@@ -193,7 +193,7 @@ class MusicService : MediaSessionService() {
 //                        Log.d(TAG,"Background fetching for Added song : ${mediaItem.mediaMetadata.title}")
 //                        songRepository.getSong(youtubeUrl+mediaItem.mediaId).onSuccess { songResult ->
 //                            val updated = mediaItem.buildUpon().setUri(songResult.streamUrl).build()
-//                            withContext(Dispatchers.Main) {
+//                            withContext(Dispatchers.MainGraph) {
 //                                mediaSession.player.replaceMediaItem(startIndex,updated)
 //                            }
 //                        }

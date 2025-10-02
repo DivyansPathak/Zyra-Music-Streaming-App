@@ -46,7 +46,6 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navController: NavController,
     modifier: Modifier = Modifier,
     state: HomeScreenState,
     onPlaylistClick: (playlistId: String) -> Unit,
