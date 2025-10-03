@@ -62,7 +62,7 @@ fun LoginScreen(
             isLoading = loading
         },
         onSignInSuccess = {
-            onLoginSuccess
+            onLoginSuccess()
             Toast.makeText(context, "Sign In Successful!", Toast.LENGTH_LONG).show()
         },
         onSignInFailed = { error ->

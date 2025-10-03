@@ -127,8 +127,10 @@ fun ZyraTheme(
             val window = (view.context as Activity).window
             // Set status bar color to transparent
             window.statusBarColor = Color.Black.toArgb()
+            window.navigationBarColor = Color.Black.toArgb()
             // Set icons to be light (for dark backgrounds)
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+
         }
     }
 
