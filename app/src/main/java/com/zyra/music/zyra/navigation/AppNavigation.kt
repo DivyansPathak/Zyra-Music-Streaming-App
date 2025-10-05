@@ -1,5 +1,9 @@
 package com.zyra.music.zyra.navigation
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -17,11 +21,12 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.zyra.music.zyra.data.remote.SupabaseClient
+import com.zyra.music.zyra.presentation.acommon.ConstrainMainGraphScreen
+import com.zyra.music.zyra.presentation.acommon.LastMainScreen
 import com.zyra.music.zyra.presentation.acommon.MainScreenWithBottomBar
 import com.zyra.music.zyra.presentation.login.LoginScreen
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.PlayerScreenN
-import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
 import org.koin.androidx.compose.koinViewModel
@@ -92,13 +97,18 @@ fun AppNavigation() {
                 )
             }
             entry<PlayerScreen> {
-                val state by mainMusicViewModel.uiState.collectAsStateWithLifecycle()
-                PlayerScreenN(
-                    state = state,
-                    onAction = mainMusicViewModel::onAction,
-                    eventFlow = mainMusicViewModel.uiEvent,
-                    navigateToBack = { appTopBackStack.removeLastOrNull() }
-                )
+                AnimatedContent(
+                    targetState = it,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() }
+                ) {_ ->
+                    val state by mainMusicViewModel.uiState.collectAsStateWithLifecycle()
+                    PlayerScreenN(
+                        state = state,
+                        onAction = mainMusicViewModel::onAction,
+                        eventFlow = mainMusicViewModel.uiEvent,
+                        navigateToBack = { appTopBackStack.removeLastOrNull() }
+                    )
+                }
             }
         }
     )

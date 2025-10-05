@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.zyra.music.zyra.presentation.common.GradientScreenContainer
@@ -49,7 +50,8 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     state: HomeScreenState,
     onPlaylistClick: (playlistId: String) -> Unit,
-    onRefresh: suspend () -> Unit
+    onRefresh: suspend () -> Unit,
+    contentPadding : Dp = 0.dp
 
 ) {
 
@@ -86,7 +88,7 @@ fun HomeScreen(
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 100.dp, top = 80.dp)
+                contentPadding = PaddingValues(bottom = contentPadding, top = 80.dp)
             ) {
                 if (state.isLoading && state.sections.isEmpty()) {
                     items(3) {

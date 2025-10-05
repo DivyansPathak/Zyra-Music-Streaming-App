@@ -1,6 +1,7 @@
 package com.zyra.music.zyra.presentation.newPlayer
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -28,6 +29,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,6 +70,19 @@ fun PlayerScreenN(
     navigateToBack: () -> Unit
 ) {
 
+    BackHandler {
+        navigateToBack()
+    }
+
+    LaunchedEffect(Unit) {
+        eventFlow.collect { event ->
+            when(event){
+                is NewPlayerEvent.NavigateToBack -> {
+                    navigateToBack()
+                }
+            }
+        }
+    }
 
 
     GradientScreenContainer(imagerUrl = state.currentTrack?.thumbnail) {
@@ -531,11 +546,13 @@ fun SeekBarSection(
         ) {
             Text(
                 text = formatTime(currentPosition),
-                style = MaterialTheme.typography.labelSmall
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
             )
             Text(
                 text = formatTime(totalDuration),
-                style = MaterialTheme.typography.labelSmall
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }

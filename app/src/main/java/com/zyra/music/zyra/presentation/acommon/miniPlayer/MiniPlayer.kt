@@ -1,6 +1,7 @@
 package com.zyra.music.zyra.presentation.acommon.miniPlayer
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +21,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +35,8 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.zyra.music.zyra.R
+import com.zyra.music.zyra.presentation.common.GradientScreenContainer
+import com.zyra.music.zyra.presentation.common.rememberDominantColorState
 import com.zyra.music.zyra.presentation.ui.theme.ZyraTheme
 
 @Composable
@@ -49,10 +53,21 @@ fun MiniPlayer(
     duration: String,
     currentDuration : String
 ) {
+
+    val dominantColorState = rememberDominantColorState(
+        imageUrl = imageUrl,
+        defaultColor = MaterialTheme.colorScheme.surface
+    )
+
+    // ✅ 3. Animate the color based on the state's value.
+    val animatedColor by animateColorAsState(
+        targetValue = dominantColorState.value,
+        label = "miniplayer_color_animation"
+    )
     Card(
         modifier = modifier.clickable { onClick() },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = animatedColor
         ),
         shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
     ) {
@@ -60,6 +75,7 @@ fun MiniPlayer(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(56.dp)
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -72,9 +88,8 @@ fun MiniPlayer(
                 MiniPlayerImage(
                     imageUrl = imageUrl,
                     modifier = Modifier
-                        .padding(vertical = 16.dp)
                         .size(48.dp)
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(8.dp))
                 )
                 Column(
                     modifier = Modifier
@@ -94,7 +109,7 @@ fun MiniPlayer(
                     )
                     Text(
                         text = "$currentDuration / $duration", style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -164,11 +179,11 @@ fun MiniPlayerImage(
         .build()
     AsyncImage(
         model = imageRequest,
-        modifier = modifier.clip(CircleShape),
+        modifier = modifier,
         contentDescription = null,
         placeholder = painterResource(id = R.drawable.placeholder_miniplayer),
         error = painterResource(id = R.drawable.placeholder_miniplayer),
-        contentScale = ContentScale.FillBounds
+        contentScale = ContentScale.Crop
 
 
     )
