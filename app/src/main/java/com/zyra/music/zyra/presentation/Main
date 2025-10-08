@@ -174,3 +174,62 @@ fun MainScreen() {
     }
 
 }
+
+
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LibraryHeader(
+    selectedScreen: LibraryScreenType,
+    onSelectionChange: (LibraryScreenType) -> Unit
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+    val screenTypes = LibraryScreenType.values()
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        ExposedDropdownMenuBox(
+            expanded = isExpanded,
+            onExpandedChange = { isExpanded = it }
+        ) {
+            // --- SOLUTION: A custom Row that acts as the anchor ---
+            Row(
+                modifier = Modifier
+                    .menuAnchor() // 1. This identifies the Row as the anchor.
+                    .clickable { isExpanded = !isExpanded }, // 2. This makes the whole Row clickable.
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = selectedScreen.title,
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                    // Use weight to take up available space and push the icon to the side
+                    // If you want them right next to each other, remove this modifier.
+                    modifier = Modifier.padding(start =  12.dp)
+                )
+
+                // 3. This is a standard icon that animates based on the expanded state.
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+            }
+
+            // The dropdown menu itself does not change
+            ExposedDropdownMenu(
+                expanded = isExpanded,
+                onDismissRequest = { isExpanded = false }
+            ) {
+                screenTypes.forEach { type ->
+                    DropdownMenuItem(
+                        text = { Text(text = type.title) },
+                        onClick = {
+                            onSelectionChange(type)
+                            isExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}

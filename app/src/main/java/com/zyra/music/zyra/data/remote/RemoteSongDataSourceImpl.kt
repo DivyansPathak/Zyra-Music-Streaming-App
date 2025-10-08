@@ -7,6 +7,9 @@ import com.zyra.music.zyra.data.remote.dto.SearchRequestBody
 import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
 import com.zyra.music.zyra.data.remote.dto.ThumbnailDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
+import com.zyra.music.zyra.data.remote.dto.favoriteDto.LibraryPlaylistDto
+import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistDto
+import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistSongDto
 import com.zyra.music.zyra.data.utils.BASE_URL
 import com.zyra.music.zyra.data.utils.PRE_PLAYLIST_URL
 import com.zyra.music.zyra.data.utils.YT_BASE_URL
@@ -14,6 +17,8 @@ import com.zyra.music.zyra.domain.utils.DataError
 import com.zyra.music.zyra.domain.utils.Result
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.rpc
 import io.ktor.client.HttpClient
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.request.get
@@ -44,21 +49,10 @@ class RemoteSongDataSourceImpl(
         }
     }
 
-//    override suspend fun getRecommendations(songTitle: String): Result<List<String>, DataError> {
-//        return withContext(Dispatchers.IO) {
-//            safeCall<List<String>> {
-//                httpClient.get(urlString = "$BASE_URL/recommendations") {
-//                    parameter("song", songTitle)
-//                }
-//            }
-//        }
-//    }
-
     override suspend fun searchSongs(queries: List<String>): Result<List<SingleTrackDto>, DataError> {
         return withContext(Dispatchers.IO) {
             safeCall<List<SingleTrackDto>> {
                 httpClient.post(urlString = "$BASE_URL/search-songs/") {
-//                    parameter("queries", queries)
                     setBody(SearchRequestBody(queries = queries))
                 }
             }
@@ -136,6 +130,66 @@ class RemoteSongDataSourceImpl(
         }
     }
 
+    override suspend fun createPlaylist(playlistDto: UserPlaylistDto): Result<Unit, DataError> {
+        return safeSupabaseCall {
+            supabase.from("playlists").insert(playlistDto)
+        }
+    }
+
+    override suspend fun createPlaylistM(playlistDto: UserPlaylistDto): Result<UserPlaylistDto, DataError> {
+//        return safeSupabaseCall {
+//           val responseBody = supabase.postgrest.rpc(
+//                "create_playlist_and_return_id",
+//                parameters = mapOf(
+//                    "p_name" to playlistDto.name,
+//                    "p_description" to playlistDto.description
+//                )
+//            ).decodeSingle<String>()
+//            responseBody.toLong()
+//        }
+        return safeSupabaseCall {
+            supabase.from("playlists").insert(playlistDto){
+                select()
+            }.decodeSingle<UserPlaylistDto>()
+        }
+    }
+
+    override suspend fun addSongToPlaylist(playlistSong: UserPlaylistSongDto): Result<Unit, DataError> {
+        return safeSupabaseCall {
+            supabase.from("playlist_songs").insert(value = playlistSong)
+        }
+    }
+
+    override suspend fun removeSongToPlaylist(playlistSong: UserPlaylistSongDto): Result<Unit, DataError> {
+        return safeSupabaseCall {
+            supabase.from("playlist_songs").delete {
+                filter {
+                    eq("playlist_id",playlistSong.playlistId)
+                    eq("song_id",playlistSong.songId)
+                }
+            }
+        }
+    }
+
+    override suspend fun deletePlaylist(playlistId: String): Result<Unit, DataError> {
+        return safeSupabaseCall {
+            supabase.from("playlists").delete {
+                filter {
+                    eq("id", playlistId)
+                }
+            }
+        }
+    }
+
+    override suspend fun getLibraryPlaylists(): Result<List<LibraryPlaylistDto>, DataError> {
+            return safeSupabaseCall {
+                supabase.postgrest.rpc(
+                    function ="get_user_personal_playlists",
+                    parameters = emptyMap<String, String>()
+                ).decodeList<LibraryPlaylistDto>()
+            }
+    }
+
     override suspend fun getSearchSuggestions(query: String): Result<List<String>, DataError> {
         if (query.isBlank()) {
             return Result.Success(emptyList())
@@ -197,6 +251,14 @@ class RemoteSongDataSourceImpl(
         return withContext(Dispatchers.IO) {
             safeCall<PrePlaylistDto> {
                 httpClient.get(urlString = "$PRE_PLAYLIST_URL/playlists/$id")
+            }
+        }
+    }
+
+    override suspend fun getMetadataOfSong(videoId: String): Result<TrackFullOneDto, DataError> {
+        return withContext(Dispatchers.IO){
+            safeCall <TrackFullOneDto>{
+                httpClient.get(urlString = "$YT_BASE_URL/song/metadata/$videoId")
             }
         }
     }

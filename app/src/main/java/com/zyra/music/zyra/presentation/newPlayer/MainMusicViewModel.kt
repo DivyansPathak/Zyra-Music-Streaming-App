@@ -439,14 +439,12 @@ class MainMusicViewModel(
         val isCurrentlyFavorite = uiState.value.isFavorite
         val currentFavoriteIds = uiState.value.favoriteIds
 
-        // 1. Create the new "Memory" (the updated set) optimistically.
         val newFavoriteIds = if (isCurrentlyFavorite) {
             currentFavoriteIds - currentTrackId
         } else {
             currentFavoriteIds + currentTrackId
         }
 
-        // 2. Update both the "Display" (isFavorite) and the "Memory" (favoriteIds) at the same time.
         _uiState.update {
             it.copy(
                 isFavorite = !isCurrentlyFavorite,

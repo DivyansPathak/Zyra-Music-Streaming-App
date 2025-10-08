@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,15 +36,23 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.navigation.HomeScreen
 import com.zyra.music.zyra.navigation.LibraryScreen
 import com.zyra.music.zyra.navigation.MainScreens
 import com.zyra.music.zyra.navigation.PlayerScreen
 import com.zyra.music.zyra.navigation.ProfileScreen
 import com.zyra.music.zyra.navigation.SearchScreen
+import com.zyra.music.zyra.presentation.acommon.addToPlaylist.AddPlaylistSheet
+import com.zyra.music.zyra.presentation.acommon.addToPlaylist.CreateNewPlaylistDialog
 import com.zyra.music.zyra.presentation.acommon.miniPlayer.MiniPlayer
+import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistAction
+import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistEvent
+import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
 import com.zyra.music.zyra.presentation.home.HomeScreen
 import com.zyra.music.zyra.presentation.home.HomeViewModel
+import com.zyra.music.zyra.presentation.libraryScreen.LibraryScreen
+import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerAction
 import com.zyra.music.zyra.presentation.searchScreen.SearchScreenN
@@ -54,6 +64,8 @@ import org.koin.androidx.compose.koinViewModel
 import org.schabi.newpipe.extractor.timeago.patterns.fi
 
 private const val TAG = "BACK_PRESS_DEBUG"
+
+@OptIn(ExperimentalMaterial3Api::class)
 @UnstableApi
 @Composable
 fun MainScreenWithBottomBar(
@@ -64,7 +76,10 @@ fun MainScreenWithBottomBar(
     val mainBackStack = rememberNavBackStack<MainScreens>(HomeScreen)
     val searchViewModel: SearchViewModel = koinViewModel()
     val homeViewModel: HomeViewModel = koinViewModel()
+    val libraryViewModel: LibraryViewModel = koinViewModel()
+    val addPlaylistViewModel : AddPlaylistViewModel = koinViewModel()
     val mainState by mainViewModel.uiState.collectAsStateWithLifecycle()
+    val addPlaylistState by addPlaylistViewModel.uiState.collectAsStateWithLifecycle()
     val isMiniPlayerVisible = mainState.currentTrack != null
 
     var controlsHeight by remember { mutableStateOf(0.dp) }
@@ -74,6 +89,47 @@ fun MainScreenWithBottomBar(
     val activity = context as? Activity
     var backPressedOnce by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+
+    var showPlaylistSheet by remember { mutableStateOf(false) }
+
+    val backToHome: () -> Unit = {
+        if (mainBackStack.size > 1) {
+            mainBackStack.removeLastOrNull()
+        } else {
+            mainBackStack.clear()
+            mainBackStack.add(HomeScreen)
+        }
+    }
+
+    val onAddToPlaylistClick : (TrackFullOne) -> Unit = { track ->
+        addPlaylistViewModel.onAction(AddPlaylistAction.SetSongAndShowSheet(track))
+        showPlaylistSheet = true
+    }
+
+    if (addPlaylistState.isCreateDialogOpen){
+        CreateNewPlaylistDialog(
+         onDismiss = {
+             addPlaylistViewModel.onAction(AddPlaylistAction.HideCreateDialog)
+         },
+            onConfirm = { title ,description ->
+                addPlaylistViewModel.onAction(AddPlaylistAction.CreatePlaylistAndAddSong(title = title, description = description))
+            }
+        )
+    }
+    if (showPlaylistSheet){
+        AddPlaylistSheet(
+            state = addPlaylistState,
+            onDismiss = {showPlaylistSheet = false},
+            onPlaylistClick = {playlistId ->
+                showPlaylistSheet = false
+                addPlaylistViewModel.onAction(AddPlaylistAction.AddSongToPlaylist(playlistId))
+            },
+            addNewPlaylistClick = {
+                addPlaylistViewModel.onAction(AddPlaylistAction.ShowCreateDialog)
+            }
+        )
+    }
+
 
     BackHandler {
         Log.d(TAG, "Back pressed!")
@@ -101,10 +157,11 @@ fun MainScreenWithBottomBar(
     Scaffold(
         contentColor = MaterialTheme.colorScheme.primary,
 
-    ) { innerPadding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
+        ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
             NavDisplay(
                 modifier = Modifier.fillMaxSize(),
@@ -127,24 +184,32 @@ fun MainScreenWithBottomBar(
                             state = state,
                             contentPadding = controlsHeight,
                             onAction = searchViewModel::onAction,
+                            eventFlow = searchViewModel.uiEvent,
                             onSongClick = { track ->
                                 mainViewModel.playRadioForSong(track)
                                 appTopBackStack.add(PlayerScreen)
                             },
                             onNextPlayClick = { track -> mainViewModel.addSongToPlayNext(track) },
                             addToQueueClick = { track -> mainViewModel.addSongToQueue(track) },
-                            onBackClick = { mainBackStack.removeLastOrNull() }
+                            onBackClick = {
+                                backToHome()
+                            }
                         )
                     }
                     entry<LibraryScreen> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "Library")
-                        }
+                        val state by libraryViewModel.uiState.collectAsStateWithLifecycle()
+                        LibraryScreen(
+//                          onPlaylistclick = {
+//                                            playlistId, playlistType ->
+//                          }
+                            onPlaylistClick = {},
+                            state = state,
+                            onScreenTypeSelected = {}
+                        )
+
+
                     }
-                    entry <ProfileScreen>{
+                    entry<ProfileScreen> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -155,10 +220,12 @@ fun MainScreenWithBottomBar(
                 }
             )
 
-            Column(modifier = Modifier.align(Alignment.BottomCenter)
-                .onSizeChanged{size ->
-                    controlsHeight = with(density){size.height.toDp()}
-                }){
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .onSizeChanged { size ->
+                        controlsHeight = with(density) { size.height.toDp() }
+                    }) {
                 AnimatedVisibility(
                     visible = isMiniPlayerVisible,
                     enter = slideInVertically(initialOffsetY = { it }),

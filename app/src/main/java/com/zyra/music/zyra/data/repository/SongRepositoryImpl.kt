@@ -38,6 +38,20 @@ class SongRepositoryImpl(
         }
     }
 
+    override suspend fun searchSongs(queries: List<String>): Result<List<SingleTrack>, DataError> {
+        Log.d(TAG, "2. Asking DataSource for songs with queries: '$queries'")
+        val result = remoteSongDataSource.searchSongs(queries = queries)
+        Log.d(TAG, "3. Got result from DataSource: $result")
+        return when(result){
+            is Result.Failure -> result
+            is Result.Success -> {
+                val singleTrackDto = result.data
+                Log.i(TAG, "3.1. Mapped ${singleTrackDto.size} DTOs to Domain models successfully.")
+                Result.Success(singleTrackDto.toSingleTrackList())
+            }
+        }
+    }
+
     override suspend fun getSong(url: String): Result<SongResult, DataError> {
         return withContext(Dispatchers.IO) {
             try {

@@ -21,9 +21,14 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.zyra.music.zyra.data.remote.SupabaseClient
+import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.presentation.acommon.ConstrainMainGraphScreen
 import com.zyra.music.zyra.presentation.acommon.LastMainScreen
 import com.zyra.music.zyra.presentation.acommon.MainScreenWithBottomBar
+import com.zyra.music.zyra.presentation.acommon.addToPlaylist.AddPlaylistSheet
+import com.zyra.music.zyra.presentation.acommon.addToPlaylist.CreateNewPlaylistDialog
+import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistAction
+import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
 import com.zyra.music.zyra.presentation.login.LoginScreen
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.PlayerScreenN
@@ -72,6 +77,19 @@ fun AppNavigation() {
 
 
     val mainMusicViewModel : MainMusicViewModel = koinViewModel()
+    val addPlaylistViewModel : AddPlaylistViewModel = koinViewModel()
+
+    val addPlaylistState by addPlaylistViewModel.uiState.collectAsStateWithLifecycle()
+    var showPlaylistSheet by remember { mutableStateOf(false) }
+
+    val onAddToPlaylistClick : (TrackFullOne) -> Unit = { track ->
+        Log.d(TAG, "Step 1: Trigger received. Calling viewModel.onAction...")
+        addPlaylistViewModel.onAction(AddPlaylistAction.SetSongAndShowSheet(track))
+        showPlaylistSheet = true
+    }
+
+
+
 
     NavDisplay(
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
@@ -106,10 +124,41 @@ fun AppNavigation() {
                         state = state,
                         onAction = mainMusicViewModel::onAction,
                         eventFlow = mainMusicViewModel.uiEvent,
-                        navigateToBack = { appTopBackStack.removeLastOrNull() }
+                        navigateToBack = { appTopBackStack.removeLastOrNull() },
+                        onAddToPlaylistClick = {track ->
+                            Log.d(TAG,"onAddToPlaylistClick")
+                            onAddToPlaylistClick(track)
+                        }
                     )
                 }
             }
         }
     )
+
+    if (addPlaylistState.isCreateDialogOpen){
+        CreateNewPlaylistDialog(
+            onDismiss = {
+                addPlaylistViewModel.onAction(AddPlaylistAction.HideCreateDialog)
+            },
+            onConfirm = { title ,description ->
+                addPlaylistViewModel.onAction(AddPlaylistAction.CreatePlaylistAndAddSong(title = title, description = description))
+                addPlaylistViewModel.onAction(AddPlaylistAction.HideCreateDialog)
+            }
+        )
+    }
+    if (showPlaylistSheet){
+        AddPlaylistSheet(
+            state = addPlaylistState,
+            onDismiss = {showPlaylistSheet = false},
+            onPlaylistClick = {playlistId ->
+                Log.d(TAG, "Step 2A: Existing playlist item clicked.")
+                showPlaylistSheet = false
+                addPlaylistViewModel.onAction(AddPlaylistAction.AddSongToPlaylist(playlistId))
+            },
+            addNewPlaylistClick = {
+                Log.d(TAG, "Step 2B: 'New Playlist' button clicked.")
+                addPlaylistViewModel.onAction(AddPlaylistAction.ShowCreateDialog)
+            }
+        )
+    }
 }

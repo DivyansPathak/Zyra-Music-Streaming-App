@@ -10,9 +10,13 @@ import com.zyra.music.zyra.domain.utils.getErrorMessage
 import com.zyra.music.zyra.domain.utils.onFailure
 import com.zyra.music.zyra.domain.utils.onSuccess
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -25,8 +29,8 @@ class SearchViewModel(
     private val _uiState = MutableStateFlow(SearchState())
     val uiState = _uiState.asStateFlow()
 
-//    private val _navigationEvent = Channel<Route>()
-//    val navigationEvent = _navigationEvent.receiveAsFlow()
+    private val _uiEvent = Channel<SearchEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
 
     var searchJob: Job? = null
 
@@ -45,8 +49,6 @@ class SearchViewModel(
         searchJob = viewModelScope.launch {
             delay(1000L)
             executeSearch(cleanQuery)
-//            val result = songRepository.searchSong("despacito")
-//            Log.d("TEST", result.toString())
         }
     }
 
@@ -97,6 +99,9 @@ class SearchViewModel(
                         searchSuggestions = emptyList()
                     )
                 }
+                viewModelScope.launch {
+                    _uiEvent.send(SearchEvent.HideKeyboard)
+                }
                 executeSearch(action.suggestion)
             }
 
@@ -124,6 +129,11 @@ class SearchViewModel(
 
             is SearchAction.OnClearQuery -> {
                 onQueryChange(query = TextFieldValue(""))
+            }
+            is SearchAction.OnBackClick ->{
+                viewModelScope.launch {
+                    _uiEvent.send(SearchEvent.NavigateToBack)
+                }
             }
         }
     }

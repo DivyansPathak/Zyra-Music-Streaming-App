@@ -9,6 +9,7 @@ import com.zyra.music.zyra.domain.utils.Result
 interface SongRepository{
 
     suspend fun searchSong(query : String) : Result<List<SingleTrack>, DataError>
+    suspend fun searchSongs(queries : List<String>) : Result<List<SingleTrack>, DataError>
     suspend fun getSong(url : String) : Result<SongResult, DataError>
 //    suspend fun getRecommendations(songTitle : String) : Result<List<SingleTrack>, DataError>
 

@@ -1,6 +1,7 @@
 package com.zyra.music.zyra.presentation.newPlayer
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
@@ -50,6 +51,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.zyra.music.zyra.R
+import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.presentation.common.GradientScreenContainer
 import com.zyra.music.zyra.presentation.newPlayer.component.PlayerTopBar
 import com.zyra.music.zyra.presentation.newPlayer.component.QueueItem
@@ -67,7 +69,8 @@ fun PlayerScreenN(
     state: NewPlayerState,
     onAction: (NewPlayerAction) -> Unit,
     eventFlow: Flow<NewPlayerEvent>,
-    navigateToBack: () -> Unit
+    navigateToBack: () -> Unit,
+    onAddToPlaylistClick: (TrackFullOne) -> Unit
 ) {
 
     BackHandler {
@@ -166,7 +169,9 @@ fun PlayerScreenN(
                 isEndTrackTimer = state.isEndTrackTimerActive,
                 onFavoriteClick = { onAction(NewPlayerAction.ToggleFavorite) },
                 onShareClick = { onAction(NewPlayerAction.Share) },
-                onAddToPlaylistClick = {},
+                onAddToPlaylistClick = {state.currentTrack?.let { trackFullOne ->
+                    onAddToPlaylistClick(trackFullOne)
+                }},
                 onDownLoadClick = {},
                 setSleepTimer = {timer -> onAction(NewPlayerAction.SetSleepTimer(timer)) },
                 setSleepTimerCurrentTrack = { onAction(NewPlayerAction.SetSleepTimerToEndOfTrack) },
@@ -365,7 +370,11 @@ fun ControlPanel(
                 tint = MaterialTheme.colorScheme.primary
             )
         }
-        IconButton(onClick = onAddToPlaylistClick) {
+        IconButton(onClick = { onAddToPlaylistClick()
+            Log.d("ButtonAddPlaylist","Button is clicked")
+        },
+            modifier = Modifier
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.playlist_icon),
                 contentDescription = "add to playlist",
@@ -609,6 +618,7 @@ private fun PreviewPlayerScreen() {
             onAction = {},
             eventFlow = emptyFlow(),
             navigateToBack = {},
+            onAddToPlaylistClick = {}
         )
     }
 }

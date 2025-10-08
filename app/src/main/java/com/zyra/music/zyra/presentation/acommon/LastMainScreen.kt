@@ -87,6 +87,7 @@ fun LastMainScreen(
                         SearchScreenN(
                             state = state,
                             onAction = searchViewModel::onAction,
+                            eventFlow = searchViewModel.uiEvent,
                             onSongClick = { track ->
                                 mainViewModel.playRadioForSong(track)
                                 appTopBackStack.add(PlayerScreen)

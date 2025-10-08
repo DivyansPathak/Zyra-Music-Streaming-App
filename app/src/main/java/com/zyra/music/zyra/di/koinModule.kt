@@ -6,13 +6,17 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.zyra.music.zyra.data.remote.HttpClientFactory
 import com.zyra.music.zyra.data.remote.RemoteSongDataSource
 import com.zyra.music.zyra.data.remote.RemoteSongDataSourceImpl
+import com.zyra.music.zyra.data.repository.LibraryRepositoryImpl
 import com.zyra.music.zyra.data.repository.PlaylistRepositoryImpl
 import com.zyra.music.zyra.data.repository.SongRepositoryImpl
+import com.zyra.music.zyra.domain.repository.LibraryRepository
 import com.zyra.music.zyra.domain.repository.PlaylistRepository
 import com.zyra.music.zyra.domain.repository.SongRepository
 import com.zyra.music.zyra.exoplayer.MusicQueueManager
 import com.zyra.music.zyra.exoplayer.NewMusicQueueManager
+import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
 import com.zyra.music.zyra.presentation.home.HomeViewModel
+import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.playerScreen.MusicViewModel
 import com.zyra.music.zyra.presentation.searchScreen.SearchViewModel
@@ -34,6 +38,7 @@ val koinModule = module {
     singleOf(::RemoteSongDataSourceImpl).bind<RemoteSongDataSource>()
     singleOf(::SongRepositoryImpl).bind<SongRepository>()
     singleOf(::PlaylistRepositoryImpl).bind<PlaylistRepository>()
+    singleOf(::LibraryRepositoryImpl).bind<LibraryRepository>()
 
     @UnstableApi
     viewModel {
@@ -46,5 +51,14 @@ val koinModule = module {
     }
     viewModelOf(::SearchViewModel)
     viewModelOf(::HomeViewModel)
+
+    viewModel{
+        LibraryViewModel(get())
+    }
+
+    viewModel{
+        AddPlaylistViewModel(get(),get())
+    }
+
 
 }

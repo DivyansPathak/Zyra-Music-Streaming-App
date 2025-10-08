@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -35,6 +36,7 @@ fun CustomSearchBar(
     onSearch : (String) -> Unit,
 ) {
 
+    val controller = LocalSoftwareKeyboardController.current
     Box(modifier = modifier){
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -52,7 +54,7 @@ fun CustomSearchBar(
                 showKeyboardOnFocus = true,
                 imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(
-                onSearch = {onSearch(query.text)}
+                onSearch = {onSearch(query.text) ; controller?.hide()}
             ),
             trailingIcon = {
                 IconButton(onClick = onTrailingIconClick) {
@@ -77,16 +79,3 @@ fun CustomSearchBar(
 
 
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//private fun PreviewCustomSearch() {
-//    ZyraTheme{
-//        CustomSearchBar(
-//            query = "",
-//            onQueryChange = {},
-//            onTrailingIconClick = {}
-//        )
-//    }
-//
-//}

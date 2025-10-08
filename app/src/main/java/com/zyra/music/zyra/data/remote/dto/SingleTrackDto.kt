@@ -10,7 +10,7 @@ data class SingleTrackDto(
     @SerialName("artist_name")
     val artistName: String? = null,
     @SerialName("url")
-    val url: String = "https://picsum.photos/200",
+    val url: String,
     @SerialName("thumbnail")
     val thumbnail: String,
     @SerialName("duration")

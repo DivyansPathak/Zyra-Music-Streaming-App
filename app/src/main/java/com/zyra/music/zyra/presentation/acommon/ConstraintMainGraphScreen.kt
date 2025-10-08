@@ -120,7 +120,8 @@ fun ConstrainMainGraphScreen(
                         },
                         onNextPlayClick = { track -> mainViewModel.addSongToPlayNext(track) },
                         addToQueueClick = { track -> mainViewModel.addSongToQueue(track) },
-                        onBackClick = { mainBackStack.removeLastOrNull() }
+                        onBackClick = { mainBackStack.removeLastOrNull() },
+                        eventFlow = searchViewModel.uiEvent
                     )
                 }
                 entry<LibraryScreen> {
