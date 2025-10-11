@@ -68,7 +68,10 @@ class LibraryRepositoryImpl(
         return remoteSongDataSource.removeSongToPlaylist(playlist.toUserPlaylistSongDto())
     }
 
-    override suspend fun deletePlaylist(playlistId: String): Result<Unit, DataError> {
+    override suspend fun deletePlaylist(playlistId: Long): Result<Unit, DataError> {
+        if (playlistId == -1L){
+            return Result.Failure(DataError.UnknownError("Cannot delete Liked Songs playlist"))
+        }
         return remoteSongDataSource.deletePlaylist(playlistId = playlistId)
     }
 }

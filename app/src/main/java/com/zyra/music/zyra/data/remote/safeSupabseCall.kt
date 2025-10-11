@@ -15,6 +15,7 @@ suspend inline fun <T> safeSupabaseCall(
         // The Supabase call is executed here. If it's successful,
         // we wrap the result in your Result.Success class.
         Result.Success(execute())
+
     }
     // This is the primary exception from Supabase for API errors (e.g., 4xx, 5xx).
     catch (e: RestException) {

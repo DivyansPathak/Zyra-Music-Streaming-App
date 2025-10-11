@@ -14,6 +14,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
@@ -27,8 +29,11 @@ import com.zyra.music.zyra.presentation.acommon.LastMainScreen
 import com.zyra.music.zyra.presentation.acommon.MainScreenWithBottomBar
 import com.zyra.music.zyra.presentation.acommon.addToPlaylist.AddPlaylistSheet
 import com.zyra.music.zyra.presentation.acommon.addToPlaylist.CreateNewPlaylistDialog
+import com.zyra.music.zyra.presentation.acommon.addToPlaylist.DeleteAlertDialog
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistAction
+import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistEvent
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
+import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.login.LoginScreen
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.PlayerScreenN
@@ -78,6 +83,7 @@ fun AppNavigation() {
 
     val mainMusicViewModel : MainMusicViewModel = koinViewModel()
     val addPlaylistViewModel : AddPlaylistViewModel = koinViewModel()
+    val libraryViewModel : LibraryViewModel = koinViewModel()
 
     val addPlaylistState by addPlaylistViewModel.uiState.collectAsStateWithLifecycle()
     var showPlaylistSheet by remember { mutableStateOf(false) }
@@ -88,7 +94,24 @@ fun AppNavigation() {
         showPlaylistSheet = true
     }
 
+    var controlsHeight by remember { mutableStateOf(0.dp) }
 
+
+    LaunchedEffect(Unit) {
+        addPlaylistViewModel.uiEvent.collect { event ->
+            when (event) {
+                is AddPlaylistEvent.ShowMessage -> {
+                    Log.d(TAG, "AddPlaylist Event: ${event.message}")
+                    // Refresh library after any playlist operation
+                    if (event.message.contains("added", ignoreCase = true) ||
+                        event.message.contains("created", ignoreCase = true)) {
+                        Log.d(TAG, "Refreshing library after playlist change")
+                        libraryViewModel.loadLibraryContent()
+                    }
+                }
+            }
+        }
+    }
 
 
     NavDisplay(
@@ -146,6 +169,7 @@ fun AppNavigation() {
             }
         )
     }
+
     if (showPlaylistSheet){
         AddPlaylistSheet(
             state = addPlaylistState,
@@ -158,7 +182,24 @@ fun AppNavigation() {
             addNewPlaylistClick = {
                 Log.d(TAG, "Step 2B: 'New Playlist' button clicked.")
                 addPlaylistViewModel.onAction(AddPlaylistAction.ShowCreateDialog)
-            }
+            },
+            deletePlaylist = {playlist ->
+                Log.d(TAG, "Step 2C: Delete Playlist button clicked. ${playlist.name}")
+                addPlaylistViewModel.onAction(AddPlaylistAction.ShowDeleteDialog(playlist))
+            },
+            contentPadding = controlsHeight
+        )
+    }
+    addPlaylistState.playlistToDelete?.let { playlist ->
+        DeleteAlertDialog(
+            onDismiss = {
+                addPlaylistViewModel.onAction(AddPlaylistAction.HideDeleteDialog)
+            },
+            onConfirm = {
+                addPlaylistViewModel.onAction(AddPlaylistAction.ConfirmDelete)
+            },
+            playlist = playlist,
+
         )
     }
 }

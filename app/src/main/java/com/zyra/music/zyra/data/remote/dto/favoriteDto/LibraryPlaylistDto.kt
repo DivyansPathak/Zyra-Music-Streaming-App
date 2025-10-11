@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LibraryPlaylistDto(
-    val id : String, // i changed it from String to Long
+    val id : Long, // i changed it from String to Long
     val title : String,
     val subtitle : String?,
     @SerialName("thumbnail_song_id")

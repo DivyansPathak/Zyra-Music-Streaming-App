@@ -31,7 +31,7 @@ interface RemoteSongDataSource {
     suspend fun createPlaylist(playlistDto : UserPlaylistDto) : Result<Unit, DataError>
     suspend fun addSongToPlaylist(playlistSong : UserPlaylistSongDto) : Result<Unit, DataError>
     suspend fun removeSongToPlaylist(playlistSong: UserPlaylistSongDto) : Result<Unit, DataError>
-    suspend fun deletePlaylist(playlistId : String) : Result<Unit, DataError>
+    suspend fun deletePlaylist(playlistId : Long) : Result<Unit, DataError>
 
     suspend fun createPlaylistM(playlistDto : UserPlaylistDto) : Result<UserPlaylistDto, DataError>
     suspend fun getLibraryPlaylists() : Result<List<LibraryPlaylistDto>, DataError>

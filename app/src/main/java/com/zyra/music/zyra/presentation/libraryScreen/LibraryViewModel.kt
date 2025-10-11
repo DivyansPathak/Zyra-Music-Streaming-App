@@ -26,7 +26,7 @@ class LibraryViewModel(
         loadLibraryContent()
     }
 
-    private fun loadLibraryContent(){
+     fun loadLibraryContent(){
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 

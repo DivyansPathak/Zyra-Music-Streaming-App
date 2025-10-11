@@ -15,13 +15,13 @@ import com.zyra.music.zyra.domain.utils.onFailure
 import com.zyra.music.zyra.domain.utils.onSuccess
 import com.zyra.music.zyra.navigation.PlayListType
 import io.github.jan.supabase.auth.auth
+import io.ktor.client.plugins.logging.Logging
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.schabi.newpipe.extractor.playlist.PlaylistInfo
 
 private const val TAG = "AddPlaylistViewModel"
 class AddPlaylistViewModel(
@@ -55,6 +55,18 @@ class AddPlaylistViewModel(
               createPlaylist(title = action.title, description = action.description)
               Log.d(TAG,"Playlist is created and song is added")
           }
+          is AddPlaylistAction.ShowDeleteDialog -> {
+              _uiState.update { it.copy(
+                  playlistToDelete = action.playlist
+              ) }
+          }
+          is AddPlaylistAction.ConfirmDelete -> {
+              deletePlaylist()
+
+          }
+          is AddPlaylistAction.HideDeleteDialog -> {
+              _uiState.update { it.copy(playlistToDelete = null) }
+          }
       }
 
     }
@@ -62,17 +74,9 @@ class AddPlaylistViewModel(
         _uiState.update { it.copy(songToAdd = track, isLoading = true) }
         viewModelScope.launch {
             libraryRepo.getPersonalPlaylists()
-                .onSuccess { userCreatedPlaylist ->
-                    val likedSongs = LibraryPlaylist(
-                        id = "-1",
-                        name = "Liked Songs",
-                        imageUrl = "",
-                        creator = "",
-                        trackCount = 0,
-                        playlistType = PlayListType.FAVORITES
-                    )
-                    val fullList = listOf(likedSongs) + userCreatedPlaylist
-                    _uiState.update { it.copy(playlists = fullList, isLoading = false) }
+                .onSuccess { userPlaylist ->
+
+                    _uiState.update { it.copy(playlists = userPlaylist, isLoading = false) }
                 }
                 .onFailure { error ->
                     _uiState.update { it.copy(isLoading = false) }
@@ -80,11 +84,11 @@ class AddPlaylistViewModel(
                 }
         }
     }
-    private fun addSongToPlaylist(playlistId : String){
+    private fun addSongToPlaylist(playlistId : Long){
         val song = _uiState.value.songToAdd ?: return
 
         viewModelScope.launch {
-            if (playlistId == "-1"){
+            if (playlistId == -1L){
                 songRepo.addFavorite(song.videoId)
                     .onSuccess {
                         _uiEvent.send(AddPlaylistEvent.ShowMessage("Added to Liked Songs"))
@@ -102,7 +106,7 @@ class AddPlaylistViewModel(
                     }
                     .onFailure {error ->
                         _uiEvent.send(AddPlaylistEvent.ShowMessage(error.getErrorMessage()))
-                        Log.d(TAG,"Error adding song to playlist $error")
+                        Log.e(TAG,"Error adding song to playlist $error")
                     }
             }
 
@@ -119,7 +123,11 @@ class AddPlaylistViewModel(
                  _uiEvent.send(AddPlaylistEvent.ShowMessage("Playlist $title created"))
                  onAction(AddPlaylistAction.HideCreateDialog)
                  newPlaylist.id?.let { newPlaylistId->
+                     Log.d(TAG,"Adding song to newly created playlist $newPlaylistId")
                      addSongToPlaylist(newPlaylistId)
+                     refreshPlaylist()
+                 } ?: run {
+                     Log.e(TAG,"Created playlist has no ID!")
                  }
              }
              .onFailure {error ->
@@ -127,35 +135,39 @@ class AddPlaylistViewModel(
                  _uiEvent.send(AddPlaylistEvent.ShowMessage(error.getErrorMessage()))
              }
      }
+
     }
 
-//    private fun createPlaylist(title : String, description : String){
-//        viewModelScope.launch {
-//            val userId = SupabaseClient.supabase.auth.currentUserOrNull()?.id ?: return@launch
-//            val playlist = UserPlaylist(userId = userId, name = title, description = description)
-//            libraryRepo.createPlaylist(playlist = playlist)
-//                .onSuccess {
-//                    _uiEvent.send(AddPlaylistEvent.ShowMessage("Playlist $title created"))
-//                    refreshAndAddSongToNewPlaylist(playlistTitle = title)
-//                    Log.d(TAG,"Playlist is created with title $title")
-//                }
-//                .onFailure { error ->
-//                    Log.e(TAG,"Error creating playlist $error")
-//                    _uiEvent.send(AddPlaylistEvent.ShowMessage(error.getErrorMessage()))
-//                }
-//
-//
-//        }
-//    }
-//    private fun refreshAndAddSongToNewPlaylist(playlistTitle : String){
-//        viewModelScope.launch {
-//            libraryRepo.getPersonalPlaylists()
-//                .onSuccess { playlists ->
-//                    _uiState.update { it.copy(playlists = playlists) }
-//                    playlists.find { it.name == playlistTitle }?.let { newPlaylist ->
-//                        addSongToPlaylist(newPlaylist.id)
-//                    }
-//                }
-//        }
-//    }
+    private fun deletePlaylist(){
+        val playlistToDelete = _uiState.value.playlistToDelete ?: return
+        viewModelScope.launch {
+            libraryRepo.deletePlaylist(playlistId = playlistToDelete.id)
+                .onSuccess {
+                    Log.d(TAG,"Successfully deleted playlist ${playlistToDelete.id}")
+                    val currentPlaylist = _uiState.value.playlists
+                    _uiState.update { it.copy(playlists = currentPlaylist.filter { it.id != playlistToDelete.id }) }
+                }
+                .onFailure {error ->
+                    Log.e(TAG,"Error deleting playlist $error")
+                }
+        }
+    }
+
+    private fun refreshPlaylist(){
+        Log.d(TAG,"Refreshing playlist list...")
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            libraryRepo.getPersonalPlaylists()
+                .onSuccess { userPlaylists ->
+                    _uiState.update { it.copy(playlists = userPlaylists, isLoading = false) }
+                    Log.d(TAG,"Playlist list is refreshed. Total count : ${userPlaylists.size}")
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    _uiEvent.send(AddPlaylistEvent.ShowMessage(error.getErrorMessage()))
+                    Log.e(TAG,"Failed to refresh playlist : ${error.getErrorMessage()}")
+                }
+        }
+    }
+
 }

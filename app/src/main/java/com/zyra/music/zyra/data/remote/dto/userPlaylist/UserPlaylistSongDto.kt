@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserPlaylistSongDto(
     @SerialName("playlist_id")
-    val playlistId : String,
+    val playlistId : Long,
     @SerialName("song_id")
     val songId : String
 )

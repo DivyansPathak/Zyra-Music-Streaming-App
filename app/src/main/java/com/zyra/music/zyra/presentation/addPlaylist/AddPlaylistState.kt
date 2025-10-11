@@ -7,5 +7,6 @@ data class AddPlaylistState(
     val playlists : List<LibraryPlaylist> = emptyList(),
     val songToAdd : TrackFullOne? = null,
     val isCreateDialogOpen : Boolean = false,
+    val playlistToDelete : LibraryPlaylist? = null,
     val isLoading : Boolean = false
 )

@@ -19,9 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
 import com.zyra.music.zyra.domain.model.LibraryPlaylist
 import com.zyra.music.zyra.presentation.ui.theme.ZyraTheme
+import org.koin.androidx.compose.koinViewModel
 
 // --- FIX 1: Restore the original function signature ---
 @Composable
@@ -29,8 +33,22 @@ fun LibraryScreen(
     onPlaylistClick: () -> Unit,
     state: LibraryState,
     onScreenTypeSelected: (LibraryScreenType) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: LibraryViewModel = koinViewModel()
 ) {
+    val lifeCycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifeCycleOwner) {
+        val observer = LifecycleEventObserver{_,event ->
+            if (event == Lifecycle.Event.ON_RESUME){
+                viewModel.loadLibraryContent()
+            }
+        }
+        lifeCycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifeCycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
    Box(modifier = Modifier.fillMaxSize(),
        contentAlignment = Alignment.Center){

@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserPlaylistDto(
-    val id: String? = null, // Nullable when creating a new playlist
+    val id: Long? = null, // Nullable when creating a new playlist
     @SerialName("user_id")
     val userId: String? = null,
     val name: String,

@@ -1,5 +1,6 @@
 package com.zyra.music.zyra.data.remote
 
+import android.util.Log
 import com.zyra.music.zyra.data.remote.SupabaseClient.supabase
 import com.zyra.music.zyra.data.remote.dto.FavoriteDto
 import com.zyra.music.zyra.data.remote.dto.PrePlaylistDto
@@ -29,6 +30,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
@@ -171,7 +173,7 @@ class RemoteSongDataSourceImpl(
         }
     }
 
-    override suspend fun deletePlaylist(playlistId: String): Result<Unit, DataError> {
+    override suspend fun deletePlaylist(playlistId: Long): Result<Unit, DataError> {
         return safeSupabaseCall {
             supabase.from("playlists").delete {
                 filter {
@@ -188,6 +190,19 @@ class RemoteSongDataSourceImpl(
                     parameters = emptyMap<String, String>()
                 ).decodeList<LibraryPlaylistDto>()
             }
+//        return try {
+//            val response = supabase.postgrest.rpc(
+//                function = "get_user_personal_playlists",
+//                parameters = emptyMap<String,String>()
+//            )
+//
+//            val dtoList = response.decodeList<LibraryPlaylistDto>()
+//            Log.d("SupabaseResponse","decoded playlists: $dtoList")
+//            Result.Success(dtoList)
+//        }catch (e : Exception){
+//            Log.e("SupabaseResponse","Error Fetching playlists",e)
+//            Result.Failure(DataError.UnknownError(e.message))
+//        }
     }
 
     override suspend fun getSearchSuggestions(query: String): Result<List<String>, DataError> {

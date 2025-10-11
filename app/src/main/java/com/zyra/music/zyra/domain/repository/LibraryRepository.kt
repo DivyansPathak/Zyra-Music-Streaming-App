@@ -11,6 +11,6 @@ interface LibraryRepository {
     suspend fun createPlaylistM(playlist : UserPlaylist) : Result<UserPlaylist, DataError>
     suspend fun addSongToPlaylist(playlist : UserPlaylistSong) : Result<Unit, DataError>
     suspend fun removeSongToPlaylist(playlist : UserPlaylistSong) : Result<Unit, DataError>
-    suspend fun deletePlaylist(playlistId : String) : Result<Unit, DataError>
+    suspend fun deletePlaylist(playlistId : Long) : Result<Unit, DataError>
     suspend fun getPersonalPlaylists() : Result<List<LibraryPlaylist>, DataError>
 }
