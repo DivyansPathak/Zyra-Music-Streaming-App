@@ -17,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +42,7 @@ import com.zyra.music.zyra.navigation.HomeScreen
 import com.zyra.music.zyra.navigation.LibraryScreen
 import com.zyra.music.zyra.navigation.MainScreens
 import com.zyra.music.zyra.navigation.PlayerScreen
+import com.zyra.music.zyra.navigation.PlaylistScreen
 import com.zyra.music.zyra.navigation.ProfileScreen
 import com.zyra.music.zyra.navigation.SearchScreen
 import com.zyra.music.zyra.presentation.acommon.addToPlaylist.AddPlaylistSheet
@@ -52,16 +54,22 @@ import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
 import com.zyra.music.zyra.presentation.home.HomeScreen
 import com.zyra.music.zyra.presentation.home.HomeViewModel
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryScreen
+import com.zyra.music.zyra.presentation.libraryScreen.LibraryScreenTest
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerAction
+import com.zyra.music.zyra.presentation.playlistScreen.PlaylistScreen
+import com.zyra.music.zyra.presentation.playlistScreen.PlaylistViewModel
 import com.zyra.music.zyra.presentation.searchScreen.SearchScreenN
 import com.zyra.music.zyra.presentation.searchScreen.SearchViewModel
 import com.zyra.music.zyra.presentation.utils.formatDurationLong
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
+import org.koin.core.parameter.parameterSetOf
 import org.schabi.newpipe.extractor.timeago.patterns.fi
+import org.schabi.newpipe.extractor.timeago.patterns.id
 
 private const val TAG = "BACK_PRESS_DEBUG"
 
@@ -174,7 +182,9 @@ fun MainScreenWithBottomBar(
                             state = state,
                             contentPadding = controlsHeight,
                             onRefresh = homeViewModel::refresh,
-                            onPlaylistClick = {},
+                            onPlaylistClick = {playlistId,playlistType ->
+                                mainBackStack.add(PlaylistScreen(id = playlistId, type = playlistType))
+                            },
                         )
                     }
 
@@ -199,10 +209,9 @@ fun MainScreenWithBottomBar(
                     entry<LibraryScreen> {
                         val state by libraryViewModel.uiState.collectAsStateWithLifecycle()
                         LibraryScreen(
-//                          onPlaylistclick = {
-//                                            playlistId, playlistType ->
-//                          }
-                            onPlaylistClick = {},
+                            onPlaylistClick = {playlistId, playlistType ->
+                               mainBackStack.add(PlaylistScreen(id= playlistId, type = playlistType))
+                            },
                             state = state,
                             onScreenTypeSelected = {}
                         )
@@ -210,12 +219,27 @@ fun MainScreenWithBottomBar(
 
                     }
                     entry<ProfileScreen> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "Profile")
+//                        Box(
+//                            modifier = Modifier.fillMaxSize(),
+//                            contentAlignment = Alignment.Center
+//                        ) {
+//                            Text(text = "Profile")
+//                        }
+                        LibraryScreenTest()
+                    }
+                    entry<PlaylistScreen> { screen ->
+                        val playlistViewModel : PlaylistViewModel = koinViewModel(
+                            key = "${screen.id}_${screen.type}",
+                            parameters = { parameterSetOf(screen.id,screen.type)
+                        })
+                        LaunchedEffect(screen.id,screen.type) {
+                            playlistViewModel.fetchPlaylistDetails(screen.id,screen.type)
                         }
+                        PlaylistScreen(
+                            viewModel = playlistViewModel,
+                            onBack = {mainBackStack.removeLastOrNull()
+                            }
+                        )
                     }
                 }
             )

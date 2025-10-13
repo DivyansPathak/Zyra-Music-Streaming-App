@@ -7,6 +7,8 @@ import com.zyra.music.zyra.domain.repository.LibraryRepository
 import com.zyra.music.zyra.domain.utils.getErrorMessage
 import com.zyra.music.zyra.domain.utils.onFailure
 import com.zyra.music.zyra.domain.utils.onSuccess
+import com.zyra.music.zyra.navigation.PlayListType
+import io.ktor.client.plugins.logging.Logging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -38,6 +40,17 @@ class LibraryViewModel(
                 .onFailure { error ->
                     Log.d(TAG,"Error loading library content $error")
                     _uiState.update { it.copy(isLoading = false, error = error.getErrorMessage()) }
+                }
+        }
+    }
+    fun getPlaylistDetails(id : String, playlistType : PlayListType){
+        viewModelScope.launch {
+            libraryRepo.getPlaylistDetails(id = id, type = playlistType)
+                .onSuccess { playlistDetails ->
+                    Log.d(TAG,"Playlist detail for $id and type : $playlistType is Details : $playlistDetails")
+                }
+                .onFailure { error ->
+                    Log.e(TAG,"Error in getting the playlist details $error")
                 }
         }
     }

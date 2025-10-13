@@ -19,6 +19,7 @@ import com.zyra.music.zyra.presentation.home.HomeViewModel
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.playerScreen.MusicViewModel
+import com.zyra.music.zyra.presentation.playlistScreen.PlaylistViewModel
 import com.zyra.music.zyra.presentation.searchScreen.SearchViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
@@ -26,6 +27,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import com.zyra.music.zyra.navigation.PlayListType
 
 val koinModule = module {
 
@@ -58,6 +60,13 @@ val koinModule = module {
 
     viewModel{
         AddPlaylistViewModel(get(),get())
+    }
+    viewModel {(playlistId:String,playlistType : PlayListType) ->
+        PlaylistViewModel(
+            libraryRepo = get()
+        ).apply {
+            fetchPlaylistDetails(playlistId = playlistId, playlistType = playlistType)
+        }
     }
 
 

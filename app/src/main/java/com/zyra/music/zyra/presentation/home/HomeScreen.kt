@@ -37,6 +37,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.zyra.music.zyra.navigation.PlayListType
 import com.zyra.music.zyra.presentation.common.GradientScreenContainer
 import com.zyra.music.zyra.presentation.home.HomeScreenState
 import com.zyra.music.zyra.presentation.home.component.CardItems
@@ -49,7 +50,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     modifier: Modifier = Modifier,
     state: HomeScreenState,
-    onPlaylistClick: (playlistId: String) -> Unit,
+    onPlaylistClick: (playlistId: String,playlistType : PlayListType) -> Unit,
     onRefresh: suspend () -> Unit,
     contentPadding : Dp = 0.dp
 
@@ -117,7 +118,9 @@ fun HomeScreen(
                                             .fillParentMaxWidth(0.4f)
                                             .aspectRatio(0.75f),
                                         playlists = playlists,
-                                        onCardItemClick = { onPlaylistClick(playlists.id) }
+                                        onCardItemClick = { playlistId,playlistType ->
+                                            onPlaylistClick(playlistId,playlistType)
+                                        }
                                     )
                                 }
                             }

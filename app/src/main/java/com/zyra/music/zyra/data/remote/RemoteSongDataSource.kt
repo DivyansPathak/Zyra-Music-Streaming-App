@@ -28,13 +28,13 @@ interface RemoteSongDataSource {
     suspend fun addFavorite(videoId: String) : Result<Unit, DataError>
     suspend fun removeFavorite(videoId : String) : Result<Unit, DataError>
     //UserPlaylist
-    suspend fun createPlaylist(playlistDto : UserPlaylistDto) : Result<Unit, DataError>
+    suspend fun createPlaylist(playlistDto : UserPlaylistDto) : Result<UserPlaylistDto, DataError>
     suspend fun addSongToPlaylist(playlistSong : UserPlaylistSongDto) : Result<Unit, DataError>
     suspend fun removeSongToPlaylist(playlistSong: UserPlaylistSongDto) : Result<Unit, DataError>
     suspend fun deletePlaylist(playlistId : Long) : Result<Unit, DataError>
 
-    suspend fun createPlaylistM(playlistDto : UserPlaylistDto) : Result<UserPlaylistDto, DataError>
     suspend fun getLibraryPlaylists() : Result<List<LibraryPlaylistDto>, DataError>
+    suspend fun getPlaylistSongIds(playlistId : Long) : Result<List<String>, DataError>
 
     // PrePlaylist
     suspend fun getPrePlaylist(genre : String?) : Result<List<PrePlaylistDto>, DataError>

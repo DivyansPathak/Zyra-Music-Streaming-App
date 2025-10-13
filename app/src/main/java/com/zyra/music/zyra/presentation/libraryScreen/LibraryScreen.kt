@@ -24,13 +24,14 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
 import com.zyra.music.zyra.domain.model.LibraryPlaylist
+import com.zyra.music.zyra.navigation.PlayListType
 import com.zyra.music.zyra.presentation.ui.theme.ZyraTheme
 import org.koin.androidx.compose.koinViewModel
 
 // --- FIX 1: Restore the original function signature ---
 @Composable
 fun LibraryScreen(
-    onPlaylistClick: () -> Unit,
+    onPlaylistClick: (String, PlayListType) -> Unit,
     state: LibraryState,
     onScreenTypeSelected: (LibraryScreenType) -> Unit,
     modifier: Modifier = Modifier,
@@ -55,10 +56,16 @@ fun LibraryScreen(
 
        Column(modifier = Modifier.fillMaxSize()) {
            Text("Library Screen")
-           LibraryContent(
-               playlists = state.playlists,
-               onPlaylistClick = {  }
-           )
+           if (state.isLoading){
+               CircularProgressIndicator()
+           }else{
+               LibraryContent(
+                   playlists = state.playlists,
+                   onPlaylistClick = {  playlist ->
+                       onPlaylistClick(playlist.id.toString(),playlist.playlistType)
+                   }
+               )
+           }
        }
    }
 
@@ -125,7 +132,9 @@ private fun PreviewLibraryScreen() {
         var state by remember { mutableStateOf(LibraryState()) }
 
         LibraryScreen(
-            onPlaylistClick = {},
+            onPlaylistClick = {playlist, playlistType  ->
+
+            },
             state = state,
             // --- FIX 5: Uncomment this block to make the preview interactive ---
             onScreenTypeSelected = { newType ->

@@ -30,13 +30,14 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.zyra.music.zyra.R
 import com.zyra.music.zyra.domain.model.PlayList
+import com.zyra.music.zyra.navigation.PlayListType
 import com.zyra.music.zyra.presentation.ui.theme.ZyraTheme
 
 @Composable
 fun CardItems(
     modifier: Modifier = Modifier,
     playlists: PlayList,
-    onCardItemClick: () -> Unit
+    onCardItemClick: (String, PlayListType) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -46,7 +47,7 @@ fun CardItems(
         .build()
 
     Card(
-        onClick = onCardItemClick,
+        onClick = { onCardItemClick(playlists.id,playlists.type) },
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
@@ -100,7 +101,8 @@ private fun PreviewCardItems() {
             subtitle = "Sanju Rathod, Andand Shinde, Vaishali Raj, Shreya S",
             thumbnail = "",
             songs = emptyList(),
-            genre = ""
+            genre = "",
+            type = PlayListType.PRESET
         )
 
 
@@ -123,7 +125,9 @@ private fun PreviewCardItems() {
                         // 2. Define the portrait shape: height = 2x width (1:2 aspect ratio)
                         .aspectRatio(0.5f),
                     playlists = playlists,
-                    onCardItemClick = { /* Handle click */ }
+                    onCardItemClick = {playlistId,playlistType ->
+
+                    }
                 )
             }
         }
@@ -131,7 +135,9 @@ private fun PreviewCardItems() {
         CardItems(
             modifier = Modifier.aspectRatio(0.5f),
             playlists = playlists,
-            onCardItemClick = {})
+            onCardItemClick = {playlistId,playlistType ->
+
+            })
 
     }
 

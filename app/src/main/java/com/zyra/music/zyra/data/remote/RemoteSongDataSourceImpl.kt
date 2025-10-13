@@ -132,23 +132,7 @@ class RemoteSongDataSourceImpl(
         }
     }
 
-    override suspend fun createPlaylist(playlistDto: UserPlaylistDto): Result<Unit, DataError> {
-        return safeSupabaseCall {
-            supabase.from("playlists").insert(playlistDto)
-        }
-    }
-
-    override suspend fun createPlaylistM(playlistDto: UserPlaylistDto): Result<UserPlaylistDto, DataError> {
-//        return safeSupabaseCall {
-//           val responseBody = supabase.postgrest.rpc(
-//                "create_playlist_and_return_id",
-//                parameters = mapOf(
-//                    "p_name" to playlistDto.name,
-//                    "p_description" to playlistDto.description
-//                )
-//            ).decodeSingle<String>()
-//            responseBody.toLong()
-//        }
+    override suspend fun createPlaylist(playlistDto: UserPlaylistDto): Result<UserPlaylistDto, DataError> {
         return safeSupabaseCall {
             supabase.from("playlists").insert(playlistDto){
                 select()
@@ -203,6 +187,15 @@ class RemoteSongDataSourceImpl(
 //            Log.e("SupabaseResponse","Error Fetching playlists",e)
 //            Result.Failure(DataError.UnknownError(e.message))
 //        }
+    }
+
+    override suspend fun getPlaylistSongIds(playlistId: Long): Result<List<String>, DataError> {
+        return safeSupabaseCall {
+            supabase.postgrest.rpc(
+                function = "get_playlist_song_ids",
+                parameters = mapOf("p_playlist_id" to playlistId)
+            ).decodeList<String>()
+        }
     }
 
     override suspend fun getSearchSuggestions(query: String): Result<List<String>, DataError> {

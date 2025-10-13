@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zyra.music.zyra.data.remote.SupabaseClient
-import com.zyra.music.zyra.domain.model.LibraryPlaylist
 import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.domain.model.playlistData.UserPlaylist
 import com.zyra.music.zyra.domain.model.playlistData.UserPlaylistSong
@@ -13,9 +12,7 @@ import com.zyra.music.zyra.domain.repository.SongRepository
 import com.zyra.music.zyra.domain.utils.getErrorMessage
 import com.zyra.music.zyra.domain.utils.onFailure
 import com.zyra.music.zyra.domain.utils.onSuccess
-import com.zyra.music.zyra.navigation.PlayListType
 import io.github.jan.supabase.auth.auth
-import io.ktor.client.plugins.logging.Logging
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -117,7 +114,7 @@ class AddPlaylistViewModel(
      viewModelScope.launch {
          val userId = SupabaseClient.supabase.auth.currentUserOrNull()?.id ?: return@launch
             val playlist = UserPlaylist(userId = userId, name = title, description = description)
-         libraryRepo.createPlaylistM(playlist = playlist)
+         libraryRepo.createPlaylist(playlist = playlist)
              .onSuccess { newPlaylist ->
                  Log.d(TAG,"Playlist is created with title $title")
                  _uiEvent.send(AddPlaylistEvent.ShowMessage("Playlist $title created"))

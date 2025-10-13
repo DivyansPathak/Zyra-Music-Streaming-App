@@ -78,7 +78,9 @@ fun LastMainScreen(
                         HomeScreen(
                             state = state,
                             onRefresh = homeViewModel::refresh,
-                            onPlaylistClick = {}
+                            onPlaylistClick = {playlistId,playlistType->
+
+                            }
                         )
                     }
 

@@ -39,6 +39,7 @@ class HomeViewModel(
             val featuredPlaylists = repository.getAllPlaylist("Bollywood")
             val romancePlaylists = repository.getAllPlaylist("Bollywood Romance")
             val dancePlaylist = repository.getAllPlaylist("Bollywood Dance")
+            val apneBandoKa = repository.getAllPlaylist("Apne Bandon ka")
 
             val section = mutableListOf<HomeSection>()
             if (featuredPlaylists.isNotEmpty()) {
@@ -68,6 +69,16 @@ class HomeViewModel(
                         id = "Dance",
                         title = "Bollywood Dance",
                         playLists = dancePlaylist
+                    )
+                )
+            }
+            if (apneBandoKa.isNotEmpty()){
+                Log.d(TAG,"Adding apne bandon ka playlist section...")
+                section.add(
+                    HomeSection(
+                        id = "Apne Bando Ka",
+                        title = "Apne Bando Ka",
+                        playLists = apneBandoKa
                     )
                 )
             }

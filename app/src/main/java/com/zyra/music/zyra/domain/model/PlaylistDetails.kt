@@ -2,12 +2,11 @@ package com.zyra.music.zyra.domain.model
 
 import com.zyra.music.zyra.navigation.PlayListType
 
-data class PlayList(
+data class PlaylistDetails(
     val id : String,
     val title : String,
-    val subtitle : String,
-    val thumbnail : String,
-    val songs : List<TrackFullOne> = emptyList(),
-    val genre : String,
+    val description : String,
+    val coverImageUrl : String?,
+    val tracks : List<TrackFullOne>,
     val type : PlayListType
 )

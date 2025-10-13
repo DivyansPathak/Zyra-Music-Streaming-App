@@ -1,5 +1,6 @@
 package com.zyra.music.zyra.data.remote.dto
 
+import com.zyra.music.zyra.navigation.PlayListType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -12,5 +13,6 @@ data class PrePlaylistDto(
     @SerialName("cover_image_url")
     val thumbnail : String,
     val tracks : List<TrackDto>,
-    val genre : String
+    val genre : String,
+    val type : PlayListType
 )
