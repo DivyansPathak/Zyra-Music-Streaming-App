@@ -15,7 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,27 +48,22 @@ import com.zyra.music.zyra.presentation.acommon.addToPlaylist.AddPlaylistSheet
 import com.zyra.music.zyra.presentation.acommon.addToPlaylist.CreateNewPlaylistDialog
 import com.zyra.music.zyra.presentation.acommon.miniPlayer.MiniPlayer
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistAction
-import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistEvent
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
 import com.zyra.music.zyra.presentation.home.HomeScreen
 import com.zyra.music.zyra.presentation.home.HomeViewModel
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryScreen
-import com.zyra.music.zyra.presentation.libraryScreen.LibraryScreenTest
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerAction
-import com.zyra.music.zyra.presentation.playlistScreen.PlaylistScreen
 import com.zyra.music.zyra.presentation.playlistScreen.PlaylistViewModel
+import com.zyra.music.zyra.presentation.playlistScreen.ComposePlaylistScreen
 import com.zyra.music.zyra.presentation.searchScreen.SearchScreenN
 import com.zyra.music.zyra.presentation.searchScreen.SearchViewModel
 import com.zyra.music.zyra.presentation.utils.formatDurationLong
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.getKoin
-import org.koin.core.parameter.parameterSetOf
-import org.schabi.newpipe.extractor.timeago.patterns.fi
-import org.schabi.newpipe.extractor.timeago.patterns.id
+import org.koin.core.parameter.parametersOf
 
 private const val TAG = "BACK_PRESS_DEBUG"
 
@@ -85,7 +79,7 @@ fun MainScreenWithBottomBar(
     val searchViewModel: SearchViewModel = koinViewModel()
     val homeViewModel: HomeViewModel = koinViewModel()
     val libraryViewModel: LibraryViewModel = koinViewModel()
-    val addPlaylistViewModel : AddPlaylistViewModel = koinViewModel()
+    val addPlaylistViewModel: AddPlaylistViewModel = koinViewModel()
     val mainState by mainViewModel.uiState.collectAsStateWithLifecycle()
     val addPlaylistState by addPlaylistViewModel.uiState.collectAsStateWithLifecycle()
     val isMiniPlayerVisible = mainState.currentTrack != null
@@ -109,35 +103,26 @@ fun MainScreenWithBottomBar(
         }
     }
 
-    val onAddToPlaylistClick : (TrackFullOne) -> Unit = { track ->
+    val onAddToPlaylistClick: (TrackFullOne) -> Unit = { track ->
         addPlaylistViewModel.onAction(AddPlaylistAction.SetSongAndShowSheet(track))
         showPlaylistSheet = true
     }
 
-    if (addPlaylistState.isCreateDialogOpen){
+    if (addPlaylistState.isCreateDialogOpen) {
         CreateNewPlaylistDialog(
-         onDismiss = {
-             addPlaylistViewModel.onAction(AddPlaylistAction.HideCreateDialog)
-         },
-            onConfirm = { title ,description ->
-                addPlaylistViewModel.onAction(AddPlaylistAction.CreatePlaylistAndAddSong(title = title, description = description))
-            }
-        )
-    }
-    if (showPlaylistSheet){
-        AddPlaylistSheet(
-            state = addPlaylistState,
-            onDismiss = {showPlaylistSheet = false},
-            onPlaylistClick = {playlistId ->
-                showPlaylistSheet = false
-                addPlaylistViewModel.onAction(AddPlaylistAction.AddSongToPlaylist(playlistId))
+            onDismiss = {
+                addPlaylistViewModel.onAction(AddPlaylistAction.HideCreateDialog)
             },
-            addNewPlaylistClick = {
-                addPlaylistViewModel.onAction(AddPlaylistAction.ShowCreateDialog)
+            onConfirm = { title, description ->
+                addPlaylistViewModel.onAction(
+                    AddPlaylistAction.CreatePlaylistAndAddSong(
+                        title = title,
+                        description = description
+                    )
+                )
             }
         )
     }
-
 
     BackHandler {
         Log.d(TAG, "Back pressed!")
@@ -182,8 +167,13 @@ fun MainScreenWithBottomBar(
                             state = state,
                             contentPadding = controlsHeight,
                             onRefresh = homeViewModel::refresh,
-                            onPlaylistClick = {playlistId,playlistType ->
-                                mainBackStack.add(PlaylistScreen(id = playlistId, type = playlistType))
+                            onPlaylistClick = { playlistId, playlistType ->
+                                mainBackStack.add(
+                                    PlaylistScreen(
+                                        id = playlistId,
+                                        type = playlistType
+                                    )
+                                )
                             },
                         )
                     }
@@ -201,6 +191,7 @@ fun MainScreenWithBottomBar(
                             },
                             onNextPlayClick = { track -> mainViewModel.addSongToPlayNext(track) },
                             addToQueueClick = { track -> mainViewModel.addSongToQueue(track) },
+                            addToPlaylistClick = {track -> onAddToPlaylistClick(track)},
                             onBackClick = {
                                 backToHome()
                             }
@@ -209,8 +200,13 @@ fun MainScreenWithBottomBar(
                     entry<LibraryScreen> {
                         val state by libraryViewModel.uiState.collectAsStateWithLifecycle()
                         LibraryScreen(
-                            onPlaylistClick = {playlistId, playlistType ->
-                               mainBackStack.add(PlaylistScreen(id= playlistId, type = playlistType))
+                            onPlaylistClick = { playlistId, playlistType ->
+                                mainBackStack.add(
+                                    PlaylistScreen(
+                                        id = playlistId,
+                                        type = playlistType
+                                    )
+                                )
                             },
                             state = state,
                             onScreenTypeSelected = {}
@@ -219,25 +215,33 @@ fun MainScreenWithBottomBar(
 
                     }
                     entry<ProfileScreen> {
-//                        Box(
-//                            modifier = Modifier.fillMaxSize(),
-//                            contentAlignment = Alignment.Center
-//                        ) {
-//                            Text(text = "Profile")
-//                        }
-                        LibraryScreenTest()
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "Profile")
+                        }
+//                        LibraryScreenTest()
                     }
                     entry<PlaylistScreen> { screen ->
-                        val playlistViewModel : PlaylistViewModel = koinViewModel(
-                            key = "${screen.id}_${screen.type}",
-                            parameters = { parameterSetOf(screen.id,screen.type)
-                        })
-                        LaunchedEffect(screen.id,screen.type) {
-                            playlistViewModel.fetchPlaylistDetails(screen.id,screen.type)
+                        val playlistViewModel: PlaylistViewModel = koinViewModel(
+                            parameters = { parametersOf(screen.id, screen.type) }
+                        )
+                        val state by playlistViewModel.uiState.collectAsStateWithLifecycle()
+                        LaunchedEffect(Unit) {
+                            playlistViewModel.fetchPlaylistDetails(screen.id, screen.type)
                         }
-                        PlaylistScreen(
-                            viewModel = playlistViewModel,
-                            onBack = {mainBackStack.removeLastOrNull()
+                        ComposePlaylistScreen(
+                            mainMusicViewModel = mainViewModel,
+                            mainState = mainState,
+                            state = state,
+                            contentPadding = controlsHeight,
+                            onBack = {
+                                mainBackStack.removeLastOrNull()
+                            },
+                            addSongToPlaylist = {trackFullOne ->
+                                Log.d(TAG,"onAddPlaylistClicked with song $trackFullOne")
+                                onAddToPlaylistClick(trackFullOne)
                             }
                         )
                     }
@@ -280,6 +284,20 @@ fun MainScreenWithBottomBar(
                     onTabSelected = {
                         mainBackStack.clear()
                         mainBackStack.add(it)
+                    }
+                )
+            }
+
+            if (showPlaylistSheet) {
+                AddPlaylistSheet(
+                    state = addPlaylistState,
+                    onDismiss = { showPlaylistSheet = false },
+                    onPlaylistClick = { playlistId ->
+                        showPlaylistSheet = false
+                        addPlaylistViewModel.onAction(AddPlaylistAction.AddSongToPlaylist(playlistId))
+                    },
+                    addNewPlaylistClick = {
+                        addPlaylistViewModel.onAction(AddPlaylistAction.ShowCreateDialog)
                     }
                 )
             }

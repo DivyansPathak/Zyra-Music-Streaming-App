@@ -61,13 +61,12 @@ val koinModule = module {
     viewModel{
         AddPlaylistViewModel(get(),get())
     }
-    viewModel {(playlistId:String,playlistType : PlayListType) ->
-        PlaylistViewModel(
-            libraryRepo = get()
-        ).apply {
-            fetchPlaylistDetails(playlistId = playlistId, playlistType = playlistType)
-        }
-    }
+   viewModel {param ->
 
+       PlaylistViewModel(get(),
+           playlistId = param.get(),
+           playlistType = param.get()
+       )
+   }
 
 }

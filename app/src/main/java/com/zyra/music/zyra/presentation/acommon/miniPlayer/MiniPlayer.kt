@@ -59,7 +59,7 @@ fun MiniPlayer(
         defaultColor = MaterialTheme.colorScheme.surface
     )
 
-    // ✅ 3. Animate the color based on the state's value.
+
     val animatedColor by animateColorAsState(
         targetValue = dominantColorState.value,
         label = "miniplayer_color_animation"

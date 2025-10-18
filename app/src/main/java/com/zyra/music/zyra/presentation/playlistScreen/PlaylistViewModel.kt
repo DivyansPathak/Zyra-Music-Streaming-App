@@ -1,6 +1,7 @@
 package com.zyra.music.zyra.presentation.playlistScreen
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zyra.music.zyra.domain.repository.LibraryRepository
@@ -17,7 +18,9 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "PlaylistViewModelTest"
 class PlaylistViewModel(
-    private val libraryRepo : LibraryRepository
+    private val libraryRepo : LibraryRepository,
+    private val playlistId : String,
+    private val playlistType : PlayListType
 ) : ViewModel(){
 
     private val _uiState = MutableStateFlow(PlaylistState())
@@ -28,15 +31,46 @@ class PlaylistViewModel(
 
    init {
        Log.d(TAG,"PlaylistViewModel initiated")
+      fetchPlaylistDetails(playlistId,playlistType)
    }
     fun onAction(action : PlaylistAction){
-
+        when(action){
+            is PlaylistAction.PlayPausePlaylist ->{
+                _uiState.value.playlistDetails?.tracks?.let { tracks ->
+                    if (tracks.isNotEmpty()){
+                        viewModelScope.launch {
+                            Log.d(TAG,"playlist is going to play unshuffled : ${tracks.size}")
+                            _uiEvent.send(PlaylistEvent.PlayPlaylist(tracks = tracks, shuffle = false))
+                        }
+                    }
+                }
+            }
+            is PlaylistAction.OnShuffleClicked ->{
+                _uiState.value.playlistDetails?.tracks?.let { tracks ->
+                    if (tracks.isNotEmpty()){
+                        viewModelScope.launch {
+                            Log.d(TAG,"playlist is going to play shuffled : ${tracks.size}")
+                            _uiEvent.send(PlaylistEvent.PlayPlaylist(tracks = tracks, shuffle = true))
+                        }
+                    }
+                }
+            }
+            is PlaylistAction.OnSongClicked ->{
+                _uiState.value.playlistDetails?.tracks?.getOrNull(action.index)?.let { track ->
+                    viewModelScope.launch {
+                        Log.d(TAG,"playlist's song is going to play unshuffled : $track")
+                        _uiEvent.send(PlaylistEvent.PlayTrackAsRadio(track = track))
+                    }
+                }
+            }
+        }
 
 
     }
-     fun fetchPlaylistDetails(playlistId : String , playlistType : PlayListType){
+     fun fetchPlaylistDetails(playlistId : String,playlistType : PlayListType){
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
+
             libraryRepo.getPlaylistDetails(id = playlistId, type = playlistType)
                 .onSuccess { playlistDetails ->
                     Log.d(TAG,"the playlist details are : $playlistDetails")

@@ -14,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.Log
@@ -24,8 +23,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.zyra.music.zyra.data.remote.SupabaseClient
 import com.zyra.music.zyra.domain.model.TrackFullOne
-import com.zyra.music.zyra.presentation.acommon.ConstrainMainGraphScreen
-import com.zyra.music.zyra.presentation.acommon.LastMainScreen
 import com.zyra.music.zyra.presentation.acommon.MainScreenWithBottomBar
 import com.zyra.music.zyra.presentation.acommon.addToPlaylist.AddPlaylistSheet
 import com.zyra.music.zyra.presentation.acommon.addToPlaylist.CreateNewPlaylistDialog

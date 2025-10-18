@@ -54,8 +54,11 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.zyra.music.zyra.R
 import com.zyra.music.zyra.domain.model.TrackFullOne
+import com.zyra.music.zyra.presentation.acommon.addToPlaylist.MenuItems
+import com.zyra.music.zyra.presentation.playlistScreen.common.SongListItem
 import com.zyra.music.zyra.presentation.searchScreen.component.SearchTopBar
 import com.zyra.music.zyra.presentation.searchScreen.component.ShimmerEffectSearch
+import com.zyra.music.zyra.presentation.searchScreen.component.SongListItemForSearch
 import com.zyra.music.zyra.presentation.utils.formatDurationLong
 import kotlinx.coroutines.flow.Flow
 
@@ -67,6 +70,7 @@ fun SearchScreenN(
     onSongClick: (TrackFullOne) -> Unit,
     onNextPlayClick: (TrackFullOne) -> Unit,
     addToQueueClick: (TrackFullOne) -> Unit,
+    addToPlaylistClick : (TrackFullOne) -> Unit,
     eventFlow : Flow<SearchEvent>,
     contentPadding : Dp = 0.dp
 ) {
@@ -153,11 +157,20 @@ fun SearchScreenN(
                     contentPadding = PaddingValues(bottom = contentPadding),
                     verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(state.searchResultsFromYT) { song ->
-                        SongRow(
+                        SongListItemForSearch(
                             track = song,
-                            onSongClick = { onSongClick(song) },
-                            onNextPlayClick = { onNextPlayClick(song) },
-                            addToQueueClick = { addToQueueClick(song) }
+                            modifier = Modifier.clickable{
+                                onSongClick(song)
+                            },
+                            isPlaying = false,
+                            trailingContent = {
+                                MenuItems(
+                                    onPlayAsRadioClick = {onSongClick(song)},
+                                    onAddToNextPlay = {onNextPlayClick(song)},
+                                    onAddToQueue = {addToQueueClick(song)},
+                                    onAddToPlaylist = {addToPlaylistClick(song)}
+                                )
+                            }
                         )
                     }
                 }
@@ -195,114 +208,5 @@ fun SuggestionRow(
         )
     }
 
-}
-
-@Composable
-fun SongRow(
-    track: TrackFullOne,
-    onSongClick: () -> Unit,
-    onNextPlayClick: () -> Unit,
-    addToQueueClick: () -> Unit
-) {
-
-    val context = LocalContext.current
-    val imageRequest = ImageRequest.Builder(context)
-        .data(track.thumbnail)
-        .crossfade(true)
-        .build()
-
-    // 1. Add state to control if the dropdown menu is open or closed.
-    var isMenuExpanded by remember { mutableStateOf(false) }
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onSongClick),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AsyncImage(
-                model = imageRequest,
-                placeholder = painterResource(id = R.drawable.preview_pager),
-                error = painterResource(id = R.drawable.preview_pager),
-                contentDescription = "track thumbnail",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(80.dp)
-                    .padding(12.dp)
-                    .shadow(shape = RectangleShape, elevation = 4.dp)
-            )
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = track.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 1,
-                    modifier = Modifier.basicMarquee(
-                        iterations = Int.MAX_VALUE,
-                        repeatDelayMillis = 0,
-                        initialDelayMillis = 3000,
-                        velocity = 10.dp,
-
-                        )
-                )
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = track.artistName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = " | ${formatDurationLong(track.duration)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 1,
-                    )
-                }
-            }
-            Box {
-                IconButton(onClick = { isMenuExpanded = true }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                // 3. Add the DropdownMenu itself.
-                DropdownMenu(
-                    expanded = isMenuExpanded,
-                    onDismissRequest = { isMenuExpanded = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Play next") },
-                        onClick = {
-                            onNextPlayClick()
-                            isMenuExpanded = false // Close the menu
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Add to queue") },
-                        onClick = {
-                            addToQueueClick()
-                            isMenuExpanded = false // Close the menu
-                        }
-                    )
-                }
-
-            }
-        }
-
-    }
 }
 
