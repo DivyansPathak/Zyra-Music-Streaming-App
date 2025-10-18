@@ -3,6 +3,8 @@ package com.zyra.music.zyra.di
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.zyra.music.zyra.data.local.AppDatabase
+import com.zyra.music.zyra.data.local.DatabaseFactory
 import com.zyra.music.zyra.data.remote.HttpClientFactory
 import com.zyra.music.zyra.data.remote.RemoteSongDataSource
 import com.zyra.music.zyra.data.remote.RemoteSongDataSourceImpl
@@ -27,13 +29,16 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
-import com.zyra.music.zyra.navigation.PlayListType
 
 val koinModule = module {
 
     single { HttpClientFactory.create() }
+    single { DatabaseFactory.create(get()) }
 
     single { ExoPlayer.Builder(get()).build() } bind Player::class
+
+    single{get<AppDatabase>().playlistDao()}
+
 
     singleOf(::MusicQueueManager)
     singleOf(::NewMusicQueueManager)

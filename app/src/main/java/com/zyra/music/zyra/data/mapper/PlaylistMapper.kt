@@ -1,5 +1,6 @@
 package com.zyra.music.zyra.data.mapper
 
+import com.zyra.music.zyra.data.local.entity.PlaylistEntity
 import com.zyra.music.zyra.data.remote.dto.PrePlaylistDto
 import com.zyra.music.zyra.data.remote.dto.TrackDto
 import com.zyra.music.zyra.domain.model.PlayList
@@ -46,4 +47,30 @@ fun PrePlaylistDto.toPlaylist() : PlayList{
         genre = this.genre,
         type = PlayListType.PRESET
     )
+}
+
+fun PlaylistEntity.toPlaylist() : PlayList{
+    return PlayList(
+        id = this.id,
+        title = this.title,
+        subtitle = this.subtitle,
+        thumbnail = this.thumbnail,
+        songs = this.songs,
+        genre = this.genre,
+        type = this.type
+    )
+}
+
+fun PlayList.toPlaylistEntity() = PlaylistEntity(
+    id = this.id,
+    title = this.title,
+    subtitle = this.subtitle,
+    thumbnail = this.thumbnail,
+    songs = this.songs,
+    genre = this.genre,
+    type = this.type
+)
+
+fun PrePlaylistDto.toPlaylistEntity() : PlaylistEntity{
+    return this.toPlaylist().toPlaylistEntity()
 }
