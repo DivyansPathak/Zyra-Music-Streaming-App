@@ -83,8 +83,7 @@ class PlaylistRepositoryImpl(
                 Log.i(TAG,"Fetched ${remoteData.size} playlists from remote for $genre")
                 val playlistEntities = remoteData.map { it.toPlaylistEntity() }
 
-                playlistDao.deleteByGenre(genre)
-                playlistDao.insertAllPlaylist(playlistEntities)
+                playlistDao.replaceGenrePlaylists(genre = genre, playlists = playlistEntities)
             }
             is Result.Failure -> {
                 Log.e(TAG,"Failed to refresh playlists for $genre : ${result.error}")
