@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 private const val TAG = "PlaylistViewModelTest"
 class PlaylistViewModel(
     private val libraryRepo : LibraryRepository,
-    private val playlistId : String,
-    private val playlistType : PlayListType
+    playlistId : String,
+    playlistType : PlayListType
 ) : ViewModel(){
 
     private val _uiState = MutableStateFlow(PlaylistState())

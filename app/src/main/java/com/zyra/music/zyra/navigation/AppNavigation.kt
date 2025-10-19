@@ -24,9 +24,9 @@ import androidx.navigation3.ui.NavDisplay
 import com.zyra.music.zyra.data.remote.SupabaseClient
 import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.presentation.acommon.MainScreenWithBottomBar
-import com.zyra.music.zyra.presentation.acommon.addToPlaylist.AddPlaylistSheet
-import com.zyra.music.zyra.presentation.acommon.addToPlaylist.CreateNewPlaylistDialog
-import com.zyra.music.zyra.presentation.acommon.addToPlaylist.DeleteAlertDialog
+import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.AddPlaylistSheet
+import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.CreateNewPlaylistDialog
+import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.DeleteAlertDialog
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistAction
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistEvent
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel

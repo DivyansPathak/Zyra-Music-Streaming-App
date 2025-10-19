@@ -44,8 +44,8 @@ import com.zyra.music.zyra.navigation.PlayerScreen
 import com.zyra.music.zyra.navigation.PlaylistScreen
 import com.zyra.music.zyra.navigation.ProfileScreen
 import com.zyra.music.zyra.navigation.SearchScreen
-import com.zyra.music.zyra.presentation.acommon.addToPlaylist.AddPlaylistSheet
-import com.zyra.music.zyra.presentation.acommon.addToPlaylist.CreateNewPlaylistDialog
+import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.AddPlaylistSheet
+import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.CreateNewPlaylistDialog
 import com.zyra.music.zyra.presentation.acommon.miniPlayer.MiniPlayer
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistAction
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
@@ -185,6 +185,7 @@ fun MainScreenWithBottomBar(
                             contentPadding = controlsHeight,
                             onAction = searchViewModel::onAction,
                             eventFlow = searchViewModel.uiEvent,
+                            mainState = mainState,
                             onSongClick = { track ->
                                 mainViewModel.playRadioForSong(track)
                                 appTopBackStack.add(PlayerScreen)
@@ -194,7 +195,8 @@ fun MainScreenWithBottomBar(
                             addToPlaylistClick = {track -> onAddToPlaylistClick(track)},
                             onBackClick = {
                                 backToHome()
-                            }
+                            },
+                            addToFavoriteClick = {track ->mainViewModel.toggleFavoriteById(track.videoId)}
                         )
                     }
                     entry<LibraryScreen> {

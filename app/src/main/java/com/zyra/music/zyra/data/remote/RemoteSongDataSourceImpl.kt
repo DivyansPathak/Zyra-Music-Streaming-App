@@ -85,38 +85,21 @@ class RemoteSongDataSourceImpl(
             }
         }
     }
-
-    override suspend fun getThumbnail(videoId: String): Result<ThumbnailDto, DataError> {
-        return withContext(Dispatchers.IO) {
-            safeCall<ThumbnailDto> {
-                httpClient.get(urlString = "$YT_BASE_URL/thumbnail") {
-                    parameter("video_id", videoId)
-                }
-            }
-        }
-    }
-
     override suspend fun getFavoriteIds(): Result<Set<String>, DataError> {
         return safeSupabaseCall {
             val favorites = supabase.from("favorites")
                 .select()
                 .decodeList<FavoriteDto>()
-            // Map the resulting list of DTOs to a simple Set of Strings.
             favorites.map { it.songId }.toSet()
         }
     }
 
     override suspend fun addFavorite(videoId: String): Result<Unit, DataError> {
-        // Use the new helper. The lambda contains only the Supabase call.
         return safeSupabaseCall {
             val currentUser = supabase.auth.currentUserOrNull()
                 ?: throw IllegalStateException("User must be logged in.")
-
             val favorite = FavoriteDto(userId = currentUser.id, songId = videoId)
-
             supabase.from("favorites").insert(favorite)
-            // For insert/update/delete, we don't need to return anything, so the
-            // inferred return type of this block is Unit, which matches our function signature.
         }
     }
 

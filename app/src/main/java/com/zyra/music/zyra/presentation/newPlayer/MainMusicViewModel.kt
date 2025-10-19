@@ -436,30 +436,51 @@ class MainMusicViewModel(
 
     private fun toggleToFavorite() {
         val currentTrackId = uiState.value.currentTrack?.videoId ?: return
-        val isCurrentlyFavorite = uiState.value.isFavorite
+        toggleFavoriteById(currentTrackId)
+
+
+    }
+
+    fun toggleFavoriteById(trackId: String) {
         val currentFavoriteIds = uiState.value.favoriteIds
+        val isCurrentlyFavorite = currentFavoriteIds.contains(trackId)
 
         val newFavoriteIds = if (isCurrentlyFavorite) {
-            currentFavoriteIds - currentTrackId
+            currentFavoriteIds - trackId
         } else {
-            currentFavoriteIds + currentTrackId
+            currentFavoriteIds + trackId
         }
 
         _uiState.update {
+            val currentTrackId = it.currentTrack?.videoId
             it.copy(
-                isFavorite = !isCurrentlyFavorite,
-                favoriteIds = newFavoriteIds
+                favoriteIds = newFavoriteIds,
+                isFavorite = if (trackId == currentTrackId) {
+                    !isCurrentlyFavorite
+                } else {
+                    it.isFavorite
+                }
             )
         }
         viewModelScope.launch {
             val result = if (isCurrentlyFavorite) {
-                repository.removeFavorite(currentTrackId)
+                repository.removeFavorite(trackId)
             } else {
-                repository.addFavorite(currentTrackId)
+                repository.addFavorite(trackId)
             }
 
             result.onFailure { error ->
                 Log.e(TAG, "Failed to toggle favorite: $error")
+                _uiState.update {
+                    it.copy(
+                        favoriteIds = currentFavoriteIds, // Revert set
+                        isFavorite = if (trackId == it.currentTrack?.videoId) {
+                            isCurrentlyFavorite // Revert boolean
+                        } else {
+                            it.isFavorite
+                        }
+                    )
+                }
                 // Optionally send a UI event to show an error message
             }
         }

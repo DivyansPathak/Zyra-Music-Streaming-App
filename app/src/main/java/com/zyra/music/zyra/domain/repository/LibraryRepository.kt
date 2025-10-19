@@ -7,9 +7,12 @@ import com.zyra.music.zyra.domain.model.playlistData.UserPlaylistSong
 import com.zyra.music.zyra.domain.utils.DataError
 import com.zyra.music.zyra.domain.utils.Result
 import com.zyra.music.zyra.navigation.PlayListType
+import kotlinx.coroutines.flow.Flow
 
 interface LibraryRepository {
 
+    fun observePersonalPlaylists() : Flow<List<LibraryPlaylist>>
+    suspend fun refreshPersonalPlaylists() : Result<Unit, DataError>
     suspend fun createPlaylist(playlist : UserPlaylist) : Result<UserPlaylist, DataError>
     suspend fun addSongToPlaylist(playlist : UserPlaylistSong) : Result<Unit, DataError>
     suspend fun removeSongToPlaylist(playlist : UserPlaylistSong) : Result<Unit, DataError>

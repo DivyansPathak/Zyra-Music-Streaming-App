@@ -58,7 +58,7 @@ import coil3.compose.rememberAsyncImagePainter
 import com.zyra.music.zyra.R
 import com.zyra.music.zyra.domain.model.PlaylistDetails
 import com.zyra.music.zyra.domain.model.TrackFullOne
-import com.zyra.music.zyra.presentation.acommon.addToPlaylist.MenuItems
+import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.MenuItems
 import com.zyra.music.zyra.presentation.common.GradientScreenContainer
 import com.zyra.music.zyra.presentation.common.rememberDominantColorState
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
@@ -119,14 +119,19 @@ fun ComposePlaylistScreen(
                         contentPadding = PaddingValues(top = headerHeight, bottom = contentPadding)
                     ) {
                         items(items = state.playlistDetails.tracks, key = { it.videoId }) { track ->
+                            val isTrackFavorite = mainState.favoriteIds.contains(track.videoId)
                             SongListItem(
                                 track = track,
                                 isPlaying = mainState.isPlaying,
                                 modifier = Modifier.clickable {
-                                    mainMusicViewModel.playRadioForSong(clickedTrack = track)
+                                    mainMusicViewModel.playPlayList(
+                                        tracks = state.playlistDetails.tracks,
+                                        shuffle = mainState.shuffleModeEnabled
+                                    )
                                 },
                                 trailingContent = {
                                     MenuItems(
+                                        isFavorite = isTrackFavorite,
                                         onAddToNextPlay = {
                                             mainMusicViewModel.addSongToPlayNext(
                                                 track
@@ -137,6 +142,11 @@ fun ComposePlaylistScreen(
                                         onPlayAsRadioClick = {
                                             mainMusicViewModel.playRadioForSong(
                                                 track
+                                            )
+                                        },
+                                        onToggleFavorite = {
+                                            mainMusicViewModel.toggleFavoriteById(
+                                                track.videoId
                                             )
                                         }
                                     )

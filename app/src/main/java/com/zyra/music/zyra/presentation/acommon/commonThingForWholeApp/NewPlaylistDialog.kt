@@ -1,4 +1,4 @@
-package com.zyra.music.zyra.presentation.acommon.addToPlaylist
+package com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

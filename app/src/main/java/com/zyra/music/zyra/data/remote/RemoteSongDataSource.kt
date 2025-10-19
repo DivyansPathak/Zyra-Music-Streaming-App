@@ -20,8 +20,6 @@ interface RemoteSongDataSource {
 //    suspend fun getRelated(videoId : String) : Result<List<SingleTrackDto>, DataError>
 
     suspend fun getSearchSuggestions(query : String) : Result<List<String>, DataError>
-    suspend fun getThumbnail(videoId : String) : Result<ThumbnailDto, DataError>
-
     // supabase
     //Favorite
     suspend fun getFavoriteIds() : Result<Set<String>, DataError>

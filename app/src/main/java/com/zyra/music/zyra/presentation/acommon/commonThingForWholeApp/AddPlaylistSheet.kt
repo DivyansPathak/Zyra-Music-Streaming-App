@@ -1,4 +1,4 @@
-package com.zyra.music.zyra.presentation.acommon.addToPlaylist
+package com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,9 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -47,7 +44,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.NoOpUpdate
 import coil3.compose.AsyncImage
 import com.zyra.music.zyra.domain.model.LibraryPlaylist
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistState

@@ -8,7 +8,6 @@ import com.zyra.music.zyra.domain.utils.getErrorMessage
 import com.zyra.music.zyra.domain.utils.onFailure
 import com.zyra.music.zyra.domain.utils.onSuccess
 import com.zyra.music.zyra.navigation.PlayListType
-import io.ktor.client.plugins.logging.Logging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -25,9 +24,36 @@ class LibraryViewModel(
 
     init {
         Log.d(TAG,"LibraryViewModel initiated")
-        loadLibraryContent()
+        observeLibraryContent()
+        refreshLibraryContent()
+
     }
 
+    private fun observeLibraryContent(){
+        viewModelScope.launch {
+            libraryRepo.observePersonalPlaylists()
+                .collect { playlists ->
+                    Log.d(TAG,"Ui updated from local cache with ${playlists.size}")
+                    _uiState.update {
+                        it.copy(playlists = playlists)
+                    }
+
+                }
+        }
+    }
+    fun refreshLibraryContent(){
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            libraryRepo.refreshPersonalPlaylists()
+                .onSuccess {
+                    _uiState.update { it.copy(isLoading = false) }
+                }
+                .onFailure { error ->
+                    Log.e(TAG,"Error refreshing library content : $error")
+                    _uiState.update { it.copy(isLoading = false,error = error.getErrorMessage()) }
+                }
+        }
+    }
      fun loadLibraryContent(){
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }

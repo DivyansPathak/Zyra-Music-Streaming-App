@@ -38,6 +38,7 @@ val koinModule = module {
     single { ExoPlayer.Builder(get()).build() } bind Player::class
 
     single{get<AppDatabase>().playlistDao()}
+    single{get<AppDatabase>().libraryPlaylistDao()}
 
 
     singleOf(::MusicQueueManager)

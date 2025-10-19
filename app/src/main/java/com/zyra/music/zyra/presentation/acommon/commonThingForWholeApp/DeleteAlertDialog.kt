@@ -1,4 +1,4 @@
-package com.zyra.music.zyra.presentation.acommon.addToPlaylist
+package com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
