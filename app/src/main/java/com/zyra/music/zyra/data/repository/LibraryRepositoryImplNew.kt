@@ -103,7 +103,7 @@ class LibraryRepositoryImplNew(
         return when (result) {
             is Result.Success -> {
                 val playlistDto = result.data
-                val latestThumbnail = playlistDto.lastOrNull()?.thumbnail
+                val latestThumbnail = playlistDto.firstOrNull()?.thumbnail
 
                 try {
                     val entities = coroutineScope {

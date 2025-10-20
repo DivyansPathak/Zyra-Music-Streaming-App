@@ -54,6 +54,7 @@ import com.zyra.music.zyra.presentation.home.HomeViewModel
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryScreen
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryScreenTest
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
+import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModelNew
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerAction
 import com.zyra.music.zyra.presentation.playlistScreen.PlaylistViewModel
@@ -79,7 +80,7 @@ fun MainScreenWithBottomBar(
     val mainBackStack = rememberNavBackStack<MainScreens>(HomeScreen)
     val searchViewModel: SearchViewModel = koinViewModel()
     val homeViewModel: HomeViewModel = koinViewModel()
-    val libraryViewModel: LibraryViewModel = koinViewModel()
+    val libraryViewModel: LibraryViewModelNew = koinViewModel()
     val addPlaylistViewModel: AddPlaylistViewModel = koinViewModel()
     val mainState by mainViewModel.uiState.collectAsStateWithLifecycle()
     val addPlaylistState by addPlaylistViewModel.uiState.collectAsStateWithLifecycle()

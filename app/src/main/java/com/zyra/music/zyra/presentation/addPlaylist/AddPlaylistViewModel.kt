@@ -8,10 +8,7 @@ import com.zyra.music.zyra.data.mapper.toUserPlaylistDto
 import com.zyra.music.zyra.data.remote.SupabaseClient
 import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.domain.model.playlistData.UserPlaylist
-import com.zyra.music.zyra.domain.model.playlistData.UserPlaylistSong
-import com.zyra.music.zyra.domain.repository.LibraryRepository
 import com.zyra.music.zyra.domain.repository.LibraryRepositoryNew
-import com.zyra.music.zyra.domain.repository.SongRepository
 import com.zyra.music.zyra.domain.utils.getErrorMessage
 import com.zyra.music.zyra.domain.utils.onFailure
 import com.zyra.music.zyra.domain.utils.onSuccess
@@ -37,6 +34,7 @@ class AddPlaylistViewModel(
 
     init {
         Log.d(TAG,"AddPlaylistViewModel is initiated")
+        observePlaylists()
 
     }
 
@@ -50,7 +48,10 @@ class AddPlaylistViewModel(
     }
     fun onAction(action : AddPlaylistAction){
       when(action){
-          is AddPlaylistAction.SetSongAndShowSheet -> loadAllPlaylists(track = action.track)
+          is AddPlaylistAction.SetSongAndShowSheet -> {
+              _uiState.update { it.copy(songToAdd = action.track) }
+              refreshPlaylistInBackground()
+          }
           is AddPlaylistAction.AddSongToPlaylist -> addSongToPlaylist(action.playlistId)
           is AddPlaylistAction.ShowCreateDialog -> {
               Log.d(TAG,"Playlist sheet is opening")
@@ -134,7 +135,6 @@ class AddPlaylistViewModel(
                     newPlaylist.id?.let { newPlaylistId ->
                         Log.d(TAG,"Adding song to newly created playlist ${newPlaylist.name}")
                         addSongToPlaylist(newPlaylistId)
-                        refreshPlaylist()
                     }
 
                 }
@@ -150,8 +150,8 @@ class AddPlaylistViewModel(
             libraryRepo.deletePlaylist(playlistId = playlistToDelete.id)
                 .onSuccess {
                     Log.d(TAG,"Successfully deleted playlist ${playlistToDelete.name}")
-                    val currentPlaylist = _uiState.value.playlists
-                    _uiState.update { it.copy(playlists = currentPlaylist.filter { it.id != playlistToDelete.id }) }
+//                    val currentPlaylist = _uiState.value.playlists
+//                    _uiState.update { it.copy(playlists = currentPlaylist.filter { it.id != playlistToDelete.id }) }
                 }
                 .onFailure { error ->
                     Log.e(TAG, "Error deleting playlist $error")
@@ -160,15 +160,14 @@ class AddPlaylistViewModel(
         }
     }
 
-    private fun refreshPlaylist(){
+    private fun refreshPlaylistInBackground(){
         Log.d(TAG,"Refreshing playlist list...")
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             libraryRepo.getLibraryPlaylists()
                 .onSuccess { userPlaylists ->
-                    val playlists = userPlaylists.map { it.toLibraryPlaylists() }
-                    _uiState.update { it.copy(playlists = playlists, isLoading = false) }
                     Log.d(TAG,"Playlist list is refreshed. Total count : ${userPlaylists.size}")
+                    _uiState.update { it.copy(isLoading = false) }
                 }
                 .onFailure { error ->
                     _uiState.update { it.copy(isLoading = false) }

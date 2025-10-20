@@ -51,7 +51,7 @@ fun LibraryScreen(
     state: LibraryState,
     onScreenTypeSelected: (LibraryScreenType) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LibraryViewModel = koinViewModel()
+    viewModel: LibraryViewModelNew = koinViewModel()
 ) {
     val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current

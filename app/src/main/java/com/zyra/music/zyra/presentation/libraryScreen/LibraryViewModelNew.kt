@@ -1,20 +1,24 @@
 package com.zyra.music.zyra.presentation.libraryScreen
 
+
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zyra.music.zyra.domain.repository.LibraryRepositoryNew
+import com.zyra.music.zyra.domain.utils.getErrorMessage
 import com.zyra.music.zyra.domain.utils.onFailure
 import com.zyra.music.zyra.domain.utils.onSuccess
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 private const val TAG = "LibraryViewModelNew"
+
 class LibraryViewModelNew(
-    private val libraryRepo : LibraryRepositoryNew
+    private val libraryRepo: LibraryRepositoryNew
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LibraryState())
@@ -24,31 +28,42 @@ class LibraryViewModelNew(
     val uiEvent = _uiEvent.receiveAsFlow()
 
     init {
-        Log.d(TAG,"LibraryViewModelNew initiated")
-        loadPlaylists()
+        Log.d(TAG, "LibraryViewModelNew initiated")
+        observeLibraryContent()
+        silentRefreshLibraryContent()
     }
-    fun loadPlaylists(){
+
+    fun silentRefreshLibraryContent() {
         viewModelScope.launch {
-            libraryRepo.getLibraryPlaylists()
-                .onSuccess { favoriteSongs ->
-                    Log.d(TAG,"Favorite songs are $favoriteSongs")
-                }
+            libraryRepo.refreshPersonalPlaylists()
                 .onFailure { error ->
-                    Log.e(TAG,"Failed to get favorite songs error : $error")
+                    Log.e(TAG, "Silent refresh failed : $error")
                 }
         }
     }
 
-    fun loadPlaylistSongs(){
+    private fun observeLibraryContent() {
         viewModelScope.launch {
-
-            libraryRepo.getPlaylistSongs(playlistId = -1)
-                .onSuccess { songs ->
-                    Log.d(TAG,"list of songs : $songs")
-                }
-                .onFailure { error ->
-                    Log.e(TAG,"Failed to get songs from playlist : $error")
+            libraryRepo.observePersonalPlaylist()
+                .collect { playlists ->
+                    Log.d(TAG, "Ui updated from local cache with ${playlists.size}")
+                    _uiState.update { it.copy(playlists = playlists) }
                 }
         }
     }
+
+    fun refreshLibraryContent() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            libraryRepo.refreshPersonalPlaylists()
+                .onSuccess {
+                    _uiState.update { it.copy(isLoading = false) }
+                }
+                .onFailure { error ->
+                    Log.e(TAG, "Error library content")
+                    _uiState.update { it.copy(isLoading = false, error = error.getErrorMessage()) }
+                }
+        }
+    }
+
 }

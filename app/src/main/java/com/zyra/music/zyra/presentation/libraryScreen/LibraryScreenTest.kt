@@ -30,7 +30,7 @@ viewModel: LibraryViewModelNew = koinViewModel()
             onClick = {
                 scope.launch {
                     Log.d("DEBUG_TEST","Button clicked, fetching playlist details")
-                    val result = viewModel.loadPlaylistSongs()
+                    val result = viewModel.silentRefreshLibraryContent()
                     Log.d("DEBUG_TEST","Result : $result")
                 }
             }) {
