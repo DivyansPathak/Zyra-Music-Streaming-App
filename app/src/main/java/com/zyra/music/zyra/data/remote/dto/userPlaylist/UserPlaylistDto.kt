@@ -9,5 +9,5 @@ data class UserPlaylistDto(
     @SerialName("user_id")
     val userId: String? = null,
     val name: String,
-    val description : String
+    val description : String? = null
 )

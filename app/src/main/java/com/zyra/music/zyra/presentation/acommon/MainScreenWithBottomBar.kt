@@ -52,6 +52,7 @@ import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
 import com.zyra.music.zyra.presentation.home.HomeScreen
 import com.zyra.music.zyra.presentation.home.HomeViewModel
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryScreen
+import com.zyra.music.zyra.presentation.libraryScreen.LibraryScreenTest
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerAction
@@ -217,13 +218,13 @@ fun MainScreenWithBottomBar(
 
                     }
                     entry<ProfileScreen> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "Profile")
-                        }
-//                        LibraryScreenTest()
+//                        Box(
+//                            modifier = Modifier.fillMaxSize(),
+//                            contentAlignment = Alignment.Center
+//                        ) {
+//                            Text(text = "Profile")
+//                        }
+                        LibraryScreenTest()
                     }
                     entry<PlaylistScreen> { screen ->
                         val playlistViewModel: PlaylistViewModel = koinViewModel(

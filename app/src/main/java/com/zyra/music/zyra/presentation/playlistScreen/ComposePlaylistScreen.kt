@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -118,7 +119,7 @@ fun ComposePlaylistScreen(
                         state = lazyListState,
                         contentPadding = PaddingValues(top = headerHeight, bottom = contentPadding)
                     ) {
-                        items(items = state.playlistDetails.tracks, key = { it.videoId }) { track ->
+                        itemsIndexed(items = state.playlistDetails.tracks, key = { _, track -> track.videoId }) {  index, track ->
                             val isTrackFavorite = mainState.favoriteIds.contains(track.videoId)
                             SongListItem(
                                 track = track,
@@ -126,7 +127,8 @@ fun ComposePlaylistScreen(
                                 modifier = Modifier.clickable {
                                     mainMusicViewModel.playPlayList(
                                         tracks = state.playlistDetails.tracks,
-                                        shuffle = mainState.shuffleModeEnabled
+                                        shuffle = mainState.shuffleModeEnabled,
+                                        startIndex = index
                                     )
                                 },
                                 trailingContent = {

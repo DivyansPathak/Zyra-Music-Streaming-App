@@ -3,8 +3,10 @@ package com.zyra.music.zyra.data.mapper
 import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
 import com.zyra.music.zyra.data.remote.dto.TrackDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
+import com.zyra.music.zyra.data.remote.dto.playlistDetails.PlaylistDetailSongs
 import com.zyra.music.zyra.domain.model.SingleTrack
 import com.zyra.music.zyra.domain.model.TrackFullOne
+import org.schabi.newpipe.extractor.timeago.patterns.vi
 
 private fun SingleTrackDto.toSingleTrack() = SingleTrack(
     title = this.title,
@@ -13,6 +15,7 @@ private fun SingleTrackDto.toSingleTrack() = SingleTrack(
     thumbnail = this.thumbnail,
     duration = this.duration,
 )
+
 fun List<SingleTrackDto>.toSingleTrackList() = map { it.toSingleTrack() }
 
 private fun TrackFullOneDto.toTrackFullOne() = TrackFullOne(
@@ -25,6 +28,7 @@ private fun TrackFullOneDto.toTrackFullOne() = TrackFullOne(
     albumName = this.albumName.toString(),
     albumId = this.albumId.toString(),
 )
+
 fun List<TrackFullOneDto>.toTrackFullOneList() = map { it.toTrackFullOne() }
 
 
@@ -40,3 +44,25 @@ fun TrackDto.toTrackFullOneDto(): TrackFullOneDto {
         albumId = null
     )
 }
+
+fun TrackFullOneDto.toPlaylistDetailSongs() = PlaylistDetailSongs(
+    title = this.title,
+    videoId = this.videoId,
+    thumbnail = this.thumbnail,
+    artistName =  this.artistName,
+    artistId = this.artistId,
+    duration = this.duration,
+    albumId = this.albumId,
+    albumName = this.albumName
+)
+
+fun PlaylistDetailSongs.toTrackFullDto() = TrackFullOneDto(
+    title = title,
+    videoId = videoId,
+    thumbnail = thumbnail,
+    artistName = artistName,
+    artistId = artistId,
+    albumId = albumId,
+    albumName = albumName,
+    duration = duration
+)

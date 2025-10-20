@@ -59,7 +59,7 @@ fun LibraryScreen(
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 scope.launch {
-                    viewModel.refreshLibraryContent()
+                    viewModel.silentRefreshLibraryContent()
                 }
             }
         }

@@ -25,49 +25,58 @@ class LibraryViewModel(
     init {
         Log.d(TAG,"LibraryViewModel initiated")
         observeLibraryContent()
-        refreshLibraryContent()
+        silentRefreshLibraryContent()
 
+    }
+
+    fun silentRefreshLibraryContent(){
+//        viewModelScope.launch {
+//            libraryRepo.refreshPersonalPlaylists()
+//                .onFailure { error ->
+//                    Log.e(TAG,"Silent refresh failed : $error")
+//                }
+//        }
     }
 
     private fun observeLibraryContent(){
-        viewModelScope.launch {
-            libraryRepo.observePersonalPlaylists()
-                .collect { playlists ->
-                    Log.d(TAG,"Ui updated from local cache with ${playlists.size}")
-                    _uiState.update {
-                        it.copy(playlists = playlists)
-                    }
-
-                }
-        }
+//        viewModelScope.launch {
+//            libraryRepo.observePersonalPlaylists()
+//                .collect { playlists ->
+//                    Log.d(TAG,"Ui updated from local cache with $playlists")
+//                    _uiState.update {
+//                        it.copy(playlists = playlists)
+//                    }
+//
+//                }
+//        }
     }
     fun refreshLibraryContent(){
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-            libraryRepo.refreshPersonalPlaylists()
-                .onSuccess {
-                    _uiState.update { it.copy(isLoading = false) }
-                }
-                .onFailure { error ->
-                    Log.e(TAG,"Error refreshing library content : $error")
-                    _uiState.update { it.copy(isLoading = false,error = error.getErrorMessage()) }
-                }
-        }
+//        viewModelScope.launch {
+//            _uiState.update { it.copy(isLoading = true, error = null) }
+//            libraryRepo.refreshPersonalPlaylists()
+//                .onSuccess {
+//                    _uiState.update { it.copy(isLoading = false) }
+//                }
+//                .onFailure { error ->
+//                    Log.e(TAG,"Error refreshing library content : $error")
+//                    _uiState.update { it.copy(isLoading = false,error = error.getErrorMessage()) }
+//                }
+//        }
     }
      fun loadLibraryContent(){
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-
-            libraryRepo.getPersonalPlaylists()
-                .onSuccess { playlists ->
-                    Log.d(TAG,"Library content loaded successfully $playlists")
-                    _uiState.update { it.copy(isLoading = false, playlists = playlists, error = null) }
-                }
-                .onFailure { error ->
-                    Log.d(TAG,"Error loading library content $error")
-                    _uiState.update { it.copy(isLoading = false, error = error.getErrorMessage()) }
-                }
-        }
+//        viewModelScope.launch {
+//            _uiState.update { it.copy(isLoading = true, error = null) }
+//
+//            libraryRepo.getPersonalPlaylists()
+//                .onSuccess { playlists ->
+//                    Log.d(TAG,"Library content loaded successfully $playlists")
+//                    _uiState.update { it.copy(isLoading = false, playlists = playlists, error = null) }
+//                }
+//                .onFailure { error ->
+//                    Log.d(TAG,"Error loading library content $error")
+//                    _uiState.update { it.copy(isLoading = false, error = error.getErrorMessage()) }
+//                }
+//        }
     }
     fun getPlaylistDetails(id : String, playlistType : PlayListType){
         viewModelScope.launch {

@@ -1,14 +1,14 @@
 package com.zyra.music.zyra.data.remote
 
-import android.util.Log
+import com.zyra.music.zyra.data.mapper.toPlaylistDetailSongs
 import com.zyra.music.zyra.data.remote.SupabaseClient.supabase
 import com.zyra.music.zyra.data.remote.dto.FavoriteDto
 import com.zyra.music.zyra.data.remote.dto.PrePlaylistDto
 import com.zyra.music.zyra.data.remote.dto.SearchRequestBody
 import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
-import com.zyra.music.zyra.data.remote.dto.ThumbnailDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.data.remote.dto.favoriteDto.LibraryPlaylistDto
+import com.zyra.music.zyra.data.remote.dto.playlistDetails.PlaylistDetailSongs
 import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistDto
 import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistSongDto
 import com.zyra.music.zyra.data.utils.BASE_URL
@@ -30,7 +30,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
@@ -85,6 +84,7 @@ class RemoteSongDataSourceImpl(
             }
         }
     }
+
     override suspend fun getFavoriteIds(): Result<Set<String>, DataError> {
         return safeSupabaseCall {
             val favorites = supabase.from("favorites")
@@ -94,7 +94,25 @@ class RemoteSongDataSourceImpl(
         }
     }
 
+    override suspend fun fetchAndCacheSongMetadata(videoId: String): Result<Unit, DataError> {
+        val metadataResult = getMetadataOfSong(videoId)
+        when (metadataResult) {
+            is Result.Success -> {
+                val songDto = metadataResult.data
+                return cacheSongMetadata(songDto.toPlaylistDetailSongs())
+            }
+
+            is Result.Failure -> {
+                return metadataResult
+            }
+        }
+    }
+
     override suspend fun addFavorite(videoId: String): Result<Unit, DataError> {
+        val cacheResult = fetchAndCacheSongMetadata(videoId)
+        if (cacheResult is Result.Failure) {
+            return cacheResult
+        }
         return safeSupabaseCall {
             val currentUser = supabase.auth.currentUserOrNull()
                 ?: throw IllegalStateException("User must be logged in.")
@@ -117,13 +135,17 @@ class RemoteSongDataSourceImpl(
 
     override suspend fun createPlaylist(playlistDto: UserPlaylistDto): Result<UserPlaylistDto, DataError> {
         return safeSupabaseCall {
-            supabase.from("playlists").insert(playlistDto){
+            supabase.from("playlists").insert(playlistDto) {
                 select()
             }.decodeSingle<UserPlaylistDto>()
         }
     }
 
     override suspend fun addSongToPlaylist(playlistSong: UserPlaylistSongDto): Result<Unit, DataError> {
+        val cacheResult = fetchAndCacheSongMetadata(playlistSong.songId)
+        if (cacheResult is Result.Failure){
+            return cacheResult
+        }
         return safeSupabaseCall {
             supabase.from("playlist_songs").insert(value = playlistSong)
         }
@@ -133,8 +155,8 @@ class RemoteSongDataSourceImpl(
         return safeSupabaseCall {
             supabase.from("playlist_songs").delete {
                 filter {
-                    eq("playlist_id",playlistSong.playlistId)
-                    eq("song_id",playlistSong.songId)
+                    eq("playlist_id", playlistSong.playlistId)
+                    eq("song_id", playlistSong.songId)
                 }
             }
         }
@@ -150,13 +172,19 @@ class RemoteSongDataSourceImpl(
         }
     }
 
+    override suspend fun cacheSongMetadata(song: PlaylistDetailSongs): Result<Unit, DataError> {
+        return safeSupabaseCall {
+            supabase.from("songs").upsert(song)
+        }
+    }
+
     override suspend fun getLibraryPlaylists(): Result<List<LibraryPlaylistDto>, DataError> {
-            return safeSupabaseCall {
-                supabase.postgrest.rpc(
-                    function ="get_user_personal_playlists",
-                    parameters = emptyMap<String, String>()
-                ).decodeList<LibraryPlaylistDto>()
-            }
+        return safeSupabaseCall {
+            supabase.postgrest.rpc(
+                function = "get_user_personal_playlists",
+                parameters = emptyMap<String, String>()
+            ).decodeList<LibraryPlaylistDto>()
+        }
 //        return try {
 //            val response = supabase.postgrest.rpc(
 //                function = "get_user_personal_playlists",
@@ -172,6 +200,20 @@ class RemoteSongDataSourceImpl(
 //        }
     }
 
+    override suspend fun getPlaylistSongs(playlistId: Long): Result<List<PlaylistDetailSongs>, DataError> {
+        return safeSupabaseCall {
+            supabase.postgrest.rpc(
+                function = "get_playlist_songs",
+                parameters = mapOf("playlist_id" to playlistId)
+            ).decodeList<PlaylistDetailSongs>()
+        }
+    }
+
+    override suspend fun getFavoriteSongs(): Result<List<PlaylistDetailSongs>, DataError> {
+        return getPlaylistSongs(playlistId = -1L)
+    }
+
+
     override suspend fun getPlaylistSongIds(playlistId: Long): Result<List<String>, DataError> {
         return safeSupabaseCall {
             supabase.postgrest.rpc(
@@ -180,6 +222,7 @@ class RemoteSongDataSourceImpl(
             ).decodeList<String>()
         }
     }
+
 
     override suspend fun getSearchSuggestions(query: String): Result<List<String>, DataError> {
         if (query.isBlank()) {
@@ -247,8 +290,8 @@ class RemoteSongDataSourceImpl(
     }
 
     override suspend fun getMetadataOfSong(videoId: String): Result<TrackFullOneDto, DataError> {
-        return withContext(Dispatchers.IO){
-            safeCall <TrackFullOneDto>{
+        return withContext(Dispatchers.IO) {
+            safeCall<TrackFullOneDto> {
                 httpClient.get(urlString = "$YT_BASE_URL/song/metadata/$videoId")
             }
         }

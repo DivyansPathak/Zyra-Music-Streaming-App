@@ -5,6 +5,7 @@ import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
 import com.zyra.music.zyra.data.remote.dto.ThumbnailDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.data.remote.dto.favoriteDto.LibraryPlaylistDto
+import com.zyra.music.zyra.data.remote.dto.playlistDetails.PlaylistDetailSongs
 import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistDto
 import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistSongDto
 import com.zyra.music.zyra.domain.utils.DataError
@@ -21,17 +22,23 @@ interface RemoteSongDataSource {
 
     suspend fun getSearchSuggestions(query : String) : Result<List<String>, DataError>
     // supabase
+
+    suspend fun fetchAndCacheSongMetadata(videoId : String) : Result<Unit, DataError>
     //Favorite
     suspend fun getFavoriteIds() : Result<Set<String>, DataError>
     suspend fun addFavorite(videoId: String) : Result<Unit, DataError>
     suspend fun removeFavorite(videoId : String) : Result<Unit, DataError>
+    suspend fun getFavoriteSongs() : Result<List<PlaylistDetailSongs>, DataError>
     //UserPlaylist
     suspend fun createPlaylist(playlistDto : UserPlaylistDto) : Result<UserPlaylistDto, DataError>
     suspend fun addSongToPlaylist(playlistSong : UserPlaylistSongDto) : Result<Unit, DataError>
     suspend fun removeSongToPlaylist(playlistSong: UserPlaylistSongDto) : Result<Unit, DataError>
     suspend fun deletePlaylist(playlistId : Long) : Result<Unit, DataError>
+    suspend fun cacheSongMetadata(song : PlaylistDetailSongs) : Result<Unit, DataError>
 
     suspend fun getLibraryPlaylists() : Result<List<LibraryPlaylistDto>, DataError>
+    suspend fun getPlaylistSongs(playlistId : Long) : Result<List<PlaylistDetailSongs>, DataError>
+
     suspend fun getPlaylistSongIds(playlistId : Long) : Result<List<String>, DataError>
 
     // PrePlaylist

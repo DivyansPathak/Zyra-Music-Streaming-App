@@ -1,5 +1,7 @@
 package com.zyra.music.zyra.data.mapper
 
+import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
+import com.zyra.music.zyra.data.remote.dto.playlistDetails.PlaylistDetailSongs
 import com.zyra.music.zyra.domain.model.SingleTrack
 import com.zyra.music.zyra.domain.model.TrackFullOne
 
@@ -15,3 +17,4 @@ private fun SingleTrack.toTrackFullOne() = TrackFullOne(
 )
 
 fun List<SingleTrack>.toListTrackFullOne() = map { it.toTrackFullOne() }
+

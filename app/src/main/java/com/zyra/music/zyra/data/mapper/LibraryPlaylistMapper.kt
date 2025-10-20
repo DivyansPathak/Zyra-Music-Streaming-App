@@ -10,7 +10,6 @@ import com.zyra.music.zyra.domain.model.playlistData.UserPlaylistSong
 import com.zyra.music.zyra.navigation.PlayListType
 
 fun LibraryPlaylistDto.toLibraryPlaylists(
-    finalImageUrl : String,
     userName : String?  = "You"
 ) : LibraryPlaylist {
     val creatorSubtitle = when(this.playlistType){
@@ -29,7 +28,7 @@ fun LibraryPlaylistDto.toLibraryPlaylists(
         id = this.id,
         name = this.title,
         creator = creatorSubtitle,
-        imageUrl = finalImageUrl,
+        imageUrl = this.thumbnail ?: "",
         trackCount = this.trackCount,
         playlistType = typeEnum
     )
@@ -40,7 +39,7 @@ fun UserPlaylistDto.toUserPlaylist() = UserPlaylist(
     id = this.id,
     userId = this.userId,
     name = this.name,
-    description = this.description
+    description = this.description ?: ""
 )
 fun UserPlaylist.toUserPlaylistDto() = UserPlaylistDto(
     id = this.id,

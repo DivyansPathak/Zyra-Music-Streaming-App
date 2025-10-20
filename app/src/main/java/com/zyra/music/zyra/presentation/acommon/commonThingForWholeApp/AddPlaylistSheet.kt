@@ -172,26 +172,6 @@ fun AddPlaylistSheetContent(
                     )
                     Text(text = "New Playlist", style = MaterialTheme.typography.titleSmall)
                 }
-
-//                Button(
-//                    onClick = {addNewPlaylistClick()},
-//                    modifier = Modifier
-//                        .align(Alignment.BottomEnd)
-//                        .clip(RoundedCornerShape(24.dp)),
-//                    colors = ButtonDefaults.buttonColors(
-//                        containerColor = MaterialTheme.colorScheme.primary,
-//                        contentColor = MaterialTheme.colorScheme.onPrimary
-//                    )
-//                ) {
-//                    Row(
-//                        modifier = Modifier,
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        horizontalArrangement = Arrangement.Absolute.SpaceEvenly
-//                    ) {
-//                        Icon(Icons.Default.Add, contentDescription = "Add Playlist Icon")
-//                        Text(text = "New Playlist")
-//                    }
-//                }
             }
         }
     }

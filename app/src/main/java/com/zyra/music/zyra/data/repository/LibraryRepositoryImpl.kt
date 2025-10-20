@@ -49,13 +49,8 @@ class LibraryRepositoryImpl(
                     val entities = coroutineScope {
                         playlitstDtos.map { dto ->
                             async {
-                                val imageUrl = dto.thumbnailSongId?.let { videoId ->
-                                    when (val thumbnail =
-                                        remoteSongDataSource.getMetadataOfSong(videoId)) {
-                                        is Result.Success -> thumbnail.data.thumbnail
-                                        is Result.Failure -> null
-                                    }
-                                }
+                                val imageUrl = dto.thumbnail
+
                                 dto.toEntity(finalImageUrl = imageUrl)
                             }
                         }.awaitAll()
@@ -73,32 +68,36 @@ class LibraryRepositoryImpl(
         }
     }
 
+
+
     override suspend fun getPersonalPlaylists(): Result<List<LibraryPlaylist>, DataError> {
-        val playlistsResult = remoteSongDataSource.getLibraryPlaylists()
-        if (playlistsResult is Result.Failure) {
-            return playlistsResult
-        }
-        val playlistDtos = (playlistsResult as Result.Success).data
-        val songIdsToFetch = playlistDtos.mapNotNull { it.thumbnailSongId }.distinct()
-        if (songIdsToFetch.isEmpty()) {
-            val mappedPlaylists = playlistDtos.map { it.toLibraryPlaylists("") }
-            return Result.Success(mappedPlaylists)
-        }
+//        val playlistsResult = remoteSongDataSource.getLibraryPlaylists()
+//        if (playlistsResult is Result.Failure) {
+//            return playlistsResult
+//        }
+//        val playlistDtos = (playlistsResult as Result.Success).data
+//        val songIdsToFetch = playlistDtos
+//        if (songIdsToFetch.isEmpty()) {
+//            val mappedPlaylists = playlistDtos.map { it.toLibraryPlaylists("") }
+//            return Result.Success(mappedPlaylists)
+//        }
+//
+//        val trackResult = songRepository.searchSongs(songIdsToFetch)
+//        if (trackResult is Result.Failure) {
+//            val playlistsWithNoThumbnails =
+//                playlistDtos.map { it.toLibraryPlaylists(finalImageUrl = "") }
+//            return Result.Success(playlistsWithNoThumbnails)
+//
+//        }
+//        val thumbnailMap = (trackResult as Result.Success).data
+//            .associateBy({ it.url.substringAfter("v=") }, { it.thumbnail })
+//        val finalPlaylists = playlistDtos.map { dto ->
+//            val imageUrl = thumbnailMap[dto.thumbnailSongId] ?: ""
+//            dto.toLibraryPlaylists(finalImageUrl = imageUrl)
+//        }
+//        return Result.Success(finalPlaylists)
 
-        val trackResult = songRepository.searchSongs(songIdsToFetch)
-        if (trackResult is Result.Failure) {
-            val playlistsWithNoThumbnails =
-                playlistDtos.map { it.toLibraryPlaylists(finalImageUrl = "") }
-            return Result.Success(playlistsWithNoThumbnails)
-
-        }
-        val thumbnailMap = (trackResult as Result.Success).data
-            .associateBy({ it.url.substringAfter("v=") }, { it.thumbnail })
-        val finalPlaylists = playlistDtos.map { dto ->
-            val imageUrl = thumbnailMap[dto.thumbnailSongId] ?: ""
-            dto.toLibraryPlaylists(finalImageUrl = imageUrl)
-        }
-        return Result.Success(finalPlaylists)
+        TODO("Not yet implemented")
     }
 
     override suspend fun getPlaylistDetails(

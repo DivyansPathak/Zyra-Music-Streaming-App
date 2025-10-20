@@ -8,8 +8,7 @@ data class LibraryPlaylistDto(
     val id : Long, // i changed it from String to Long
     val title : String,
     val subtitle : String?,
-    @SerialName("thumbnail_song_id")
-    val thumbnailSongId : String?,
+    val thumbnail : String?,
     @SerialName("track_count")
     val trackCount : Long,
     @SerialName("playlist_type")
