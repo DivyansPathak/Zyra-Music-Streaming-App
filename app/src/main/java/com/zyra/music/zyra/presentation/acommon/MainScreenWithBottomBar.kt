@@ -59,6 +59,8 @@ import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerAction
 import com.zyra.music.zyra.presentation.playlistScreen.PlaylistViewModel
 import com.zyra.music.zyra.presentation.playlistScreen.ComposePlaylistScreen
+import com.zyra.music.zyra.presentation.profileScreen.ComposeProfileScreen
+import com.zyra.music.zyra.presentation.profileScreen.ProfileViewModel
 import com.zyra.music.zyra.presentation.searchScreen.SearchScreenN
 import com.zyra.music.zyra.presentation.searchScreen.SearchViewModel
 import com.zyra.music.zyra.presentation.utils.formatDurationLong
@@ -82,6 +84,7 @@ fun MainScreenWithBottomBar(
     val homeViewModel: HomeViewModel = koinViewModel()
     val libraryViewModel: LibraryViewModelNew = koinViewModel()
     val addPlaylistViewModel: AddPlaylistViewModel = koinViewModel()
+    val profileViewModel: ProfileViewModel = koinViewModel()
     val mainState by mainViewModel.uiState.collectAsStateWithLifecycle()
     val addPlaylistState by addPlaylistViewModel.uiState.collectAsStateWithLifecycle()
     val isMiniPlayerVisible = mainState.currentTrack != null
@@ -194,11 +197,11 @@ fun MainScreenWithBottomBar(
                             },
                             onNextPlayClick = { track -> mainViewModel.addSongToPlayNext(track) },
                             addToQueueClick = { track -> mainViewModel.addSongToQueue(track) },
-                            addToPlaylistClick = {track -> onAddToPlaylistClick(track)},
+                            addToPlaylistClick = { track -> onAddToPlaylistClick(track) },
                             onBackClick = {
                                 backToHome()
                             },
-                            addToFavoriteClick = {track ->mainViewModel.toggleFavoriteById(track.videoId)}
+                            addToFavoriteClick = { track -> mainViewModel.toggleFavoriteById(track.videoId) }
                         )
                     }
                     entry<LibraryScreen> {
@@ -219,13 +222,12 @@ fun MainScreenWithBottomBar(
 
                     }
                     entry<ProfileScreen> {
-//                        Box(
-//                            modifier = Modifier.fillMaxSize(),
-//                            contentAlignment = Alignment.Center
-//                        ) {
-//                            Text(text = "Profile")
-//                        }
-                        LibraryScreenTest()
+                        val state by profileViewModel.uiState.collectAsStateWithLifecycle()
+                        ComposeProfileScreen(
+                            state = state,
+                            onAction = profileViewModel::onAction,
+                            onSignedOutClick = {}
+                        )
                     }
                     entry<PlaylistScreen> { screen ->
                         val playlistViewModel: PlaylistViewModel = koinViewModel(
@@ -243,8 +245,8 @@ fun MainScreenWithBottomBar(
                             onBack = {
                                 mainBackStack.removeLastOrNull()
                             },
-                            addSongToPlaylist = {trackFullOne ->
-                                Log.d(TAG,"onAddPlaylistClicked with song $trackFullOne")
+                            addSongToPlaylist = { trackFullOne ->
+                                Log.d(TAG, "onAddPlaylistClicked with song $trackFullOne")
                                 onAddToPlaylistClick(trackFullOne)
                             }
                         )

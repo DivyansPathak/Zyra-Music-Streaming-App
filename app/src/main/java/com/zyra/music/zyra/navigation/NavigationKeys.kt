@@ -29,8 +29,6 @@ data object LibraryScreen : MainScreens
 @Serializable
 data object ProfileScreen : MainScreens
 
-
-
 @Serializable
 data class PlaylistScreen(
     val id: String,

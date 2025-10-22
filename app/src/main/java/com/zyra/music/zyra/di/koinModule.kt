@@ -25,6 +25,7 @@ import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModelNew
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.playerScreen.MusicViewModel
 import com.zyra.music.zyra.presentation.playlistScreen.PlaylistViewModel
+import com.zyra.music.zyra.presentation.profileScreen.ProfileViewModel
 import com.zyra.music.zyra.presentation.searchScreen.SearchViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
@@ -64,6 +65,7 @@ val koinModule = module {
     viewModelOf(::SearchViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::LibraryViewModelNew)
+    viewModelOf(::ProfileViewModel)
 
     viewModel{
         LibraryViewModel(get())
