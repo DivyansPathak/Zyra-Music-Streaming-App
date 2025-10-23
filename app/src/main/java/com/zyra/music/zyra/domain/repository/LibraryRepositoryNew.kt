@@ -67,8 +67,4 @@ interface LibraryRepositoryNew {
      */
     suspend fun refreshPersonalPlaylists() : Result<Unit, DataError>
 
-    /**
-     * get playlist by id from local cached database
-     */
-    suspend fun getPlaylistById(playlistId : Long) : LibraryPlaylist?
 }

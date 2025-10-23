@@ -35,10 +35,10 @@ class LibraryRepositoryImplNew(
     }
 
     override suspend fun createPlaylist(
-        userPlaylist : UserPlaylistDto
+        userPlaylist: UserPlaylistDto
     ): Result<UserPlaylistDto, DataError> {
-        val result =remoteSongDataSource.createPlaylist(playlistDto = userPlaylist)
-        if (result is Result.Success){
+        val result = remoteSongDataSource.createPlaylist(playlistDto = userPlaylist)
+        if (result is Result.Success) {
             refreshPersonalPlaylists()
         }
         return result
@@ -64,7 +64,7 @@ class LibraryRepositoryImplNew(
         songId: String
     ): Result<Unit, DataError> {
         val playlistSongDto = UserPlaylistSongDto(playlistId = playlistId, songId = songId)
-        val result =  remoteSongDataSource.addSongToPlaylist(playlistSong = playlistSongDto)
+        val result = remoteSongDataSource.addSongToPlaylist(playlistSong = playlistSongDto)
         if (result is Result.Success) {
             refreshPersonalPlaylists()
         }
@@ -103,8 +103,6 @@ class LibraryRepositoryImplNew(
         return when (result) {
             is Result.Success -> {
                 val playlistDto = result.data
-//                val latestThumbnail = playlistDto.firstOrNull()?.thumbnail
-
                 try {
                     val entities = coroutineScope {
                         playlistDto.map { dto ->
@@ -125,10 +123,6 @@ class LibraryRepositoryImplNew(
                 Result.Failure(result.error)
             }
         }
-    }
-
-    override suspend fun getPlaylistById(playlistId: Long): LibraryPlaylist? {
-        return libraryDao.getPlaylistById(playlistId = playlistId)?.toLibraryPlaylist()
     }
 
 }

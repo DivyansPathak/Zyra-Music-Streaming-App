@@ -35,9 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,20 +44,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
 import com.zyra.music.zyra.domain.model.LibraryPlaylist
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistState
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
-import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AddPlaylistSheet(
     state: AddPlaylistState,
-    viewModel : AddPlaylistViewModel = koinViewModel(),
+    viewModel : AddPlaylistViewModel,
     onDismiss: () -> Unit = {},
     onPlaylistClick: (Long) -> Unit = {},
     addNewPlaylistClick: () -> Unit = {},

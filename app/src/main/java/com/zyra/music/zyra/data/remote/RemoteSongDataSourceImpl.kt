@@ -186,19 +186,6 @@ class RemoteSongDataSourceImpl(
                 parameters = emptyMap<String, String>()
             ).decodeList<LibraryPlaylistDto>()
         }
-//        return try {
-//            val response = supabase.postgrest.rpc(
-//                function = "get_user_personal_playlists",
-//                parameters = emptyMap<String,String>()
-//            )
-//
-//            val dtoList = response.decodeList<LibraryPlaylistDto>()
-//            Log.d("SupabaseResponse","decoded playlists: $dtoList")
-//            Result.Success(dtoList)
-//        }catch (e : Exception){
-//            Log.e("SupabaseResponse","Error Fetching playlists",e)
-//            Result.Failure(DataError.UnknownError(e.message))
-//        }
     }
 
     override suspend fun getPlaylistSongs(playlistId: Long): Result<List<PlaylistDetailSongs>, DataError> {
@@ -208,19 +195,6 @@ class RemoteSongDataSourceImpl(
                 parameters = mapOf("playlist_id" to playlistId)
             ).decodeList<PlaylistDetailSongs>()
         }
-//        return try {
-//            val result = supabase.postgrest.rpc(
-//                function = "get_playlist_songs",
-//                parameters = mapOf("playlist_id" to playlistId)
-//            ).decodeList<PlaylistDetailSongs>()
-//            Log.d("RemoteSongDataSource", "Successfully fetched data : $result")
-//            Result.Success(result)
-//        } catch (e: Exception){
-//            Log.e("RemoteSongDataSource", "Error getting playlist songs: ${e.message}", e)
-//            Log.e("RemoteSongDataSource", "Error type: ${e::class.simpleName}")
-//            Result.Failure(DataError.ServerError)
-//        }
-
     }
 
     override suspend fun getFavoriteSongs(): Result<List<PlaylistDetailSongs>, DataError> {
@@ -244,15 +218,12 @@ class RemoteSongDataSourceImpl(
         }
         return withContext(Dispatchers.IO) {
             try {
-                // 1. Make the network call and get the raw response as text
                 val responseBody =
                     httpClient.get("https://suggestqueries.google.com/complete/search") {
                         parameter("client", "firefox")
                         parameter("ds", "yt")
                         parameter("q", query)
                     }.bodyAsText()
-
-                // 2. Perform your custom JSON parsing
                 val jsonArray = Json.parseToJsonElement(responseBody).jsonArray
                 val suggestions = if (jsonArray.size > 1) {
                     val suggestionsArray = jsonArray[1].jsonArray
@@ -260,12 +231,9 @@ class RemoteSongDataSourceImpl(
                 } else {
                     emptyList()
                 }
-
-                // 3. Return the Success result with your manually parsed list
                 Result.Success(suggestions)
 
             } catch (e: Exception) {
-                // 4. Catch common network exceptions, just like safeCall does
                 when (e) {
                     is UnknownHostException, is UnresolvedAddressException -> {
                         Result.Failure(DataError.NoInternet)

@@ -74,25 +74,19 @@ fun PlayerScreenN(
     onAction: (NewPlayerAction) -> Unit,
     eventFlow: Flow<NewPlayerEvent>,
     navigateToBack: () -> Unit,
-    onAddToPlaylistClick: (TrackFullOne) -> Unit
+    onAddToPlaylistClick: (TrackFullOne) -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
 
     BackHandler {
         navigateToBack()
     }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         eventFlow.collect { event ->
             when(event){
                 is NewPlayerEvent.NavigateToBack -> {
                     navigateToBack()
-                }
-                is NewPlayerEvent.ShowMessage ->{
-                    scope.launch {
-                        snackbarHostState.showSnackbar(event.message)
-                    }
                 }
             }
         }
@@ -624,20 +618,3 @@ fun BottomMenuRow(
 
 }
 
-@UnstableApi
-@Preview(
-    showSystemUi = true,
-    uiMode = UI_MODE_NIGHT_YES
-)
-@Composable
-private fun PreviewPlayerScreen() {
-    ZyraTheme() {
-        PlayerScreenN(
-            state = NewPlayerState(),
-            onAction = {},
-            eventFlow = emptyFlow(),
-            navigateToBack = {},
-            onAddToPlaylistClick = {}
-        )
-    }
-}

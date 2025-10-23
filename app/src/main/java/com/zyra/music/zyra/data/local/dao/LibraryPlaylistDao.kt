@@ -21,9 +21,6 @@ interface LibraryPlaylistDao {
     @Query("DELETE FROM library_playlists")
     suspend fun clearAll()
 
-    @Query("SELECT * FROM library_playlists WHERE id = :playlistId")
-    suspend fun getPlaylistById(playlistId : Long) : LibraryPlaylistEntity?
-
     @Transaction
     suspend fun replaceAll(playlists : List<LibraryPlaylistEntity>){
         clearAll()

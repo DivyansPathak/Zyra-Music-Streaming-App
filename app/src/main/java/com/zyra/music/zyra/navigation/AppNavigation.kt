@@ -1,5 +1,6 @@
 package com.zyra.music.zyra.navigation
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -7,6 +8,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.Log
@@ -33,9 +36,13 @@ import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.login.LoginScreen
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
+import com.zyra.music.zyra.presentation.newPlayer.NewPlayerEvent
 import com.zyra.music.zyra.presentation.newPlayer.PlayerScreenN
+import com.zyra.music.zyra.presentation.profileScreen.ProfileEvent
+import com.zyra.music.zyra.presentation.profileScreen.ProfileViewModel
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 private const val TAG = "AppNavigation"
@@ -80,7 +87,8 @@ fun AppNavigation() {
 
     val mainMusicViewModel : MainMusicViewModel = koinViewModel()
     val addPlaylistViewModel : AddPlaylistViewModel = koinViewModel()
-    val libraryViewModel : LibraryViewModel = koinViewModel()
+
+    val snackBarHostState = remember { SnackbarHostState() }
 
     val addPlaylistState by addPlaylistViewModel.uiState.collectAsStateWithLifecycle()
     var showPlaylistSheet by remember { mutableStateOf(false) }
@@ -94,17 +102,21 @@ fun AppNavigation() {
     var controlsHeight by remember { mutableStateOf(0.dp) }
 
 
-    LaunchedEffect(Unit) {
+   LaunchedEffect(addPlaylistViewModel) {
+        Log.d("SNACK_DEBUG", "Collector launched for AddPlaylistViewModel")
         addPlaylistViewModel.uiEvent.collect { event ->
             when (event) {
                 is AddPlaylistEvent.ShowMessage -> {
-                    Log.d(TAG, "AddPlaylist Event: ${event.message}")
-                    // Refresh library after any playlist operation
-                    if (event.message.contains("added", ignoreCase = true) ||
-                        event.message.contains("created", ignoreCase = true)) {
-                        Log.d(TAG, "Refreshing library after playlist change")
-                        libraryViewModel.loadLibraryContent()
-                    }
+                    snackBarHostState.showSnackbar(message = event.message)
+                }
+            }
+        }
+    }
+    LaunchedEffect(Unit) {
+        mainMusicViewModel.uiEvent.collect { event ->
+            when (event) {
+                is NewPlayerEvent.ShowMessage -> {
+                        snackBarHostState.showSnackbar(message = event.message)
                 }
             }
         }
@@ -131,7 +143,10 @@ fun AppNavigation() {
                 Log.d(TAG,"Main Graph initiated")
                 MainScreenWithBottomBar(
                     appTopBackStack = appTopBackStack,
-                    mainViewModel = mainMusicViewModel
+                    mainViewModel = mainMusicViewModel,
+                    addPlaylistViewModel = addPlaylistViewModel,
+                    onAddToPlaylistClick = onAddToPlaylistClick,
+                    snackbarHostState = snackBarHostState
                 )
             }
             entry<PlayerScreen> {
@@ -148,7 +163,8 @@ fun AppNavigation() {
                         onAddToPlaylistClick = {track ->
                             Log.d(TAG,"onAddToPlaylistClick")
                             onAddToPlaylistClick(track)
-                        }
+                        },
+                        snackbarHostState = snackBarHostState
                     )
                 }
             }
@@ -184,7 +200,8 @@ fun AppNavigation() {
                 Log.d(TAG, "Step 2C: Delete Playlist button clicked. ${playlist.name}")
                 addPlaylistViewModel.onAction(AddPlaylistAction.ShowDeleteDialog(playlist))
             },
-            contentPadding = controlsHeight
+            contentPadding = controlsHeight,
+            viewModel = addPlaylistViewModel
         )
     }
     addPlaylistState.playlistToDelete?.let { playlist ->

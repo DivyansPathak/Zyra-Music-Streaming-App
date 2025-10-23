@@ -36,6 +36,7 @@ class AddPlaylistViewModel(
 
     init {
         Log.d(TAG, "AddPlaylistViewModel is initiated")
+        Log.d(TAG, "AddPlaylistViewModel is initiated, hash=${this.hashCode()}")
         observePlaylists()
         silentRefreshLibraryContent()
 
@@ -45,7 +46,7 @@ class AddPlaylistViewModel(
         viewModelScope.launch {
             libraryRepo.observePersonalPlaylist().collect { playlists ->
                 _uiState.update { it.copy(playlists = playlists) }
-                Log.d(TAG, "Local playlists updated. Count : ${playlists.size}")
+//                Log.d(TAG, "Local playlists updated. Count : ${playlists.size}")
             }
         }
     }
@@ -53,7 +54,7 @@ class AddPlaylistViewModel(
         viewModelScope.launch {
             libraryRepo.refreshPersonalPlaylists()
                 .onFailure { error ->
-                    Log.e(TAG,"Silent refresh failed : $error")
+//                    Log.e(TAG,"Silent refresh failed : $error")
                 }
         }
     }
@@ -65,15 +66,17 @@ class AddPlaylistViewModel(
                 refreshPlaylistInBackground()
             }
 
-            is AddPlaylistAction.AddSongToPlaylist -> addSongToPlaylist(action.playlistId)
+            is AddPlaylistAction.AddSongToPlaylist -> {
+                addSongToPlaylist(action.playlistId)
+            }
             is AddPlaylistAction.ShowCreateDialog -> {
-                Log.d(TAG, "Playlist sheet is opening")
+//                Log.d(TAG, "Playlist sheet is opening")
                 _uiState.update { it.copy(isCreateDialogOpen = true) }
             }
 
             is AddPlaylistAction.HideCreateDialog -> {
                 _uiState.update { it.copy(isCreateDialogOpen = false) }
-                Log.d(TAG, "Playlist sheet is closing")
+//                Log.d(TAG, "Playlist sheet is closing")
             }
 
             is AddPlaylistAction.CreatePlaylistAndAddSong -> {
@@ -103,7 +106,6 @@ class AddPlaylistViewModel(
 
     private fun addSongToPlaylist(playlistId: Long) {
         val song = _uiState.value.songToAdd ?: return
-
         viewModelScope.launch {
             if (playlistId == -1L) {
                 libraryRepo.addFavorite(songId = song.videoId)
@@ -120,12 +122,18 @@ class AddPlaylistViewModel(
                     .onSuccess {
                         val playlistName =
                             _uiState.value.playlists.find { it.id == playlistId }?.name ?: ""
-                        _uiEvent.send(AddPlaylistEvent.ShowMessage("Song added to $playlistName"))
-                        Log.d(TAG, "Song added to $playlistName")
+                        _uiEvent.send(AddPlaylistEvent.ShowMessage("Song :${song.title} added to $playlistName"))
+                        Log.d(TAG, "Song :${song.title} added to $playlistName")
                     }
                     .onFailure { error ->
                         Log.e(TAG, "song ${song.title} can not added in playlist : $playlistId")
-                        _uiEvent.send(AddPlaylistEvent.ShowMessage(message = error.getErrorMessage()))
+                        val errorMessage = error.getErrorMessage()
+                        if (errorMessage.contains("duplicate", ignoreCase = true) ||
+                            errorMessage.contains("already exixts", ignoreCase = true)){
+                            _uiEvent.send(AddPlaylistEvent.ShowMessage("Song ${song.title} is already in this playlist"))
+                        }else{
+                            _uiEvent.send(AddPlaylistEvent.ShowMessage(message = error.getErrorMessage()))
+                        }
                     }
             }
         }

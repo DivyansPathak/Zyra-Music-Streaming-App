@@ -82,14 +82,17 @@ private const val TAG = "BACK_PRESS_DEBUG"
 @Composable
 fun MainScreenWithBottomBar(
     appTopBackStack: NavBackStack<NavKey>,
-    mainViewModel: MainMusicViewModel
+    mainViewModel: MainMusicViewModel,
+    addPlaylistViewModel: AddPlaylistViewModel,
+    onAddToPlaylistClick : (TrackFullOne) -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
 
     val mainBackStack = rememberNavBackStack<MainScreens>(HomeScreen)
     val searchViewModel: SearchViewModel = koinViewModel()
     val homeViewModel: HomeViewModel = koinViewModel()
     val libraryViewModel: LibraryViewModelNew = koinViewModel()
-    val addPlaylistViewModel: AddPlaylistViewModel = koinViewModel()
+//    val addPlaylistViewModel: AddPlaylistViewModel = koinViewModel<AddPlaylistViewModel>()
     val profileViewModel: ProfileViewModel = koinViewModel()
     val mainState by mainViewModel.uiState.collectAsStateWithLifecycle()
     val addPlaylistState by addPlaylistViewModel.uiState.collectAsStateWithLifecycle()
@@ -102,9 +105,9 @@ fun MainScreenWithBottomBar(
     val activity = context as? Activity
     var backPressedOnce by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-    val snackBarHostState = remember { SnackbarHostState() }
+//    val snackBarHostState = remember { SnackbarHostState() }
 
-    var showPlaylistSheet by remember { mutableStateOf(false) }
+//    var showPlaylistSheet by remember { mutableStateOf(false) }
 
     val backToHome: () -> Unit = {
         if (mainBackStack.size > 1) {
@@ -115,26 +118,26 @@ fun MainScreenWithBottomBar(
         }
     }
 
-    val onAddToPlaylistClick: (TrackFullOne) -> Unit = { track ->
-        addPlaylistViewModel.onAction(AddPlaylistAction.SetSongAndShowSheet(track))
-        showPlaylistSheet = true
-    }
-
-    if (addPlaylistState.isCreateDialogOpen) {
-        CreateNewPlaylistDialog(
-            onDismiss = {
-                addPlaylistViewModel.onAction(AddPlaylistAction.HideCreateDialog)
-            },
-            onConfirm = { title, description ->
-                addPlaylistViewModel.onAction(
-                    AddPlaylistAction.CreatePlaylistAndAddSong(
-                        title = title,
-                        description = description
-                    )
-                )
-            }
-        )
-    }
+//    val onAddToPlaylistClick: (TrackFullOne) -> Unit = { track ->
+//        addPlaylistViewModel.onAction(AddPlaylistAction.SetSongAndShowSheet(track))
+//        showPlaylistSheet = true
+//    }
+//
+//    if (addPlaylistState.isCreateDialogOpen) {
+//        CreateNewPlaylistDialog(
+//            onDismiss = {
+//                addPlaylistViewModel.onAction(AddPlaylistAction.HideCreateDialog)
+//            },
+//            onConfirm = { title, description ->
+//                addPlaylistViewModel.onAction(
+//                    AddPlaylistAction.CreatePlaylistAndAddSong(
+//                        title = title,
+//                        description = description
+//                    )
+//                )
+//            }
+//        )
+//    }
 
     BackHandler {
         Log.d(TAG, "Back pressed!")
@@ -173,30 +176,10 @@ fun MainScreenWithBottomBar(
             }
         }
     }
-    LaunchedEffect(Unit) {
-        mainViewModel.uiEvent.collect { event ->
-            when (event) {
-                is NewPlayerEvent.ShowMessage -> {
-                    coroutineScope.launch {
-                        snackBarHostState.showSnackbar(event.message)
-                    }
-                }
-            }
-        }
-    }
-    LaunchedEffect(Unit) {
-        addPlaylistViewModel.uiEvent.collect { event ->
-            when (event) {
-                is AddPlaylistEvent.ShowMessage -> {
-                    snackBarHostState.showSnackbar(message = event.message)
 
-                }
-            }
-        }
-    }
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackBarHostState)
+            SnackbarHost(hostState = snackbarHostState)
         },
         contentColor = MaterialTheme.colorScheme.primary,
 
@@ -268,11 +251,11 @@ fun MainScreenWithBottomBar(
                     }
                     entry<ProfileScreen> {
                         val state by profileViewModel.uiState.collectAsStateWithLifecycle()
-//                        ComposeProfileScreen(
-//                            state = state,
-//                            onAction = profileViewModel::onAction,
-//                        )
-                        LibraryScreenTest()
+                        ComposeProfileScreen(
+                            state = state,
+                            onAction = profileViewModel::onAction,
+                        )
+//                        LibraryScreenTest()
                     }
                     entry<PlaylistScreen> { screen ->
                         val playlistViewModel: PlaylistViewModel = koinViewModel(
@@ -348,19 +331,20 @@ fun MainScreenWithBottomBar(
                 }
             }
 
-            if (showPlaylistSheet) {
-                AddPlaylistSheet(
-                    state = addPlaylistState,
-                    onDismiss = { showPlaylistSheet = false },
-                    onPlaylistClick = { playlistId ->
-                        showPlaylistSheet = false
-                        addPlaylistViewModel.onAction(AddPlaylistAction.AddSongToPlaylist(playlistId))
-                    },
-                    addNewPlaylistClick = {
-                        addPlaylistViewModel.onAction(AddPlaylistAction.ShowCreateDialog)
-                    }
-                )
-            }
+//            if (showPlaylistSheet) {
+//                AddPlaylistSheet(
+//                    state = addPlaylistState,
+//                    onDismiss = { showPlaylistSheet = false },
+//                    onPlaylistClick = { playlistId ->
+//                        showPlaylistSheet = false
+//                        addPlaylistViewModel.onAction(AddPlaylistAction.AddSongToPlaylist(playlistId))
+//                    },
+//                    addNewPlaylistClick = {
+//                        addPlaylistViewModel.onAction(AddPlaylistAction.ShowCreateDialog)
+//                    },
+//                    viewModel = addPlaylistViewModel
+//                )
+//            }
         }
     }
 }
