@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
-import org.schabi.newpipe.extractor.timeago.patterns.fa
 
 private const val TAG = "ProfileViewModel"
 
@@ -52,6 +51,7 @@ class ProfileViewModel() : ViewModel() {
                 SupabaseClient.supabase.auth.signOut()
                 _uiState.update { it.copy(isLoading = false) }
                 Log.d(TAG,"signed out successfully")
+                _uiEvent.send(ProfileEvent.NavigateToLoginScreen)
                 _uiEvent.send(ProfileEvent.ShowMessage(message = "Signed out successfully"))
             }catch (e: Exception){
                 Log.e(TAG,"LogOut failed : ${e.message}")

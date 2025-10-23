@@ -5,6 +5,7 @@ import com.zyra.music.zyra.data.remote.dto.favoriteDto.LibraryPlaylistDto
 import com.zyra.music.zyra.data.remote.dto.playlistDetails.PlaylistDetailSongs
 import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistDto
 import com.zyra.music.zyra.domain.model.LibraryPlaylist
+import com.zyra.music.zyra.domain.model.PlayList
 import com.zyra.music.zyra.domain.utils.DataError
 import com.zyra.music.zyra.domain.utils.Result
 import kotlinx.coroutines.flow.Flow
@@ -65,4 +66,9 @@ interface LibraryRepositoryNew {
      * refresh playlists for cached playlist
      */
     suspend fun refreshPersonalPlaylists() : Result<Unit, DataError>
+
+    /**
+     * get playlist by id from local cached database
+     */
+    suspend fun getPlaylistById(playlistId : Long) : LibraryPlaylist?
 }

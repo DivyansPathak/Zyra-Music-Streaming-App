@@ -20,6 +20,9 @@ interface PrePlaylistDao {
     @Query("SELECT * FROM pre_playlists WHERE genre = :genre")
     suspend fun getPlaylistByGenre(genre: String): List<PlaylistEntity>
 
+    @Query("SELECT * FROM pre_playlists WHERE id = :playlistId")
+    suspend fun getPlaylistById(playlistId : String) : PlaylistEntity?
+
     @Query("DELETE FROM pre_playlists  WHERE genre = :genre")
     suspend fun deleteByGenre(genre: String)
 

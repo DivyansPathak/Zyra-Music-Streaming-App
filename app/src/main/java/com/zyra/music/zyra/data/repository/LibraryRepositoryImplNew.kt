@@ -103,13 +103,13 @@ class LibraryRepositoryImplNew(
         return when (result) {
             is Result.Success -> {
                 val playlistDto = result.data
-                val latestThumbnail = playlistDto.firstOrNull()?.thumbnail
+//                val latestThumbnail = playlistDto.firstOrNull()?.thumbnail
 
                 try {
                     val entities = coroutineScope {
                         playlistDto.map { dto ->
                             async {
-                                dto.toEntity(finalImageUrl = latestThumbnail)
+                                dto.toEntity(finalImageUrl = dto.thumbnail)
                             }
                         }.awaitAll()
                     }
@@ -125,6 +125,10 @@ class LibraryRepositoryImplNew(
                 Result.Failure(result.error)
             }
         }
+    }
+
+    override suspend fun getPlaylistById(playlistId: Long): LibraryPlaylist? {
+        return libraryDao.getPlaylistById(playlistId = playlistId)?.toLibraryPlaylist()
     }
 
 }

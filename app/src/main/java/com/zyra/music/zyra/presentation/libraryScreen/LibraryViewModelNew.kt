@@ -4,6 +4,7 @@ package com.zyra.music.zyra.presentation.libraryScreen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zyra.music.zyra.data.mapper.toTrackFull
 import com.zyra.music.zyra.domain.repository.LibraryRepositoryNew
 import com.zyra.music.zyra.domain.utils.getErrorMessage
 import com.zyra.music.zyra.domain.utils.onFailure
@@ -48,6 +49,20 @@ class LibraryViewModelNew(
                 .collect { playlists ->
                     Log.d(TAG, "Ui updated from local cache with ${playlists.size}")
                     _uiState.update { it.copy(playlists = playlists) }
+                }
+        }
+    }
+
+    fun loadPlaylistSong(){
+        viewModelScope.launch {
+            val playlistId = -1L
+            libraryRepo.getPlaylistSongs(playlistId)
+                .onSuccess { songs ->
+                    val track = songs.map { it.toTrackFull() }
+                    Log.d(TAG,"songs of playlist TrackFullOne : $track")
+                }
+                .onFailure { error ->
+                    Log.e(TAG,"error in getting error : $error")
                 }
         }
     }

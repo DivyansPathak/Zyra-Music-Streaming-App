@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +41,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.navigation.HomeScreen
 import com.zyra.music.zyra.navigation.LibraryScreen
+import com.zyra.music.zyra.navigation.LoginScreen
 import com.zyra.music.zyra.navigation.MainScreens
 import com.zyra.music.zyra.navigation.PlayerScreen
 import com.zyra.music.zyra.navigation.PlaylistScreen
@@ -48,6 +51,7 @@ import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.AddPlayli
 import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.CreateNewPlaylistDialog
 import com.zyra.music.zyra.presentation.acommon.miniPlayer.MiniPlayer
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistAction
+import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistEvent
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
 import com.zyra.music.zyra.presentation.home.HomeScreen
 import com.zyra.music.zyra.presentation.home.HomeViewModel
@@ -57,9 +61,11 @@ import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModelNew
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerAction
+import com.zyra.music.zyra.presentation.newPlayer.NewPlayerEvent
 import com.zyra.music.zyra.presentation.playlistScreen.PlaylistViewModel
 import com.zyra.music.zyra.presentation.playlistScreen.ComposePlaylistScreen
 import com.zyra.music.zyra.presentation.profileScreen.ComposeProfileScreen
+import com.zyra.music.zyra.presentation.profileScreen.ProfileEvent
 import com.zyra.music.zyra.presentation.profileScreen.ProfileViewModel
 import com.zyra.music.zyra.presentation.searchScreen.SearchScreenN
 import com.zyra.music.zyra.presentation.searchScreen.SearchViewModel
@@ -96,6 +102,7 @@ fun MainScreenWithBottomBar(
     val activity = context as? Activity
     var backPressedOnce by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val snackBarHostState = remember { SnackbarHostState() }
 
     var showPlaylistSheet by remember { mutableStateOf(false) }
 
@@ -152,7 +159,45 @@ fun MainScreenWithBottomBar(
         }
     }
 
+    LaunchedEffect(Unit) {
+        profileViewModel.uiEvent.collect { event ->
+            when (event) {
+                is ProfileEvent.ShowMessage -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+
+                is ProfileEvent.NavigateToLoginScreen -> {
+                    appTopBackStack.clear()
+                    appTopBackStack.add(LoginScreen)
+                }
+            }
+        }
+    }
+    LaunchedEffect(Unit) {
+        mainViewModel.uiEvent.collect { event ->
+            when (event) {
+                is NewPlayerEvent.ShowMessage -> {
+                    coroutineScope.launch {
+                        snackBarHostState.showSnackbar(event.message)
+                    }
+                }
+            }
+        }
+    }
+    LaunchedEffect(Unit) {
+        addPlaylistViewModel.uiEvent.collect { event ->
+            when (event) {
+                is AddPlaylistEvent.ShowMessage -> {
+                    snackBarHostState.showSnackbar(message = event.message)
+
+                }
+            }
+        }
+    }
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackBarHostState)
+        },
         contentColor = MaterialTheme.colorScheme.primary,
 
         ) { innerPadding ->
@@ -223,11 +268,11 @@ fun MainScreenWithBottomBar(
                     }
                     entry<ProfileScreen> {
                         val state by profileViewModel.uiState.collectAsStateWithLifecycle()
-                        ComposeProfileScreen(
-                            state = state,
-                            onAction = profileViewModel::onAction,
-                            onSignedOutClick = {}
-                        )
+//                        ComposeProfileScreen(
+//                            state = state,
+//                            onAction = profileViewModel::onAction,
+//                        )
+                        LibraryScreenTest()
                     }
                     entry<PlaylistScreen> { screen ->
                         val playlistViewModel: PlaylistViewModel = koinViewModel(
@@ -235,7 +280,7 @@ fun MainScreenWithBottomBar(
                         )
                         val state by playlistViewModel.uiState.collectAsStateWithLifecycle()
                         LaunchedEffect(Unit) {
-                            playlistViewModel.fetchPlaylistDetails(screen.id, screen.type)
+                            playlistViewModel.getPlaylistSongsDetails(screen.id, screen.type)
                         }
                         ComposePlaylistScreen(
                             mainMusicViewModel = mainViewModel,
@@ -284,14 +329,23 @@ fun MainScreenWithBottomBar(
                     }
 
                 }
-                BottomBarInvisible(
-                    modifier = Modifier.fillMaxWidth(),
-                    currentScreen = mainBackStack.lastOrNull() as? MainScreens,
-                    onTabSelected = {
-                        mainBackStack.clear()
-                        mainBackStack.add(it)
-                    }
-                )
+                val currentScreen = mainBackStack.lastOrNull() as? MainScreens
+                val isBottomBarVisible = currentScreen !is ProfileScreen
+
+                AnimatedVisibility(
+                    visible = isBottomBarVisible,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it })
+                ) {
+                    BottomBarInvisible(
+                        modifier = Modifier.fillMaxWidth(),
+                        currentScreen = mainBackStack.lastOrNull() as? MainScreens,
+                        onTabSelected = {
+                            mainBackStack.clear()
+                            mainBackStack.add(it)
+                        }
+                    )
+                }
             }
 
             if (showPlaylistSheet) {

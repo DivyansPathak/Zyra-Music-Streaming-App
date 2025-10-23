@@ -469,6 +469,14 @@ class MainMusicViewModel(
                 repository.addFavorite(trackId)
             }
 
+            result.onSuccess {
+                val message = if (isCurrentlyFavorite){
+                    "Removed from favorites"
+                } else{
+                    "Added to favorites"
+                }
+                _uiEvent.send(NewPlayerEvent.ShowMessage(message = message))
+            }
             result.onFailure { error ->
                 Log.e(TAG, "Failed to toggle favorite: $error")
                 _uiState.update {

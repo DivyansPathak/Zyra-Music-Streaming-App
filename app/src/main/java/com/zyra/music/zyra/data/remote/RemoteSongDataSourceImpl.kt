@@ -1,5 +1,6 @@
 package com.zyra.music.zyra.data.remote
 
+import android.util.Log
 import com.zyra.music.zyra.data.mapper.toPlaylistDetailSongs
 import com.zyra.music.zyra.data.remote.SupabaseClient.supabase
 import com.zyra.music.zyra.data.remote.dto.FavoriteDto
@@ -207,6 +208,19 @@ class RemoteSongDataSourceImpl(
                 parameters = mapOf("playlist_id" to playlistId)
             ).decodeList<PlaylistDetailSongs>()
         }
+//        return try {
+//            val result = supabase.postgrest.rpc(
+//                function = "get_playlist_songs",
+//                parameters = mapOf("playlist_id" to playlistId)
+//            ).decodeList<PlaylistDetailSongs>()
+//            Log.d("RemoteSongDataSource", "Successfully fetched data : $result")
+//            Result.Success(result)
+//        } catch (e: Exception){
+//            Log.e("RemoteSongDataSource", "Error getting playlist songs: ${e.message}", e)
+//            Log.e("RemoteSongDataSource", "Error type: ${e::class.simpleName}")
+//            Result.Failure(DataError.ServerError)
+//        }
+
     }
 
     override suspend fun getFavoriteSongs(): Result<List<PlaylistDetailSongs>, DataError> {

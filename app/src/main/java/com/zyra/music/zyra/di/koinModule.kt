@@ -77,6 +77,7 @@ val koinModule = module {
    viewModel {param ->
 
        PlaylistViewModel(get(),
+           get(),
            playlistId = param.get(),
            playlistType = param.get()
        )

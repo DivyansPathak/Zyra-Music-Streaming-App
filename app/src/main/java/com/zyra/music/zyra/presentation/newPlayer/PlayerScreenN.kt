@@ -27,6 +27,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +63,7 @@ import com.zyra.music.zyra.presentation.playerScreen.RepeatMode
 import com.zyra.music.zyra.presentation.ui.theme.ZyraTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @UnstableApi
@@ -77,11 +81,18 @@ fun PlayerScreenN(
         navigateToBack()
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         eventFlow.collect { event ->
             when(event){
                 is NewPlayerEvent.NavigateToBack -> {
                     navigateToBack()
+                }
+                is NewPlayerEvent.ShowMessage ->{
+                    scope.launch {
+                        snackbarHostState.showSnackbar(event.message)
+                    }
                 }
             }
         }
@@ -89,141 +100,149 @@ fun PlayerScreenN(
 
 
     GradientScreenContainer(imagerUrl = state.currentTrack?.thumbnail) {
-        var showQueueSheet by remember { mutableStateOf(false) }
+       Box(modifier = Modifier.fillMaxSize()){
+           var showQueueSheet by remember { mutableStateOf(false) }
 
-        if (showQueueSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showQueueSheet = false },
-            ) {
-                LazyColumn {
-                    itemsIndexed(state.queue) { index, song ->
-                        QueueItem(
-                            song = song, onClick =
-                                {
-                                    onAction(NewPlayerAction.PlayFromQueue(index))
-                                    showQueueSheet = false
-                                },
-                            isCurrentlyPlaying = (song.videoId == state.currentTrack?.videoId),
-                            onRemoveClick = { onAction(NewPlayerAction.RemoveFromQueue(index)) },
-                            isPlaying = state.isPlaying
-                        )
-                    }
-                }
-            }
-        }
+           if (showQueueSheet) {
+               ModalBottomSheet(
+                   onDismissRequest = { showQueueSheet = false },
+               ) {
+                   LazyColumn {
+                       itemsIndexed(state.queue) { index, song ->
+                           QueueItem(
+                               song = song, onClick =
+                                   {
+                                       onAction(NewPlayerAction.PlayFromQueue(index))
+                                       showQueueSheet = false
+                                   },
+                               isCurrentlyPlaying = (song.videoId == state.currentTrack?.videoId),
+                               onRemoveClick = { onAction(NewPlayerAction.RemoveFromQueue(index)) },
+                               isPlaying = state.isPlaying
+                           )
+                       }
+                   }
+               }
+           }
 
-        ConstraintLayout(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            val (topBar,
-                thumbnail,
-                title,
-                controlPanel,
-                seekBar,
-                controlsButtons,
-                bottomMenu) = createRefs()
+           ConstraintLayout(
+               modifier = Modifier
+                   .fillMaxSize()
+                   .padding(16.dp)
+           ) {
+               val (topBar,
+                   thumbnail,
+                   title,
+                   controlPanel,
+                   seekBar,
+                   controlsButtons,
+                   bottomMenu) = createRefs()
 
-            PlayerTopBar(
-                modifier = Modifier.constrainAs(topBar) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                },
-                onBackClick = { onAction(NewPlayerAction.Back) },
-                timerText = state.sleepTimeRemaining,
-            )
+               PlayerTopBar(
+                   modifier = Modifier.constrainAs(topBar) {
+                       top.linkTo(parent.top)
+                       start.linkTo(parent.start)
+                       end.linkTo(parent.end)
+                       width = Dimension.fillToConstraints
+                   },
+                   onBackClick = { onAction(NewPlayerAction.Back) },
+                   timerText = state.sleepTimeRemaining,
+               )
 
-            ThumbnailSection(
-                modifier = Modifier.constrainAs(thumbnail) {
-                    top.linkTo(topBar.bottom, margin = 16.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                    height = Dimension.percent(0.45f)
-                },
-                imageUrl = state.currentTrack?.thumbnail,
-                isLoading = state.isLoading
-            )
-            SongDetailSection(
-                modifier = Modifier.constrainAs(title) {
-                    top.linkTo(thumbnail.bottom, margin = 16.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                },
-                songTitle = state.currentTrack?.title,
-                songArtist = state.currentTrack?.artistName
-            )
-            ControlPanel(
-                modifier = Modifier.constrainAs(controlPanel) {
-                    top.linkTo(title.bottom, margin = 20.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(seekBar.top, margin = 16.dp)
-                    width = Dimension.fillToConstraints
-                },
-                isFavorite = state.isFavorite,
-                isEndTrackTimer = state.isEndTrackTimerActive,
-                onFavoriteClick = { onAction(NewPlayerAction.ToggleFavorite) },
-                onShareClick = { onAction(NewPlayerAction.Share) },
-                onAddToPlaylistClick = {state.currentTrack?.let { trackFullOne ->
-                    onAddToPlaylistClick(trackFullOne)
-                }},
-                onDownLoadClick = {},
-                setSleepTimer = {timer -> onAction(NewPlayerAction.SetSleepTimer(timer)) },
-                setSleepTimerCurrentTrack = { onAction(NewPlayerAction.SetSleepTimerToEndOfTrack) },
-                cancelTimer = { onAction(NewPlayerAction.CancelSleepTimer) }
-            )
-            SeekBarSection(
-                modifier = Modifier.constrainAs(seekBar) {
-                    top.linkTo(controlPanel.bottom, margin = 16.dp)
-                    start.linkTo(parent.start, margin = 8.dp)
-                    end.linkTo(parent.end, margin = 8.dp)
-                    bottom.linkTo(controlsButtons.top, margin = 16.dp)
-                    width = Dimension.fillToConstraints
-                },
-                currentPosition = state.currentPosition,
-                totalDuration = state.totalDuration,
-                isLoading = state.isLoading,
-                onSeek = { fraction ->
-                    val targetPosition = (fraction * state.totalDuration).toFloat()
-                    onAction(NewPlayerAction.SeekTo(targetPosition))
-                }
-            )
-            PlayControls(
-                modifier = Modifier.constrainAs(controlsButtons) {
-                    top.linkTo(controlPanel.bottom, margin = 16.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(bottomMenu.top)
-                    width = Dimension.fillToConstraints
-                },
-                isPlaying = state.isPlaying,
-                repeatMode = state.repeatMode,
-                shuffleModeEnabled = state.shuffleModeEnabled,
-                onPlayPauseClick = { onAction(NewPlayerAction.PlayPause) },
-                onPreviousClick = { onAction(NewPlayerAction.SkipToPrevious) },
-                onNextClick = { onAction(NewPlayerAction.SkipToNext) },
-                onShuffleClick = { onAction(NewPlayerAction.ToggleShuffle) },
-                onRepeatClick = { onAction(NewPlayerAction.CycleRepeatMode) },
-            )
+               ThumbnailSection(
+                   modifier = Modifier.constrainAs(thumbnail) {
+                       top.linkTo(topBar.bottom, margin = 16.dp)
+                       start.linkTo(parent.start)
+                       end.linkTo(parent.end)
+                       width = Dimension.fillToConstraints
+                       height = Dimension.percent(0.45f)
+                   },
+                   imageUrl = state.currentTrack?.thumbnail,
+                   isLoading = state.isLoading
+               )
+               SongDetailSection(
+                   modifier = Modifier.constrainAs(title) {
+                       top.linkTo(thumbnail.bottom, margin = 16.dp)
+                       start.linkTo(parent.start)
+                       end.linkTo(parent.end)
+                       width = Dimension.fillToConstraints
+                   },
+                   songTitle = state.currentTrack?.title,
+                   songArtist = state.currentTrack?.artistName
+               )
+               ControlPanel(
+                   modifier = Modifier.constrainAs(controlPanel) {
+                       top.linkTo(title.bottom, margin = 20.dp)
+                       start.linkTo(parent.start)
+                       end.linkTo(parent.end)
+                       bottom.linkTo(seekBar.top, margin = 16.dp)
+                       width = Dimension.fillToConstraints
+                   },
+                   isFavorite = state.isFavorite,
+                   isEndTrackTimer = state.isEndTrackTimerActive,
+                   onFavoriteClick = { onAction(NewPlayerAction.ToggleFavorite) },
+                   onShareClick = { onAction(NewPlayerAction.Share) },
+                   onAddToPlaylistClick = {state.currentTrack?.let { trackFullOne ->
+                       onAddToPlaylistClick(trackFullOne)
+                   }},
+                   onDownLoadClick = {},
+                   setSleepTimer = {timer -> onAction(NewPlayerAction.SetSleepTimer(timer)) },
+                   setSleepTimerCurrentTrack = { onAction(NewPlayerAction.SetSleepTimerToEndOfTrack) },
+                   cancelTimer = { onAction(NewPlayerAction.CancelSleepTimer) }
+               )
+               SeekBarSection(
+                   modifier = Modifier.constrainAs(seekBar) {
+                       top.linkTo(controlPanel.bottom, margin = 16.dp)
+                       start.linkTo(parent.start, margin = 8.dp)
+                       end.linkTo(parent.end, margin = 8.dp)
+                       bottom.linkTo(controlsButtons.top, margin = 16.dp)
+                       width = Dimension.fillToConstraints
+                   },
+                   currentPosition = state.currentPosition,
+                   totalDuration = state.totalDuration,
+                   isLoading = state.isLoading,
+                   onSeek = { fraction ->
+                       val targetPosition = (fraction * state.totalDuration).toFloat()
+                       onAction(NewPlayerAction.SeekTo(targetPosition))
+                   }
+               )
+               PlayControls(
+                   modifier = Modifier.constrainAs(controlsButtons) {
+                       top.linkTo(controlPanel.bottom, margin = 16.dp)
+                       start.linkTo(parent.start)
+                       end.linkTo(parent.end)
+                       bottom.linkTo(bottomMenu.top)
+                       width = Dimension.fillToConstraints
+                   },
+                   isPlaying = state.isPlaying,
+                   repeatMode = state.repeatMode,
+                   shuffleModeEnabled = state.shuffleModeEnabled,
+                   onPlayPauseClick = { onAction(NewPlayerAction.PlayPause) },
+                   onPreviousClick = { onAction(NewPlayerAction.SkipToPrevious) },
+                   onNextClick = { onAction(NewPlayerAction.SkipToNext) },
+                   onShuffleClick = { onAction(NewPlayerAction.ToggleShuffle) },
+                   onRepeatClick = { onAction(NewPlayerAction.CycleRepeatMode) },
+               )
 
-            BottomMenuRow(
-                modifier = Modifier.constrainAs(bottomMenu) {
-                    bottom.linkTo(parent.bottom, margin = 16.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                },
-                onUpNextClick = { showQueueSheet = true },
-                onLyricsClick = {},
-                onRelatedClick = {}
-            )
+               BottomMenuRow(
+                   modifier = Modifier.constrainAs(bottomMenu) {
+                       bottom.linkTo(parent.bottom, margin = 16.dp)
+                       start.linkTo(parent.start)
+                       end.linkTo(parent.end)
+                       width = Dimension.fillToConstraints
+                   },
+                   onUpNextClick = { showQueueSheet = true },
+                   onLyricsClick = {},
+                   onRelatedClick = {}
+               )
 
-        }
+           }
+           SnackbarHost(
+               hostState = snackbarHostState,
+               modifier = Modifier
+                   .align(Alignment.BottomCenter)
+                   .padding(bottom = 50.dp, start = 16.dp, end = 16.dp)
+           )
+       }
     }
 }
 

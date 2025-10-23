@@ -66,3 +66,14 @@ fun PlaylistDetailSongs.toTrackFullDto() = TrackFullOneDto(
     albumName = albumName,
     duration = duration
 )
+
+fun PlaylistDetailSongs.toTrackFull() = TrackFullOne(
+    title = title,
+    videoId = videoId,
+    thumbnail = thumbnail,
+    artistName = artistName,
+    artistId = artistId ?: "",
+    albumId = albumId ?: "",
+    albumName = albumName ?: "",
+    duration = duration
+)

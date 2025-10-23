@@ -43,7 +43,6 @@ import org.schabi.newpipe.extractor.timeago.patterns.id
 fun ComposeProfileScreen(
     state: ProfileState,
     onAction: (ProfileAction) -> Unit,
-    onSignedOutClick : () -> Unit
 ) {
     if (state.isNameChangeDialogVisible) {
         NameChangeDialog(state = state, onAction = onAction)
@@ -63,7 +62,7 @@ fun ComposeProfileScreen(
         ProfileMenuItem(
             title = "Privacy & Control",
             icon = R.drawable.ic_privacy,
-            onClick = { onAction(ProfileAction.ShowNameChangeDialog) }
+            onClick = { }
         ),
         ProfileMenuItem(
             title = "About & Help",
@@ -108,28 +107,12 @@ fun ComposeProfileScreen(
             }
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
                 Text(
                     text = state.name.takeIf { it.isNotEmpty() } ?: "User Name",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
-                IconButton(onClick = { onAction(ProfileAction.ShowNameChangeDialog) }) {
-                    Icon(
-                        modifier = Modifier
-                            .offset(y = (-12).dp),
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
+
 
             Spacer(modifier = Modifier.height(16.dp))
 
