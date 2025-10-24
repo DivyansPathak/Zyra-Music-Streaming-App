@@ -200,6 +200,14 @@ class MainMusicViewModel(
                 }
             }
 
+            is NewPlayerAction.MoveQueueItem ->{
+                queueManager.moveSongInQueue(
+                    controller = mediaController,
+                    fromIndex = action.fromIndex,
+                    toIndex = action.toIndex
+                )
+            }
+
             NewPlayerAction.SkipToNext -> {
                 mediaController?.seekToNextMediaItem()
                 mediaController?.play()

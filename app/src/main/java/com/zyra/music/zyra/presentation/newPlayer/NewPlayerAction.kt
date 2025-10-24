@@ -15,6 +15,7 @@ interface NewPlayerAction {
     data class SeekTo(val position: Float) : NewPlayerAction
     data class PlayFromQueue(val index: Int) : NewPlayerAction
     data class RemoveFromQueue(val index: Int) : NewPlayerAction
+    data class MoveQueueItem(val fromIndex : Int, val toIndex : Int) : NewPlayerAction
     data object ExpandPlayer : NewPlayerAction
     object CollapsePlayer : NewPlayerAction
     data class SetSleepTimer(val durationInMinutes: Long) : NewPlayerAction

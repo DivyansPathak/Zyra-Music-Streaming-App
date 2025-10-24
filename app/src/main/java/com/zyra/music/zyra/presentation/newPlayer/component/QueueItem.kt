@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,12 +41,13 @@ fun QueueItem(
     onClick: () -> Unit,
     isPlaying: Boolean,
     isCurrentlyPlaying: Boolean,
-    onRemoveClick : () -> Unit
+    onRemoveClick : () -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
     val color = if (isCurrentlyPlaying) Color.Green else MaterialTheme.colorScheme.primary
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -101,6 +103,7 @@ fun QueueItem(
                 modifier = Modifier.size(24.dp)
             )
         }
+
 
     }
 }

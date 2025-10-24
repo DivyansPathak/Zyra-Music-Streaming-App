@@ -80,6 +80,14 @@ class NewMusicQueueManager {
         }
     }
 
+    fun moveSongInQueue(controller: MediaController?, fromIndex : Int, toIndex : Int){
+        val count = controller?.mediaItemCount ?: 0
+        if(fromIndex in 0 until count && toIndex in 0 until count && fromIndex != toIndex){
+            controller?.moveMediaItem(fromIndex,toIndex)
+            Log.d(TAG,"${controller?.mediaMetadata?.title} move from $fromIndex to $toIndex")
+        }
+    }
+
     fun removeSongFromQueue(controller: MediaController?, index: Int) {
         if (index >= 0 && index < (controller?.mediaItemCount ?: 0)) {
             controller?.removeMediaItem(index)
