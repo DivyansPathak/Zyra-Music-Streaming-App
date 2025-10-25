@@ -21,4 +21,5 @@ interface NewPlayerAction {
     data class SetSleepTimer(val durationInMinutes: Long) : NewPlayerAction
     object SetSleepTimerToEndOfTrack : NewPlayerAction
     object CancelSleepTimer : NewPlayerAction
+    object ToggleAutoPlay : NewPlayerAction
 }

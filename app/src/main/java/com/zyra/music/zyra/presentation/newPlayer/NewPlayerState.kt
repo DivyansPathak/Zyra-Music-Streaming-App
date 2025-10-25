@@ -24,5 +24,6 @@ data class NewPlayerState(
     val playerState : PlayerDraggableState = PlayerDraggableState.COLLAPSED,
 //    val downloadStatus : DownloadState? = DownloadState.NOT_DOWNLOADED,
     val sleepTimeRemaining : Long? = null,
-    val isEndTrackTimerActive : Boolean = false
+    val isEndTrackTimerActive : Boolean = false,
+    val toggleAutoPlay : Boolean = true
 )

@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -32,9 +34,10 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -50,6 +54,7 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -67,7 +72,6 @@ import com.zyra.music.zyra.presentation.newPlayer.component.ReorderHapticFeedbac
 import com.zyra.music.zyra.presentation.newPlayer.component.YoutubeStyleSeekBar
 import com.zyra.music.zyra.presentation.newPlayer.component.rememberReorderHapticFeedback
 import com.zyra.music.zyra.presentation.playerScreen.RepeatMode
-import kotlinx.coroutines.flow.Flow
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -79,7 +83,6 @@ fun PlayerScreenN(
     modifier: Modifier = Modifier,
     state: NewPlayerState,
     onAction: (NewPlayerAction) -> Unit,
-    eventFlow: Flow<NewPlayerEvent>,
     navigateToBack: () -> Unit,
     onAddToPlaylistClick: (TrackFullOne) -> Unit,
     snackbarHostState: SnackbarHostState
@@ -103,17 +106,6 @@ fun PlayerScreenN(
             )
             haptic.performHapticFeedback(ReorderHapticFeedbackType.MOVE)
         }
-    LaunchedEffect(Unit) {
-        eventFlow.collect { event ->
-            when (event) {
-                is NewPlayerEvent.NavigateToBack -> {
-                    navigateToBack()
-                }
-            }
-        }
-    }
-
-
     GradientScreenContainer(imagerUrl = state.currentTrack?.thumbnail) {
         Box(modifier = Modifier.fillMaxSize()) {
             var showQueueSheet by remember { mutableStateOf(false) }
@@ -129,6 +121,38 @@ fun PlayerScreenN(
                             .fillMaxWidth()
 
                     ) {
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Text(
+                                    text = "AutoPlay",
+                                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(Modifier.width(16.dp))
+                                Switch(
+                                    checked = state.toggleAutoPlay,
+                                    onCheckedChange = {onAction(NewPlayerAction.ToggleAutoPlay)},
+                                    thumbContent = null,
+                                    colors = SwitchDefaults.colors(
+                                        // Your custom blue colors applied to the thumb and track
+                                        checkedThumbColor = Color.Green,
+                                        checkedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        checkedBorderColor = Color.Transparent,
+
+                                        // Default colors for the 'off' state
+                                        uncheckedThumbColor = Color.LightGray,
+                                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        uncheckedBorderColor = Color.Transparent
+                                    )
+                                )
+                            }
+                        }
                         itemsIndexed(
                             state.queue,
                             key = { _, song -> song.queueInstanceId }) { index, song ->

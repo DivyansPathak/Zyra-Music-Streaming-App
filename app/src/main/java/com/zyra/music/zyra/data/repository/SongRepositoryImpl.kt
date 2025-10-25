@@ -17,9 +17,7 @@ import org.schabi.newpipe.extractor.timeago.patterns.vi
 
 private const val TAG = "SongRepository"
 
-class SongRepositoryImpl(
-    private val remoteSongDataSource: RemoteSongDataSource
-) : SongRepository {
+class SongRepositoryImpl(private val remoteSongDataSource: RemoteSongDataSource) : SongRepository {
     override suspend fun searchSong(query: String): Result<List<SingleTrack>, DataError> {
 
         Log.d(TAG, "2. Asking DataSource for songs with query: '$query'")
@@ -131,45 +129,3 @@ class SongRepositoryImpl(
 
 
 }
-
-
-//    override suspend fun getRecommendations(songTitle: String): Result<List<SingleTrack>, DataError> {
-//        // STEP 1: Get the list of recommended song titles from the first API call.
-//        // STEP 1: Get the list of recommended song titles.
-//        Log.d(TAG, "Step 1: Fetching recommendation titles for song: $songTitle")
-//        when (val titlesResult = remoteSongDataSource.getRecommendations(songTitle)) {
-//            is Result.Failure -> {
-//                Log.e(TAG, "Step 1 Failed: Could not get recommendation titles.")
-//                // Bug Fix 1: Return the correct error type
-//                Log.e(
-//                    TAG,
-//                    "Step 1 Failed: Could not get recommendation titles. Error: ${titlesResult.error}"
-//                )
-//                return titlesResult
-//            }
-//
-//            is Result.Success -> {
-//                val titles = titlesResult.data
-//                if (titles.isEmpty()) {
-//                    Log.w(TAG, "Step 1 Success: Got an empty list of titles.")
-//                    return Result.Success(emptyList())
-//                }
-//
-//                // STEP 2: Use the titles to get the full song metadata.
-//                Log.d(TAG, "Step 2: Fetching metadata for ${titles.size} titles.")
-//                Log.d(TAG, "the data is $titles")
-//                // Bug Fix 2: Add 'return' to send the final result back
-//                return when (val metadataResult =
-//                    remoteSongDataSource.searchSongs(queries = titles)) {
-//                    is Result.Success -> Result.Success(metadataResult.data.toSingleTrackList())
-//                    is Result.Failure -> {
-//                        Log.e(TAG, "Step 2 Failed: Could not get metadata for titles.")
-//                        Log.e(TAG, "the data is $metadataResult")
-//                        metadataResult
-//                    }
-//                }
-//            }
-//        }
-//
-//
-//    }

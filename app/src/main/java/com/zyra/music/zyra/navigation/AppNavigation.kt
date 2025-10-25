@@ -36,6 +36,7 @@ import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.login.LoginScreen
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
+import com.zyra.music.zyra.presentation.newPlayer.NewPlayerAction
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerEvent
 import com.zyra.music.zyra.presentation.newPlayer.PlayerScreenN
 import com.zyra.music.zyra.presentation.profileScreen.ProfileEvent
@@ -118,6 +119,9 @@ fun AppNavigation() {
                 is NewPlayerEvent.ShowMessage -> {
                         snackBarHostState.showSnackbar(message = event.message)
                 }
+                is NewPlayerEvent.NavigateToBack ->{
+                    appTopBackStack.removeLastOrNull()
+                }
             }
         }
     }
@@ -158,7 +162,6 @@ fun AppNavigation() {
                     PlayerScreenN(
                         state = state,
                         onAction = mainMusicViewModel::onAction,
-                        eventFlow = mainMusicViewModel.uiEvent,
                         navigateToBack = { appTopBackStack.removeLastOrNull() },
                         onAddToPlaylistClick = {track ->
                             Log.d(TAG,"onAddToPlaylistClick")

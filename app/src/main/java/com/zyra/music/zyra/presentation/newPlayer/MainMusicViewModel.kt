@@ -38,11 +38,7 @@ import java.util.UUID
 private const val TAG = "NewMusicViewModel"
 private const val KEY_INSTANCE_ID = "com.zyra.music.INSTANCE_ID"
 @androidx.media3.common.util.UnstableApi
-class MainMusicViewModel(
-    private val repository: SongRepository,
-    private val queueManager: NewMusicQueueManager,
-    context: Context
-) : ViewModel() {
+class MainMusicViewModel(private val repository: SongRepository, private val queueManager: NewMusicQueueManager, context: Context) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NewPlayerState())
     val uiState = _uiState.asStateFlow()
@@ -224,6 +220,15 @@ class MainMusicViewModel(
 
             NewPlayerAction.CycleRepeatMode -> cycleRepeatMode()
             NewPlayerAction.ToggleFavorite -> toggleToFavorite()
+            NewPlayerAction.ToggleAutoPlay -> {
+                val newState = !_uiState.value.toggleAutoPlay
+
+               _uiState.update { it.copy(toggleAutoPlay = newState) }
+                val message = if (newState) "AutoPlay enable" else "AutoPlay disable"
+                viewModelScope.launch {
+                    _uiEvent.send(NewPlayerEvent.ShowMessage(message = message))
+                }
+            }
             is NewPlayerAction.PlayFromQueue -> queueManager.playSongAtIndex(
                 mediaController,
                 action.index
@@ -334,8 +339,9 @@ class MainMusicViewModel(
         val controller = mediaController ?: return
         val queueSize = controller.mediaItemCount
         val currentIndex = controller.currentMediaItemIndex
+        val isAutoPlay = _uiState.value.toggleAutoPlay
 
-        if (queueSize > 1 && currentIndex >= queueSize - 2) {
+        if (queueSize > 1 && currentIndex >= queueSize - 2 && isAutoPlay) {
             _uiState.value.queue.lastOrNull()?.let { track ->
                 Log.d(TAG, "Queue nearing end. Proactively fetching recommendation ")
                 fetchRecommendationsAndUpdateQueue(track)

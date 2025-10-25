@@ -55,12 +55,6 @@ class NewMusicQueueManager {
         Log.d(TAG, "Sent command to add song to queue: ${track.title}")
     }
 
-    fun addTracksToQueue(controller: MediaController?, tracks : List<TrackFullOne>){
-        if (tracks.isEmpty()) return
-        val mediaItems = tracks.map { it.toMediaItem() }
-        controller?.addMediaItems(mediaItems)
-        Log.d(TAG, "Sent command to add ${tracks.size} songs to queue")
-    }
 
     fun addSongToPlayNext(controller: MediaController?, track: TrackFullOne) {
         val nextIndex =
