@@ -1,6 +1,7 @@
 package com.zyra.music.zyra.domain.model
 
 import kotlinx.serialization.Serializable
+import java.util.UUID
 
 @Serializable
 data class TrackFullOne(
@@ -12,4 +13,5 @@ data class TrackFullOne(
     val artistId : String,
     val albumName : String,
     val albumId : String,
+    val queueInstanceId : String = UUID.randomUUID().toString()
 )

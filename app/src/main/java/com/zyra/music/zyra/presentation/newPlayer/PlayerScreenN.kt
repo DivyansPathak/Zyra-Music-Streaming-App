@@ -131,10 +131,10 @@ fun PlayerScreenN(
                     ) {
                         itemsIndexed(
                             state.queue,
-                            key = { _, song -> song.videoId }) { index, song ->
+                            key = { _, song -> song.queueInstanceId }) { index, song ->
                             ReorderableItem(
                                 state = reorderableLazyList,
-                                key = song.videoId
+                                key = song.queueInstanceId
                             ) { isDragging ->
                                 val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
                                 val interactionSource = remember { MutableInteractionSource() }
@@ -198,7 +198,7 @@ fun PlayerScreenN(
                                             onAction(NewPlayerAction.PlayFromQueue(index))
                                             showQueueSheet = false
                                         },
-                                    isCurrentlyPlaying = (song.videoId == state.currentTrack?.videoId),
+                                    isCurrentlyPlaying = (song.queueInstanceId == state.currentTrack?.queueInstanceId),
                                     onRemoveClick = { onAction(NewPlayerAction.RemoveFromQueue(index)) },
                                     isPlaying = state.isPlaying,
 

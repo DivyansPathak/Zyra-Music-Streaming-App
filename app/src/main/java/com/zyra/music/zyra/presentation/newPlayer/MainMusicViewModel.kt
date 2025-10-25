@@ -33,9 +33,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 private const val TAG = "NewMusicViewModel"
-
+private const val KEY_INSTANCE_ID = "com.zyra.music.INSTANCE_ID"
 @androidx.media3.common.util.UnstableApi
 class MainMusicViewModel(
     private val repository: SongRepository,
@@ -300,7 +301,7 @@ class MainMusicViewModel(
         }
 
         override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-            Log.d(TAG, "Queue is updating")
+            Log.d(TAG, "Queue is updating MediaItem : ${_uiState.value.currentTrack?.queueInstanceId}")
             updateStateFromController()
         }
 
@@ -387,6 +388,7 @@ class MainMusicViewModel(
                     albumName = it.mediaMetadata.albumTitle?.toString() ?: "Unknown Album",
                     albumId = it.mediaMetadata.albumTitle?.toString() ?: "",
 
+                    queueInstanceId = it.requestMetadata.extras?.getString(KEY_INSTANCE_ID) ?: UUID.randomUUID().toString()
                     )
             }
             val currentQueue = (0 until controller.mediaItemCount).map { index ->
@@ -399,7 +401,10 @@ class MainMusicViewModel(
                     duration = 0L.toInt(),
                     artistId = item.mediaMetadata.artist?.toString() ?: "",
                     albumId = item.mediaMetadata.albumTitle?.toString() ?: "",
-                    albumName = item.mediaMetadata.albumTitle?.toString() ?: "Unknown Album"
+                    albumName = item.mediaMetadata.albumTitle?.toString() ?: "Unknown Album",
+
+                    queueInstanceId = item.requestMetadata.extras?.getString(KEY_INSTANCE_ID)
+                    ?: UUID.randomUUID().toString()
                 )
             }
             val currentDownloadStatus = controller?.let {

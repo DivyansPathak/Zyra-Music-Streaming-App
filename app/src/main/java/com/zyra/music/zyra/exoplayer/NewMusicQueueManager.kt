@@ -1,6 +1,7 @@
 package com.zyra.music.zyra.exoplayer
 
 import android.util.Log
+import androidx.core.bundle.Bundle
 import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -10,6 +11,7 @@ import androidx.media3.session.MediaController
 import com.zyra.music.zyra.domain.model.TrackFullOne
 
 private const val TAG = "MusicQueueManagerNew"
+private const val KEY_INSTANCE_ID = "com.zyra.music.INSTANCE_ID"
 
 class NewMusicQueueManager {
 
@@ -21,10 +23,14 @@ class NewMusicQueueManager {
             .setArtworkUri(this.thumbnail.toUri())
             .setAlbumTitle(this.artistName)
             .build()
+        val extras = Bundle().apply {
+            putString(KEY_INSTANCE_ID,this@toMediaItem.queueInstanceId)
+        }
 
         return MediaItem.Builder()
             .setMediaId(this.videoId)
             .setMediaMetadata(metadata)
+            .setRequestMetadata(MediaItem.RequestMetadata.Builder().setExtras(extras).build())
             .build()
 
     }
@@ -47,6 +53,13 @@ class NewMusicQueueManager {
     fun addSongToQueue(controller: MediaController?, track: TrackFullOne) {
         controller?.addMediaItem(track.toMediaItem())
         Log.d(TAG, "Sent command to add song to queue: ${track.title}")
+    }
+
+    fun addTracksToQueue(controller: MediaController?, tracks : List<TrackFullOne>){
+        if (tracks.isEmpty()) return
+        val mediaItems = tracks.map { it.toMediaItem() }
+        controller?.addMediaItems(mediaItems)
+        Log.d(TAG, "Sent command to add ${tracks.size} songs to queue")
     }
 
     fun addSongToPlayNext(controller: MediaController?, track: TrackFullOne) {

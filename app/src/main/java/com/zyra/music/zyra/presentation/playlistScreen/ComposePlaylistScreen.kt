@@ -127,7 +127,7 @@ fun ComposePlaylistScreen(
                                 modifier = Modifier.clickable {
                                     mainMusicViewModel.playPlayList(
                                         tracks = state.playlistDetails.tracks,
-                                        shuffle = mainState.shuffleModeEnabled,
+                                        shuffle = false,
                                         startIndex = index
                                     )
                                 },
