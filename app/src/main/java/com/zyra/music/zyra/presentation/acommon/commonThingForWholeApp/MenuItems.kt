@@ -26,7 +26,8 @@ fun MenuItems(
     onAddToQueue: () -> Unit,
     onAddToPlaylist: () -> Unit,
     onPlayAsRadioClick: () -> Unit,
-    onToggleFavorite : () -> Unit
+    onToggleFavorite : () -> Unit,
+    onRemoveFromPlaylist : (() -> Unit)? = null
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
     Box {
@@ -115,6 +116,22 @@ fun MenuItems(
                     isMenuExpanded = false
                 }
             )
+            onRemoveFromPlaylist?.let { onRemoveClick ->
+                DropdownMenuItem(
+                    text = { Text("Remove from playlist") },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.icon_remove),
+                            contentDescription = "Remove from playlist",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    onClick = {
+                        onRemoveClick()
+                        isMenuExpanded = false
+                    }
+                )
+            }
         }
 
     }

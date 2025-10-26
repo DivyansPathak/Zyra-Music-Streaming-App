@@ -80,7 +80,8 @@ fun ComposePlaylistScreen(
     mainState: NewPlayerState,
     contentPadding: Dp = 0.dp,
     onBack: () -> Unit,
-    addSongToPlaylist: (TrackFullOne) -> Unit
+    addSongToPlaylist: (TrackFullOne) -> Unit,
+    onRemoveSongFromPlaylist : ((TrackFullOne) -> Unit)? = null
 
 ) {
     Box(
@@ -150,7 +151,10 @@ fun ComposePlaylistScreen(
                                             mainMusicViewModel.toggleFavoriteById(
                                                 track.videoId
                                             )
-                                        }
+                                        },
+                                        onRemoveFromPlaylist =  onRemoveSongFromPlaylist?.let { onRemove -> { onRemove(track)} }
+
+
                                     )
                                 }
                             )

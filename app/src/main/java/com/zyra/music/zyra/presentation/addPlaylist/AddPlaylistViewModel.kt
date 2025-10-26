@@ -3,10 +3,8 @@ package com.zyra.music.zyra.presentation.addPlaylist
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zyra.music.zyra.data.mapper.toLibraryPlaylists
 import com.zyra.music.zyra.data.mapper.toUserPlaylistDto
 import com.zyra.music.zyra.data.remote.SupabaseClient
-import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.domain.model.playlistData.UserPlaylist
 import com.zyra.music.zyra.domain.repository.LibraryRepositoryNew
 import com.zyra.music.zyra.domain.utils.getErrorMessage
@@ -14,9 +12,7 @@ import com.zyra.music.zyra.domain.utils.onFailure
 import com.zyra.music.zyra.domain.utils.onSuccess
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -24,9 +20,7 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "AddPlaylistViewModel"
 
-class AddPlaylistViewModel(
-    private val libraryRepo: LibraryRepositoryNew,
-    ) : ViewModel() {
+class AddPlaylistViewModel(private val libraryRepo: LibraryRepositoryNew, ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddPlaylistState())
     val uiState = _uiState.asStateFlow()
@@ -68,6 +62,9 @@ class AddPlaylistViewModel(
 
             is AddPlaylistAction.AddSongToPlaylist -> {
                 addSongToPlaylist(action.playlistId)
+            }
+            is AddPlaylistAction.RemoveSongFromPlaylist ->{
+                removeSongFromPlaylist(playlistId = action.playlistId, songId = action.songId)
             }
             is AddPlaylistAction.ShowCreateDialog -> {
 //                Log.d(TAG, "Playlist sheet is opening")
@@ -136,6 +133,23 @@ class AddPlaylistViewModel(
                         }
                     }
             }
+        }
+    }
+
+    private fun removeSongFromPlaylist(playlistId: Long, songId : String){
+        viewModelScope.launch {
+            libraryRepo.removeSongFromPlaylist(playlistId = playlistId, songId = songId)
+                .onSuccess {
+                    val playlist = _uiState.value.playlists
+                    val thisPlaylist = playlist.find { it.id == playlistId }
+                    Log.d(TAG,"song removed successfully")
+                    _uiEvent.send(AddPlaylistEvent.ShowMessage(message = "Song successfully removed from ${thisPlaylist?.name}"))
+                    refreshPlaylistInBackground()
+                }
+                .onFailure { error ->
+                    Log.e(TAG,"Error in deleting song from playlist : $playlistId")
+                    _uiEvent.send(AddPlaylistEvent.ShowMessage(message = "Error in removing song from playlist"))
+                }
         }
     }
 

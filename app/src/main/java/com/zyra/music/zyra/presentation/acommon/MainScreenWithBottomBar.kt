@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,27 +42,23 @@ import com.zyra.music.zyra.navigation.HomeScreen
 import com.zyra.music.zyra.navigation.LibraryScreen
 import com.zyra.music.zyra.navigation.LoginScreen
 import com.zyra.music.zyra.navigation.MainScreens
+import com.zyra.music.zyra.navigation.PlayListType
 import com.zyra.music.zyra.navigation.PlayerScreen
 import com.zyra.music.zyra.navigation.PlaylistScreen
 import com.zyra.music.zyra.navigation.ProfileScreen
 import com.zyra.music.zyra.navigation.SearchScreen
-import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.AddPlaylistSheet
-import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.CreateNewPlaylistDialog
 import com.zyra.music.zyra.presentation.acommon.miniPlayer.MiniPlayer
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistAction
-import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistEvent
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
 import com.zyra.music.zyra.presentation.home.HomeScreen
 import com.zyra.music.zyra.presentation.home.HomeViewModel
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryScreen
-import com.zyra.music.zyra.presentation.libraryScreen.LibraryScreenTest
-import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModelNew
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerAction
-import com.zyra.music.zyra.presentation.newPlayer.NewPlayerEvent
-import com.zyra.music.zyra.presentation.playlistScreen.PlaylistViewModel
 import com.zyra.music.zyra.presentation.playlistScreen.ComposePlaylistScreen
+import com.zyra.music.zyra.presentation.playlistScreen.PlaylistEvent
+import com.zyra.music.zyra.presentation.playlistScreen.PlaylistViewModel
 import com.zyra.music.zyra.presentation.profileScreen.ComposeProfileScreen
 import com.zyra.music.zyra.presentation.profileScreen.ProfileEvent
 import com.zyra.music.zyra.presentation.profileScreen.ProfileViewModel
@@ -84,7 +79,7 @@ fun MainScreenWithBottomBar(
     appTopBackStack: NavBackStack<NavKey>,
     mainViewModel: MainMusicViewModel,
     addPlaylistViewModel: AddPlaylistViewModel,
-    onAddToPlaylistClick : (TrackFullOne) -> Unit,
+    onAddToPlaylistClick: (TrackFullOne) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
 
@@ -92,10 +87,8 @@ fun MainScreenWithBottomBar(
     val searchViewModel: SearchViewModel = koinViewModel()
     val homeViewModel: HomeViewModel = koinViewModel()
     val libraryViewModel: LibraryViewModelNew = koinViewModel()
-//    val addPlaylistViewModel: AddPlaylistViewModel = koinViewModel<AddPlaylistViewModel>()
     val profileViewModel: ProfileViewModel = koinViewModel()
     val mainState by mainViewModel.uiState.collectAsStateWithLifecycle()
-    val addPlaylistState by addPlaylistViewModel.uiState.collectAsStateWithLifecycle()
     val isMiniPlayerVisible = mainState.currentTrack != null
 
     var controlsHeight by remember { mutableStateOf(0.dp) }
@@ -105,9 +98,6 @@ fun MainScreenWithBottomBar(
     val activity = context as? Activity
     var backPressedOnce by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-//    val snackBarHostState = remember { SnackbarHostState() }
-
-//    var showPlaylistSheet by remember { mutableStateOf(false) }
 
     val backToHome: () -> Unit = {
         if (mainBackStack.size > 1) {
@@ -117,27 +107,6 @@ fun MainScreenWithBottomBar(
             mainBackStack.add(HomeScreen)
         }
     }
-
-//    val onAddToPlaylistClick: (TrackFullOne) -> Unit = { track ->
-//        addPlaylistViewModel.onAction(AddPlaylistAction.SetSongAndShowSheet(track))
-//        showPlaylistSheet = true
-//    }
-//
-//    if (addPlaylistState.isCreateDialogOpen) {
-//        CreateNewPlaylistDialog(
-//            onDismiss = {
-//                addPlaylistViewModel.onAction(AddPlaylistAction.HideCreateDialog)
-//            },
-//            onConfirm = { title, description ->
-//                addPlaylistViewModel.onAction(
-//                    AddPlaylistAction.CreatePlaylistAndAddSong(
-//                        title = title,
-//                        description = description
-//                    )
-//                )
-//            }
-//        )
-//    }
 
     BackHandler {
         Log.d(TAG, "Back pressed!")
@@ -208,6 +177,9 @@ fun MainScreenWithBottomBar(
                                     )
                                 )
                             },
+                            onSearchClick = {
+                                mainBackStack.add(SearchScreen)
+                            }
                         )
                     }
 
@@ -265,6 +237,23 @@ fun MainScreenWithBottomBar(
                         LaunchedEffect(Unit) {
                             playlistViewModel.getPlaylistSongsDetails(screen.id, screen.type)
                         }
+                        val removeFun: ((TrackFullOne) -> Unit)? =
+                            if (state.playlistDetails?.type == PlayListType.USER_CREATED) {
+                                { trackToRemove ->
+                                    playlistViewModel.removeSongFromPlaylist(track = trackToRemove)
+                                }
+                            } else {
+                                null
+                            }
+                        LaunchedEffect(playlistViewModel) {
+                            playlistViewModel.uiEvent.collect { event ->
+                                when (event) {
+                                    is PlaylistEvent.ShowMessage -> {
+                                        snackbarHostState.showSnackbar(event.message)
+                                    }
+                                }
+                            }
+                        }
                         ComposePlaylistScreen(
                             mainMusicViewModel = mainViewModel,
                             mainState = mainState,
@@ -276,7 +265,8 @@ fun MainScreenWithBottomBar(
                             addSongToPlaylist = { trackFullOne ->
                                 Log.d(TAG, "onAddPlaylistClicked with song $trackFullOne")
                                 onAddToPlaylistClick(trackFullOne)
-                            }
+                            },
+                            onRemoveSongFromPlaylist = removeFun
                         )
                     }
                 }
@@ -330,21 +320,6 @@ fun MainScreenWithBottomBar(
                     )
                 }
             }
-
-//            if (showPlaylistSheet) {
-//                AddPlaylistSheet(
-//                    state = addPlaylistState,
-//                    onDismiss = { showPlaylistSheet = false },
-//                    onPlaylistClick = { playlistId ->
-//                        showPlaylistSheet = false
-//                        addPlaylistViewModel.onAction(AddPlaylistAction.AddSongToPlaylist(playlistId))
-//                    },
-//                    addNewPlaylistClick = {
-//                        addPlaylistViewModel.onAction(AddPlaylistAction.ShowCreateDialog)
-//                    },
-//                    viewModel = addPlaylistViewModel
-//                )
-//            }
         }
     }
 }

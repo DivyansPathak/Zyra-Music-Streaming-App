@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.zyra.music.zyra.data.mapper.toTrackFull
 import com.zyra.music.zyra.data.mapper.toTrackFullDto
 import com.zyra.music.zyra.domain.model.PlaylistDetails
+import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.domain.repository.LibraryRepository
 import com.zyra.music.zyra.domain.repository.LibraryRepositoryNew
 import com.zyra.music.zyra.domain.repository.PlaylistRepository
@@ -112,5 +113,35 @@ class PlaylistViewModel(
                 }
             }
         }
+    }
+
+    fun removeSongFromPlaylist(track : TrackFullOne){
+        val currentPlaylist = _uiState.value.playlistDetails
+        val currentPlaylistId = currentPlaylist?.id?.toLongOrNull()
+
+        if (currentPlaylistId == null || currentPlaylist.type != PlayListType.USER_CREATED){
+            viewModelScope.launch {
+                _uiEvent.send(PlaylistEvent.ShowMessage(message = "You can not remove song from this playlist"))
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            libraryRepo.removeSongFromPlaylist(playlistId = currentPlaylistId, songId = track.videoId)
+                .onSuccess {
+                    _uiState.update {newState ->
+                        newState.copy(
+                        playlistDetails = newState.playlistDetails?.copy(
+                            tracks = newState.playlistDetails.tracks.filterNot {  it.videoId == track.videoId}
+                        )
+                    ) }
+                    _uiEvent.send(PlaylistEvent.ShowMessage(message = "${track.title} removed from ${currentPlaylist.title}"))
+                }
+                .onFailure { error ->
+                    Log.e(TAG,"Error in removing song from ${currentPlaylist.title} error : $error")
+                    _uiEvent.send(PlaylistEvent.ShowMessage(message = "Error in removing song from playlist"))
+                }
+        }
+
     }
 }

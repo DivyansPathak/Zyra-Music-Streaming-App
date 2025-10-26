@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -37,6 +39,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -113,15 +116,22 @@ fun PlayerScreenN(
             if (showQueueSheet) {
                 ModalBottomSheet(
                     onDismissRequest = { showQueueSheet = false },
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    dragHandle = {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Spacer(Modifier.height(24.dp))
+                            Text(
+                                text = "Now Playing Queue",
+                                style = MaterialTheme.typography.titleSmall,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                    }
                 ) {
-
-                    LazyColumn(
-                        state = lazyListState,
-                        modifier = Modifier
-                            .fillMaxWidth()
-
-                    ) {
-                        item {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -137,96 +147,103 @@ fun PlayerScreenN(
                                 Spacer(Modifier.width(16.dp))
                                 Switch(
                                     checked = state.toggleAutoPlay,
-                                    onCheckedChange = {onAction(NewPlayerAction.ToggleAutoPlay)},
+                                    onCheckedChange = { onAction(NewPlayerAction.ToggleAutoPlay) },
                                     thumbContent = null,
                                     colors = SwitchDefaults.colors(
-                                        // Your custom blue colors applied to the thumb and track
                                         checkedThumbColor = Color.Green,
                                         checkedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
                                         checkedBorderColor = Color.Transparent,
-
-                                        // Default colors for the 'off' state
                                         uncheckedThumbColor = Color.LightGray,
                                         uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
                                         uncheckedBorderColor = Color.Transparent
                                     )
                                 )
                             }
-                        }
-                        itemsIndexed(
-                            state.queue,
-                            key = { _, song -> song.queueInstanceId }) { index, song ->
-                            ReorderableItem(
-                                state = reorderableLazyList,
-                                key = song.queueInstanceId
-                            ) { isDragging ->
-                                val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
-                                val interactionSource = remember { MutableInteractionSource() }
 
-                                QueueItem(
-                                    modifier = Modifier
-                                        .semantics {
-                                            customActions = listOf(
-                                                CustomAccessibilityAction(
-                                                    label = "Move Up",
-                                                    action = {
-                                                        if (index > 0) {
-                                                            onAction(
-                                                                NewPlayerAction.MoveQueueItem(
-                                                                    fromIndex = index,
-                                                                    toIndex = index - 1
-                                                                )
-                                                            )
-                                                            true
-                                                        } else {
-                                                            false
-                                                        }
-                                                    }
-                                                ),
-                                                CustomAccessibilityAction(
-                                                    label = "Move Down",
-                                                    action = {
-                                                        if (index < state.queue.size - 1) {
-                                                            onAction(
-                                                                NewPlayerAction.MoveQueueItem(
-                                                                    fromIndex = index,
-                                                                    toIndex = index + 1
-                                                                )
-                                                            )
-                                                            true
-                                                        } else {
-                                                            false
-                                                        }
-                                                    }
+                            LazyColumn(state = lazyListState, modifier = Modifier.fillMaxWidth()) {
+                                itemsIndexed(
+                                    state.queue,
+                                    key = { _, song -> song.queueInstanceId }) { index, song ->
+                                    ReorderableItem(
+                                        state = reorderableLazyList,
+                                        key = song.queueInstanceId
+                                    ) { isDragging ->
+                                        val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+                                        val interactionSource =
+                                            remember { MutableInteractionSource() }
+
+                                        QueueItem(
+                                            modifier = Modifier
+                                                .semantics {
+                                                    customActions = listOf(
+                                                        CustomAccessibilityAction(
+                                                            label = "Move Up",
+                                                            action = {
+                                                                if (index > 0) {
+                                                                    onAction(
+                                                                        NewPlayerAction.MoveQueueItem(
+                                                                            fromIndex = index,
+                                                                            toIndex = index - 1
+                                                                        )
+                                                                    )
+                                                                    true
+                                                                } else {
+                                                                    false
+                                                                }
+                                                            }
+                                                        ),
+                                                        CustomAccessibilityAction(
+                                                            label = "Move Down",
+                                                            action = {
+                                                                if (index < state.queue.size - 1) {
+                                                                    onAction(
+                                                                        NewPlayerAction.MoveQueueItem(
+                                                                            fromIndex = index,
+                                                                            toIndex = index + 1
+                                                                        )
+                                                                    )
+                                                                    true
+                                                                } else {
+                                                                    false
+                                                                }
+                                                            }
+                                                        )
+                                                    )
+                                                }
+                                                .longPressDraggableHandle(
+                                                    onDragStarted = {
+                                                        haptic.performHapticFeedback(
+                                                            ReorderHapticFeedbackType.START
+                                                        )
+                                                    },
+                                                    onDragStopped = {
+                                                        haptic.performHapticFeedback(
+                                                            ReorderHapticFeedbackType.END
+                                                        )
+                                                    },
+                                                    interactionSource = interactionSource
                                                 )
+                                                .clearAndSetSemantics {}
+                                                .shadow(elevation = elevation),
+                                            song = song,
+                                            onClick =
+                                                {
+                                                    onAction(NewPlayerAction.PlayFromQueue(index))
+                                                    showQueueSheet = false
+                                                },
+                                            isCurrentlyPlaying = (song.queueInstanceId == state.currentTrack?.queueInstanceId),
+                                            onRemoveClick = {
+                                                onAction(
+                                                    NewPlayerAction.RemoveFromQueue(
+                                                        index
+                                                    )
+                                                )
+                                            },
+                                            isPlaying = state.isPlaying,
+
                                             )
-                                        }
-                                        .longPressDraggableHandle(
-                                            onDragStarted = {
-                                                haptic.performHapticFeedback(
-                                                    ReorderHapticFeedbackType.START
-                                                )
-                                            },
-                                            onDragStopped = {
-                                                haptic.performHapticFeedback(
-                                                    ReorderHapticFeedbackType.END
-                                                )
-                                            },
-                                            interactionSource = interactionSource
-                                        )
-                                        .clearAndSetSemantics {}
-                                        .shadow(elevation = elevation),
-                                    song = song,
-                                    onClick =
-                                        {
-                                            onAction(NewPlayerAction.PlayFromQueue(index))
-                                            showQueueSheet = false
-                                        },
-                                    isCurrentlyPlaying = (song.queueInstanceId == state.currentTrack?.queueInstanceId),
-                                    onRemoveClick = { onAction(NewPlayerAction.RemoveFromQueue(index)) },
-                                    isPlaying = state.isPlaying,
-
-                                    )
+                                    }
+                                }
                             }
                         }
                     }

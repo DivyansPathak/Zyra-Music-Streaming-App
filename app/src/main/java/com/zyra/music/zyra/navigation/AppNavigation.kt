@@ -100,6 +100,11 @@ fun AppNavigation() {
         showPlaylistSheet = true
     }
 
+//    val onRemoveSongFromPlaylist : (TrackFullOne) -> Unit = {track ->
+//        Log.d(TAG,"Step 1: Trigger received. Calling viewModel.onAction")
+//        addPlaylistViewModel.onAction(AddPlaylistAction.RemoveSongFromPlaylist())
+//    }
+
     var controlsHeight by remember { mutableStateOf(0.dp) }
 
 

@@ -18,30 +18,24 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
-import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.compose.ui.unit.lerp
 import com.zyra.music.zyra.navigation.PlayListType
 import com.zyra.music.zyra.presentation.common.GradientScreenContainer
-import com.zyra.music.zyra.presentation.home.HomeScreenState
 import com.zyra.music.zyra.presentation.home.component.CardItems
 import com.zyra.music.zyra.presentation.home.component.HomeTopBar
+import com.zyra.music.zyra.presentation.home.component.HomeTopBarNew
 import com.zyra.music.zyra.presentation.home.component.ShimmerEffect
 import kotlinx.coroutines.launch
 
@@ -51,6 +45,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     state: HomeScreenState,
     onPlaylistClick: (playlistId: String,playlistType : PlayListType) -> Unit,
+    onSearchClick : () -> Unit,
     onRefresh: suspend () -> Unit,
     contentPadding : Dp = 0.dp
 
@@ -60,6 +55,29 @@ fun HomeScreen(
 
     val pullToRefreshState = rememberPullToRefreshState()
     val scope = rememberCoroutineScope()
+
+    val expandedHeaderHeight = 150.dp // Height for "Hello" (60) + SearchBar (56) + paddings
+    val collapsedHeaderHeight = 88.dp // Height for just SearchBar (56) + paddings
+
+    // The range of motion for the collapsing part
+    val headerHeightDelta = expandedHeaderHeight - collapsedHeaderHeight
+    val headerHeightDeltaPx = with(LocalDensity.current) { headerHeightDelta.toPx() }
+
+
+    // --- Calculate Collapse Fraction ---
+    val collapseFraction by remember {
+        derivedStateOf {
+            if (lazyListState.firstVisibleItemIndex > 0) {
+                1f // Fully collapsed
+            } else {
+                // How much of the "delta" height is scrolled off
+                (lazyListState.firstVisibleItemScrollOffset / headerHeightDeltaPx).coerceIn(0f, 1f)
+            }
+        }
+    }
+
+    // --- Calculate Current Header Height ---
+    val currentHeaderHeight = lerp(expandedHeaderHeight, collapsedHeaderHeight, collapseFraction)
 
     val gradientAlpha by remember {
         derivedStateOf {
@@ -71,71 +89,79 @@ fun HomeScreen(
         }
     }
     val firstImageUrl = state.sections.firstOrNull()?.playLists?.firstOrNull()?.thumbnail
-    GradientScreenContainer(
-        modifier = modifier,
-        imagerUrl = firstImageUrl,
-        alphaValue = gradientAlpha
-    ) {
-        PullToRefreshBox(
-            modifier = Modifier
-                .fillMaxSize(),
-            isRefreshing = state.isLoading,
-            onRefresh = {
-                scope.launch {
-                    onRefresh()
-                }
-            }
-        ) {
-            LazyColumn(
-                state = lazyListState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = contentPadding, top = 80.dp)
-            ) {
-                if (state.isLoading && state.sections.isEmpty()) {
-                    items(3) {
-                        ShimmeringSectionPlaceholder()
-                    }
-                } else {
-                    items(state.sections, key = { it.id }) { section ->
-                        Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                            Text(
-                                text = section.title,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
+        Box(modifier = Modifier.fillMaxSize()){
 
-                            LazyRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentPadding = PaddingValues(
-                                    horizontal = 16.dp,
-                                    vertical = 12.dp
-                                ),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                items(section.playLists, key = { it.id }) { playlists ->
-                                    CardItems(
-                                        modifier = Modifier
-                                            .fillParentMaxWidth(0.4f)
-                                            .aspectRatio(0.75f),
-                                        playlists = playlists,
-                                        onCardItemClick = { playlistId,playlistType ->
-                                            onPlaylistClick(playlistId,playlistType)
-                                        }
+            GradientScreenContainer(
+                modifier = modifier,
+                imagerUrl = firstImageUrl,
+                alphaValue = gradientAlpha * 0.4f
+            ) {}
+            PullToRefreshBox(
+                modifier = Modifier
+                    .fillMaxSize(),
+                isRefreshing = state.isLoading,
+                onRefresh = {
+                    scope.launch {
+                        onRefresh()
+                    }
+                }
+            ) {
+                    LazyColumn(
+                        state = lazyListState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = contentPadding, top = expandedHeaderHeight)
+                    ) {
+                        if (state.isLoading && state.sections.isEmpty()) {
+                            items(3) {
+                                ShimmeringSectionPlaceholder()
+                            }
+                        } else {
+                            items(state.sections, key = { it.id }) { section ->
+                                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                                    Text(
+                                        text = section.title,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        modifier = Modifier.padding(horizontal = 16.dp)
                                     )
+
+                                    LazyRow(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentPadding = PaddingValues(
+                                            horizontal = 16.dp,
+                                            vertical = 12.dp
+                                        ),
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        items(section.playLists, key = { it.id }) { playlists ->
+                                            CardItems(
+                                                modifier = Modifier
+                                                    .fillParentMaxWidth(0.4f)
+                                                    .aspectRatio(0.75f),
+                                                playlists = playlists,
+                                                onCardItemClick = { playlistId,playlistType ->
+                                                    onPlaylistClick(playlistId,playlistType)
+                                                }
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                }
+
             }
-            HomeTopBar(
+
+            HomeTopBarNew(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                    .height(currentHeaderHeight) // Height animates
+                    .align(Alignment.TopCenter),
+                collapseFraction = collapseFraction,
+                onSearchClick = onSearchClick // Pass the click handler
             )
 
         }
-    }
+
 
 }
 

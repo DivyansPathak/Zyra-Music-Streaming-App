@@ -67,7 +67,7 @@ fun MiniPlayer(
     Card(
         modifier = modifier.clickable { onClick() },
         colors = CardDefaults.cardColors(
-            containerColor = animatedColor
+            containerColor = animatedColor.copy(alpha = 0.9f)
         ),
         shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
     ) {
@@ -79,12 +79,6 @@ fun MiniPlayer(
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-//            IconButton(onClick = onCancelIconClick) {
-//                Icon(
-//                    imageVector = Icons.Default.Close, contentDescription = null,
-//                    tint = MaterialTheme.colorScheme.primary
-//                )
-//            }
                 MiniPlayerImage(
                     imageUrl = imageUrl,
                     modifier = Modifier

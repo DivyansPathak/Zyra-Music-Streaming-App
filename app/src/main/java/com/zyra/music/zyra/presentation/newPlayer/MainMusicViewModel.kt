@@ -107,7 +107,8 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
         _uiState.update {
             it.copy(
                 playbackMode = PlaybackMode.PLAYLIST,
-                isManuallyTriggered = true
+                isManuallyTriggered = true,
+                toggleAutoPlay = false
             )
         }
         queueManager.setQueueAndPlay(
@@ -119,7 +120,7 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
     }
 
     fun playRadioForSong(clickedTrack: TrackFullOne) {
-        _uiState.update { it.copy(playbackMode = PlaybackMode.RADIO, isManuallyTriggered = true) }
+        _uiState.update { it.copy(playbackMode = PlaybackMode.RADIO, isManuallyTriggered = true, toggleAutoPlay = true) }
         queueManager.setQueueAndPlay(mediaController, tracks = listOf(clickedTrack), startIndex = 0)
 
         needToFetchUpNext = true
@@ -238,9 +239,6 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
                 mediaController,
                 action.index
             )
-
-            NewPlayerAction.ExpandPlayer -> _uiState.update { it.copy(playerState = PlayerDraggableState.EXPANDED) }
-            NewPlayerAction.CollapsePlayer -> _uiState.update { it.copy(playerState = PlayerDraggableState.COLLAPSED) }
             NewPlayerAction.Back -> {
                 viewModelScope.launch { _uiEvent.send(NewPlayerEvent.NavigateToBack) }
             }
@@ -334,8 +332,6 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
     }
 
     private fun handleProactiveFetching() {
-        if (_uiState.value.playbackMode != PlaybackMode.RADIO) return
-
         val controller = mediaController ?: return
         val queueSize = controller.mediaItemCount
         val currentIndex = controller.currentMediaItemIndex

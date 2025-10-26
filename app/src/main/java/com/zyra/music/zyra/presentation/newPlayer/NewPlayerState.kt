@@ -21,7 +21,6 @@ data class NewPlayerState(
     val favoriteIds : Set<String> = emptySet(),
     val playbackMode: PlaybackMode = PlaybackMode.PLAYLIST,
     val isManuallyTriggered : Boolean = false,
-    val playerState : PlayerDraggableState = PlayerDraggableState.COLLAPSED,
 //    val downloadStatus : DownloadState? = DownloadState.NOT_DOWNLOADED,
     val sleepTimeRemaining : Long? = null,
     val isEndTrackTimerActive : Boolean = false,
