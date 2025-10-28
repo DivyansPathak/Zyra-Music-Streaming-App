@@ -28,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -35,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -80,8 +82,10 @@ fun ComposePlaylistScreen(
     contentPadding: Dp = 0.dp,
     onBack: () -> Unit,
     addSongToPlaylist: (TrackFullOne) -> Unit,
-    onRemoveSongFromPlaylist : ((TrackFullOne) -> Unit)? = null
-
+    onRemoveSongFromPlaylist: ((TrackFullOne) -> Unit)? = null,
+    onShowDeleteDialog: () -> Unit,
+    onDismissDeleteDialog: () -> Unit,
+    onConfirmDelete: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -119,7 +123,9 @@ fun ComposePlaylistScreen(
                         state = lazyListState,
                         contentPadding = PaddingValues(top = headerHeight, bottom = contentPadding)
                     ) {
-                        itemsIndexed(items = state.playlistDetails.tracks, key = { _, track -> track.videoId }) {  index, track ->
+                        itemsIndexed(
+                            items = state.playlistDetails.tracks,
+                            key = { _, track -> track.videoId }) { index, track ->
                             val isTrackFavorite = mainState.favoriteIds.contains(track.videoId)
                             SongListItem(
                                 track = track,
@@ -151,7 +157,13 @@ fun ComposePlaylistScreen(
                                                 track.videoId
                                             )
                                         },
-                                        onRemoveFromPlaylist =  onRemoveSongFromPlaylist?.let { onRemove -> { onRemove(track)} }
+                                        onRemoveFromPlaylist = onRemoveSongFromPlaylist?.let { onRemove ->
+                                            {
+                                                onRemove(
+                                                    track
+                                                )
+                                            }
+                                        }
 
 
                                     )
@@ -175,7 +187,8 @@ fun ComposePlaylistScreen(
                                 tracks = state.playlistDetails.tracks,
                                 shuffle = mainState.shuffleModeEnabled
                             )
-                        }
+                        },
+                        onConfirmDelete = onShowDeleteDialog
                     )
 
                     CollapsingToolbar(
@@ -212,6 +225,23 @@ fun ComposePlaylistScreen(
                         }
                     }
                 }
+                if (state.showDeleteDialog){
+                    AlertDialog(
+                        onDismissRequest = onDismissDeleteDialog,
+                        title = { Text("Delete Playlist") },
+                        text = { Text("Are you sure you want to delete '${state.playlistDetails.title}'? This action cannot be undone.") },
+                        confirmButton = {
+                            TextButton(onClick = onConfirmDelete) {
+                                Text("Delete")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = onDismissDeleteDialog) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
             }
         }
     }
@@ -223,7 +253,8 @@ private fun DynamicHeader(
     transitionProgress: Float,
     mainState: NewPlayerState,
     onPlayAllClick: () -> Unit,
-    onShuffleClick: () -> Unit
+    onShuffleClick: () -> Unit,
+    onConfirmDelete: () -> Unit
 ) {
     val imageSize = lerp(250.dp, 40.dp, transitionProgress)
     val paddingTop = lerp(20.dp, 12.dp, transitionProgress)
@@ -299,7 +330,7 @@ private fun DynamicHeader(
                     tint = shuffleEnableColor
                 )
             }
-            IconButton(onClick = {}) {
+            IconButton(onClick = {onConfirmDelete()}) {
                 Icon(
                     imageVector = Icons.Default.MoreVert, contentDescription = "more option",
                     tint = MaterialTheme.colorScheme.primary

@@ -226,7 +226,6 @@ fun MainScreenWithBottomBar(
                             state = state,
                             onAction = profileViewModel::onAction,
                         )
-//                        LibraryScreenTest()
                     }
                     entry<PlaylistScreen> { screen ->
                         val playlistViewModel: PlaylistViewModel = koinViewModel(
@@ -250,6 +249,9 @@ fun MainScreenWithBottomBar(
                                     is PlaylistEvent.ShowMessage -> {
                                         snackbarHostState.showSnackbar(event.message)
                                     }
+                                    is PlaylistEvent.DeletePlaylist ->{
+                                        mainBackStack.removeLastOrNull()
+                                    }
                                 }
                             }
                         }
@@ -265,7 +267,10 @@ fun MainScreenWithBottomBar(
                                 Log.d(TAG, "onAddPlaylistClicked with song $trackFullOne")
                                 onAddToPlaylistClick(trackFullOne)
                             },
-                            onRemoveSongFromPlaylist = removeFun
+                            onRemoveSongFromPlaylist = removeFun,
+                            onShowDeleteDialog = playlistViewModel::showDeleteDialog,
+                            onDismissDeleteDialog = playlistViewModel::hideDeleteDialog,
+                            onConfirmDelete = playlistViewModel::deletePlaylist
                         )
                     }
                 }

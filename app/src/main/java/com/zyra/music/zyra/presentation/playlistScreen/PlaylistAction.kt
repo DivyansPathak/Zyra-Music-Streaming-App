@@ -5,4 +5,5 @@ interface PlaylistAction {
     data object OnBackClicked : PlaylistAction
     data object OnShuffleClicked : PlaylistAction
     data class OnSongClicked(val index : Int) : PlaylistAction
+
 }

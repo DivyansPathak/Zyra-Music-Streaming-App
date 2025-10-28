@@ -141,4 +141,37 @@ class PlaylistViewModel(
         }
 
     }
+
+    fun showDeleteDialog(){
+        _uiState.update { it.copy(showDeleteDialog = true) }
+    }
+    fun hideDeleteDialog(){
+        _uiState.update { it.copy(showDeleteDialog = false) }
+    }
+    fun deletePlaylist(){
+
+        val currentPlaylist = _uiState.value.playlistDetails
+        val currentPlaylistId = currentPlaylist?.id?.toLongOrNull()
+
+        _uiState.update { it.copy(showDeleteDialog = false) }
+        if (currentPlaylistId == null || currentPlaylist.type != PlayListType.USER_CREATED){
+            viewModelScope.launch {
+
+                _uiEvent.send(PlaylistEvent.ShowMessage(message = "You can not remove this playlist"))
+            }
+            return
+        }
+        viewModelScope.launch {
+            libraryRepo.deletePlaylist(playlistId = currentPlaylistId)
+                .onSuccess {
+                    _uiEvent.send(PlaylistEvent.DeletePlaylist)
+                    _uiEvent.send(PlaylistEvent.ShowMessage(message = "'${currentPlaylist.title}' deleted"))
+                }
+                .onFailure { error ->
+                    Log.e(TAG,"playlist ${currentPlaylist.title} can not be deleted error : $error")
+                    _uiEvent.send(PlaylistEvent.ShowMessage(message = "Error in deleting playlist"))
+                }
+        }
+
+    }
 }
