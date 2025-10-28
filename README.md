@@ -81,8 +81,8 @@ A modern Android music player built with Jetpack Compose, offering seamless musi
     Zyra Music uses Supabase for user authentication and managing personal playlists. You need to configure your Supabase project keys.
     Create a `local.properties` file in the root of your project (if it doesn't exist) and add the following:
     ```properties
-    SUPABASE_URL="https://kjegpczagrbhbgtubhxa.supabase.co"
-    SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZWdwY3phZ3JiaGJndHViaHhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0OTk3NTMsImV4cCI6MjA3MTA3NTc1M30.-9RrnlOP3Vm1u_-0Wfdno5sPA91GcNryUVx4oVRqn3A"
+    SUPABASE_URL=""
+    SUPABASE_ANON_KEY=""
     ```
     Also, add your Google Sign-In `client_id` for Google Authentication. Create `app/src/main/res/values/strings.xml` if it doesn't exist or add to an existing one:
     ```xml
