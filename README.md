@@ -1,3 +1,5 @@
+<p align="center"> <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-1.9.20-7F52FF?logo=kotlin&logoColor=white"/> <img alt="Jetpack Compose" src="https://img.shields.io/badge/Jetpack_Compose-1.6-4285F4?logo=jetpackcompose&logoColor=white"/> <img alt="Supabase" src="https://img.shields.io/badge/Supabase-1.162.4-3ECF8E?logo=supabase&logoColor=white"/> <img alt="Koin" src="https://img.shields.io/badge/Koin-3.5.0-5B2F91?logo=koin&logoColor=white"/> <img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg"/> </p>
+
 # Zyra Music Player
 
 A modern Android music player built with Jetpack Compose, offering seamless music playback, personalized playlists, and a rich user experience.
@@ -33,8 +35,6 @@ A modern Android music player built with Jetpack Compose, offering seamless musi
 │       ├── profileScreen/
 │       └── searchScreen/
 ```
-
-<p align="center"> <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-1.9.20-7F52FF?logo=kotlin&logoColor=white"/> <img alt="Jetpack Compose" src="https://img.shields.io/badge/Jetpack_Compose-1.6-4285F4?logo=jetpackcompose&logoColor=white"/> <img alt="Supabase" src="https://img.shields.io/badge/Supabase-1.162.4-3ECF8E?logo=supabase&logoColor=white"/> <img alt="Koin" src="https://img.shields.io/badge/Koin-3.5.0-5B2F91?logo=koin&logoColor=white"/> <img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg"/> </p>
 
 ## Supported Platforms
 
