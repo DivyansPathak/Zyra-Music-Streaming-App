@@ -1,4 +1,4 @@
-package com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp
+package com.zyra.music.zyra.presentation.common.commonThingForWholeApp
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons

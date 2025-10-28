@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -74,7 +75,7 @@ import com.zyra.music.zyra.presentation.newPlayer.component.QueueItem
 import com.zyra.music.zyra.presentation.newPlayer.component.ReorderHapticFeedbackType
 import com.zyra.music.zyra.presentation.newPlayer.component.YoutubeStyleSeekBar
 import com.zyra.music.zyra.presentation.newPlayer.component.rememberReorderHapticFeedback
-import com.zyra.music.zyra.presentation.playerScreen.RepeatMode
+import com.zyra.music.zyra.presentation.newPlayer.component.RepeatMode
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -116,6 +117,7 @@ fun PlayerScreenN(
             if (showQueueSheet) {
                 ModalBottomSheet(
                     onDismissRequest = { showQueueSheet = false },
+                    scrimColor = BottomSheetDefaults.ScrimColor,
                     sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
                     dragHandle = {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -128,7 +130,7 @@ fun PlayerScreenN(
                         }
                     }
                 ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.75f)) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
                         ) {
@@ -327,7 +329,7 @@ fun PlayerScreenN(
                     },
                     currentPosition = state.currentPosition,
                     totalDuration = state.totalDuration,
-                    isLoading = state.isLoading,
+                    isPlaying = state.isPlaying,
                     onSeek = { fraction ->
                         val targetPosition = (fraction * state.totalDuration).toFloat()
                         onAction(NewPlayerAction.SeekTo(targetPosition))
@@ -682,11 +684,12 @@ private fun PlayPauseButton(
 fun SeekBarSection(
     modifier: Modifier = Modifier,
     currentPosition: Long,
+    isPlaying: Boolean,
     totalDuration: Long,
-    isLoading: Boolean,
     onSeek: (Float) -> Unit
 ) {
 
+    val progress = (currentPosition.toFloat() / totalDuration.toFloat()).coerceIn(0f,1f)
     fun formatTime(ms: Long): String {
         val totalSeconds = ms / 1000
         val minutes = totalSeconds / 60
@@ -697,10 +700,8 @@ fun SeekBarSection(
     Column(modifier = modifier) {
         YoutubeStyleSeekBar(
             modifier = Modifier,
-            progress = if (totalDuration > 0) {
-                currentPosition.toFloat() / totalDuration.toFloat()
-            } else 0f,
-            seekTo = onSeek
+            progress = progress,
+            seekTo = onSeek,
         )
         Row(
             modifier = Modifier.fillMaxWidth(),

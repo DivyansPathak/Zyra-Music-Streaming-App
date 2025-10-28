@@ -71,7 +71,7 @@ class NewMusicQueueManager {
         val currentIndex = controller?.currentMediaItemIndex ?: -1
 
         if (mediaItemCount > currentIndex + 1) {
-            controller?.removeMediaItems(currentIndex + 1, mediaItemCount)
+            controller?.removeMediaItems(currentIndex + 2, mediaItemCount)
         }
         controller?.addMediaItems(mediaItems)
         Log.d(TAG, "Sent command to replace upcoming queue with ${newTrack.size} new songs")

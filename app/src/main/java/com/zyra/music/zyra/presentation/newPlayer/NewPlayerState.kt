@@ -1,7 +1,7 @@
 package com.zyra.music.zyra.presentation.newPlayer
 
 import com.zyra.music.zyra.domain.model.TrackFullOne
-import com.zyra.music.zyra.presentation.playerScreen.RepeatMode
+import com.zyra.music.zyra.presentation.newPlayer.component.RepeatMode
 import com.zyra.music.zyra.exoplayer.download.DownloadState
 
 data class NewPlayerState(

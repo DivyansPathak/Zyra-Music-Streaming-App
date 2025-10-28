@@ -1,4 +1,4 @@
-package com.zyra.music.zyra.presentation.acommon
+package com.zyra.music.zyra.presentation.common
 
 import android.app.Activity
 import android.widget.Toast
@@ -47,8 +47,7 @@ import com.zyra.music.zyra.navigation.PlayerScreen
 import com.zyra.music.zyra.navigation.PlaylistScreen
 import com.zyra.music.zyra.navigation.ProfileScreen
 import com.zyra.music.zyra.navigation.SearchScreen
-import com.zyra.music.zyra.presentation.acommon.miniPlayer.MiniPlayer
-import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistAction
+import com.zyra.music.zyra.presentation.common.miniPlayer.MiniPlayer
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
 import com.zyra.music.zyra.presentation.home.HomeScreen
 import com.zyra.music.zyra.presentation.home.HomeViewModel

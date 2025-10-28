@@ -26,14 +26,10 @@ fun rememberDominantColorState(
     defaultColor: Color = MaterialTheme.colorScheme.surface
 ): State<Color> {
 
-    // 1. Remember a mutable state, initialized with the default color.
-    // The key ensures that if the imageUrl or defaultColor changes, the state resets.
     val dominantColor = remember(imageUrl, defaultColor) {
         mutableStateOf(defaultColor)
     }
     val context = LocalContext.current
-
-    // 2. Launch a side-effect that runs whenever the imageUrl changes.
     LaunchedEffect(imageUrl) {
         if (imageUrl.isBlank()) {
             dominantColor.value = defaultColor
@@ -44,7 +40,7 @@ fun rememberDominantColorState(
             try {
                 val request = ImageRequest.Builder(context)
                     .data(imageUrl)
-                    .allowHardware(false) // Required for Palette
+                    .allowHardware(false)
                     .build()
 
                 val loader = ImageLoader(context)
@@ -60,7 +56,6 @@ fun rememberDominantColorState(
                         ?: palette.dominantSwatch?.rgb
                         ?: palette.mutedSwatch?.rgb
 
-                    // 3. Update the state's value with the new color if found.
                     dominantColor.value = colorInt?.let { Color(it) } ?: defaultColor
                 } else {
                     dominantColor.value = defaultColor
@@ -71,7 +66,6 @@ fun rememberDominantColorState(
         }
     }
 
-    // 4. Return the state object. The caller can read its .value.
     return dominantColor
 }
 

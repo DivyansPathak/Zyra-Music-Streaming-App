@@ -52,17 +52,3 @@ fun ShimmerEffect(modifier: Modifier = Modifier,
     }
 
 }
-
-@Preview
-@Composable
-private fun PreviewShimmerEffect() {
-    ZyraTheme {
-        ShimmerEffect(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            shimmerColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-
-}

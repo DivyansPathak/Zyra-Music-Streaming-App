@@ -1,6 +1,9 @@
 package com.zyra.music.zyra.presentation.newPlayer.component
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -11,8 +14,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -22,6 +29,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zyra.music.zyra.presentation.ui.theme.ZyraTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun YoutubeStyleSeekBar(
@@ -31,7 +39,22 @@ fun YoutubeStyleSeekBar(
 ) {
 
     val interactionSource = remember { MutableInteractionSource() }
-    val isDragging by interactionSource.collectIsDraggedAsState()
+    val scope = rememberCoroutineScope()
+//    val isDragging by interactionSource.collectIsDraggedAsState()
+
+    var isDragging by remember { mutableStateOf(false) }
+    val displayProgress = remember { Animatable(progress) }
+
+    LaunchedEffect(progress) {
+       if(!isDragging){
+           displayProgress.animateTo(
+               targetValue = progress,
+               animationSpec = spring(stiffness = Spring.StiffnessLow)
+           )
+       }
+    }
+
+
 
     val thumbSize by animateDpAsState(
         targetValue = if (isDragging) 14.dp else 6.dp,
@@ -42,45 +65,45 @@ fun YoutubeStyleSeekBar(
         modifier = modifier
             .fillMaxWidth()
             .height(24.dp)
-//            .pointerInput(Unit) {
-//                detectDragGestures { change, dragAmount ->
-//                    val newProgress = (change.position.x / size.width).coerceIn(0f, 1f)
-//                    seekTo(newProgress)
-//                }
-//            }
-            // Handle taps anywhere on the bar
             .pointerInput(Unit) {
                 detectTapGestures { tapOffset ->
                     val newProgress = (tapOffset.x / size.width).coerceIn(0f, 1f)
                     seekTo(newProgress)
+                    scope.launch {
+                        displayProgress.stop()
+                        displayProgress.snapTo(newProgress)
+                    }
                 }
             }
-//            .pointerInput(Unit) {
-//                // ✅ CORRECTED SPELLING HERE
-//                detectDragGestures(
-//                    onDragStart = { offset ->
-//                        // This captures the initial tap position
-//                        val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
-//                        seekTo(newProgress)
-//                    },
-//                    onDrag = { change, _ ->
-//                        // This handles the continuous drag movement
-//                        val newProgress = (change.position.x / size.width).coerceIn(0f, 1f)
-//                        seekTo(newProgress)
-//                    }
-//                )
-//            }
-            // Handle dragging the thumb
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->
                         val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
-                        seekTo(newProgress)
+//                        seekTo(newProgress)
+                        isDragging = true
+                        scope.launch {
+                            displayProgress.stop()
+                        }
+                        scope.launch {
+                            displayProgress.snapTo(newProgress)
+                        }
                     },
                     onDrag = { change, _ ->
                         val newProgress = (change.position.x / size.width).coerceIn(0f, 1f)
-                        seekTo(newProgress)
+//                        seekTo(newProgress)
+//                        change.consume()
+                        scope.launch {
+                            displayProgress.snapTo(newProgress)
+                        }
                         change.consume()
+                    },
+                    onDragEnd = {
+                        val finalProgress = displayProgress.value
+                        seekTo(finalProgress)
+                        isDragging = false
+                    },
+                    onDragCancel = {
+                        isDragging = false
                     }
                 )
             }
@@ -88,7 +111,11 @@ fun YoutubeStyleSeekBar(
     ) {
 
         Canvas(modifier = Modifier.fillMaxSize()) {
-            //background line
+            val trackHeight = 4.dp.toPx()
+            val trackY = center.y
+
+            val currentProgress = displayProgress.value
+
             drawLine(
                 color = Color.Gray.copy(alpha = 0.5f),
                 start = Offset(0f,size.height/2),
@@ -96,36 +123,19 @@ fun YoutubeStyleSeekBar(
                 strokeWidth = 4.dp.toPx(),
                 cap = StrokeCap.Round
             )
-
-            // Progress Line
             drawLine(
                 color = Color.Red,
                 start = Offset(0f,size.height/2),
-                end = Offset(progress*size.width, size.height/2),
+                end = Offset(currentProgress * size.width , trackY),
                 strokeWidth = 4.dp.toPx(),
                 cap = StrokeCap.Round
             )
-
-            // Tiny thumb
             drawCircle(
                 color = Color.White,
                 radius = (thumbSize / 2).toPx().coerceAtLeast(6.dp.toPx()),
-                center = Offset(progress * size.width, size.height / 2)
+                center = Offset(currentProgress * size.width, trackY)
             )
         }
 
     }
-}
-
-@Preview
-@Composable
-private fun PreviewSeekBar() {
-
-    ZyraTheme {
-        YoutubeStyleSeekBar(
-            progress = 0.5f,
-            seekTo = {}
-        )
-    }
-
 }

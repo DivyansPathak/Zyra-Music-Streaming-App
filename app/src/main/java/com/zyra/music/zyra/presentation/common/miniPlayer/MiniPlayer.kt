@@ -1,4 +1,4 @@
-package com.zyra.music.zyra.presentation.acommon.miniPlayer
+package com.zyra.music.zyra.presentation.common.miniPlayer
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,7 +34,6 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.zyra.music.zyra.R
-import com.zyra.music.zyra.presentation.common.GradientScreenContainer
 import com.zyra.music.zyra.presentation.common.rememberDominantColorState
 import com.zyra.music.zyra.presentation.ui.theme.ZyraTheme
 

@@ -2,7 +2,6 @@ package com.zyra.music.zyra.data.remote
 
 import com.zyra.music.zyra.data.remote.dto.PrePlaylistDto
 import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
-import com.zyra.music.zyra.data.remote.dto.ThumbnailDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.data.remote.dto.favoriteDto.LibraryPlaylistDto
 import com.zyra.music.zyra.data.remote.dto.playlistDetails.PlaylistDetailSongs

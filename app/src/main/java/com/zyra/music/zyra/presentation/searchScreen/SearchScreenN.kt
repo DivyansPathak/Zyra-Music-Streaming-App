@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.zyra.music.zyra.domain.model.TrackFullOne
-import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.MenuItems
+import com.zyra.music.zyra.presentation.common.commonThingForWholeApp.MenuItems
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerState
 import com.zyra.music.zyra.presentation.searchScreen.component.SearchTopBar
 import com.zyra.music.zyra.presentation.searchScreen.component.ShimmerEffectSearch

@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -59,7 +58,7 @@ import coil3.compose.rememberAsyncImagePainter
 import com.zyra.music.zyra.R
 import com.zyra.music.zyra.domain.model.PlaylistDetails
 import com.zyra.music.zyra.domain.model.TrackFullOne
-import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.MenuItems
+import com.zyra.music.zyra.presentation.common.commonThingForWholeApp.MenuItems
 import com.zyra.music.zyra.presentation.common.GradientScreenContainer
 import com.zyra.music.zyra.presentation.common.rememberDominantColorState
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel

@@ -22,7 +22,7 @@ import com.zyra.music.zyra.domain.utils.onFailure
 import com.zyra.music.zyra.domain.utils.onSuccess
 import com.zyra.music.zyra.exoplayer.MusicService
 import com.zyra.music.zyra.exoplayer.NewMusicQueueManager
-import com.zyra.music.zyra.presentation.playerScreen.RepeatMode
+import com.zyra.music.zyra.presentation.newPlayer.component.RepeatMode
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.Dispatchers
@@ -167,8 +167,6 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
                 sleepTimer = null
             }
         }.start()
-
-        // Immediately update the UI to show the initial time.
         _uiState.update { it.copy(sleepTimeRemaining = durationInMillis) }
     }
 
@@ -336,8 +334,9 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
         val queueSize = controller.mediaItemCount
         val currentIndex = controller.currentMediaItemIndex
         val isAutoPlay = _uiState.value.toggleAutoPlay
+        val isPlaylistRepeat = controller.repeatMode == Player.REPEAT_MODE_ALL
 
-        if (queueSize > 1 && currentIndex >= queueSize - 2 && isAutoPlay) {
+        if (queueSize > 1 && currentIndex >= queueSize - 2 && isAutoPlay && !isPlaylistRepeat) {
             _uiState.value.queue.lastOrNull()?.let { track ->
                 Log.d(TAG, "Queue nearing end. Proactively fetching recommendation ")
                 fetchRecommendationsAndUpdateQueue(track)

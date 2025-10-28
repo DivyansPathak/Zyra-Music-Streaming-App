@@ -26,15 +26,10 @@ fun HomeTopBarNew(
     collapseFraction: Float,
     onSearchClick: () -> Unit
 ) {
-    // Linearly interpolate (lerp) values based on the collapse fraction
-
-    // Title fades out completely
     val titleAlpha = lerp(1f, 0f, collapseFraction * 2) // Fades out faster
 
-    // Padding for the title when expanded
     val titlePaddingTop = lerp(16.dp, 0.dp, collapseFraction)
 
-    // The search bar moves up to the top
     val searchBarPaddingTop = lerp(104.dp, 16.dp, collapseFraction)
 
     val user = SupabaseClient.supabase.auth.currentUserOrNull()
@@ -46,9 +41,9 @@ fun HomeTopBarNew(
             .fillMaxSize()
     ) {
         Text(
-            text = "Hello,\n$userName", // You can pass this as a parameter
+            text = "Hello,\n$userName",
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface, // Adjust color as needed
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .padding(top = titlePaddingTop)
                 .alpha(titleAlpha)

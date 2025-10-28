@@ -22,9 +22,7 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "SearchViewModel"
 
-class SearchViewModel(
-    private val songRepository: SongRepository
-) : ViewModel() {
+class SearchViewModel(private val songRepository: SongRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchState())
     val uiState = _uiState.asStateFlow()

@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.lerp
 import com.zyra.music.zyra.navigation.PlayListType
 import com.zyra.music.zyra.presentation.common.GradientScreenContainer
 import com.zyra.music.zyra.presentation.home.component.CardItems
-import com.zyra.music.zyra.presentation.home.component.HomeTopBar
 import com.zyra.music.zyra.presentation.home.component.HomeTopBarNew
 import com.zyra.music.zyra.presentation.home.component.ShimmerEffect
 import kotlinx.coroutines.launch
@@ -56,27 +55,25 @@ fun HomeScreen(
     val pullToRefreshState = rememberPullToRefreshState()
     val scope = rememberCoroutineScope()
 
-    val expandedHeaderHeight = 150.dp // Height for "Hello" (60) + SearchBar (56) + paddings
-    val collapsedHeaderHeight = 88.dp // Height for just SearchBar (56) + paddings
+    val expandedHeaderHeight = 150.dp
+    val collapsedHeaderHeight = 88.dp
 
-    // The range of motion for the collapsing part
+
     val headerHeightDelta = expandedHeaderHeight - collapsedHeaderHeight
     val headerHeightDeltaPx = with(LocalDensity.current) { headerHeightDelta.toPx() }
 
 
-    // --- Calculate Collapse Fraction ---
     val collapseFraction by remember {
         derivedStateOf {
             if (lazyListState.firstVisibleItemIndex > 0) {
-                1f // Fully collapsed
+                1f
             } else {
-                // How much of the "delta" height is scrolled off
                 (lazyListState.firstVisibleItemScrollOffset / headerHeightDeltaPx).coerceIn(0f, 1f)
             }
         }
     }
 
-    // --- Calculate Current Header Height ---
+
     val currentHeaderHeight = lerp(expandedHeaderHeight, collapsedHeaderHeight, collapseFraction)
 
     val gradientAlpha by remember {

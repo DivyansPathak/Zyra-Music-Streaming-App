@@ -1,6 +1,5 @@
 package com.zyra.music.zyra.navigation
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,7 +15,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.Log
@@ -26,24 +24,19 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.zyra.music.zyra.data.remote.SupabaseClient
 import com.zyra.music.zyra.domain.model.TrackFullOne
-import com.zyra.music.zyra.presentation.acommon.MainScreenWithBottomBar
-import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.AddPlaylistSheet
-import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.CreateNewPlaylistDialog
-import com.zyra.music.zyra.presentation.acommon.commonThingForWholeApp.DeleteAlertDialog
+import com.zyra.music.zyra.presentation.common.MainScreenWithBottomBar
+import com.zyra.music.zyra.presentation.common.commonThingForWholeApp.AddPlaylistSheet
+import com.zyra.music.zyra.presentation.common.commonThingForWholeApp.CreateNewPlaylistDialog
+import com.zyra.music.zyra.presentation.common.commonThingForWholeApp.DeleteAlertDialog
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistAction
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistEvent
 import com.zyra.music.zyra.presentation.addPlaylist.AddPlaylistViewModel
-import com.zyra.music.zyra.presentation.libraryScreen.LibraryViewModel
 import com.zyra.music.zyra.presentation.login.LoginScreen
 import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
-import com.zyra.music.zyra.presentation.newPlayer.NewPlayerAction
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerEvent
 import com.zyra.music.zyra.presentation.newPlayer.PlayerScreenN
-import com.zyra.music.zyra.presentation.profileScreen.ProfileEvent
-import com.zyra.music.zyra.presentation.profileScreen.ProfileViewModel
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 private const val TAG = "AppNavigation"
