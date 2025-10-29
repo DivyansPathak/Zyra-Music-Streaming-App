@@ -44,7 +44,7 @@ The app is designed around a Unidirectional Data Flow (UDF), similar to MVI (Sta
   &nbsp; &nbsp; &nbsp;
   <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/home_screen.png?raw=true" width="220" alt="Home Screen">
   &nbsp; &nbsp; &nbsp;
-  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/search_screen_suggestion.png?raw=true" width="220" alt="search Screen Suggestion">
+  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/search_screen_%20suggestion.png?raw=true" width="220" alt="search Screen Suggestion">
   &nbsp; &nbsp; &nbsp;
   <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/search_screen_result.png?raw=true" width="220" alt="Search Screen result">
    &nbsp; &nbsp; &nbsp;
