@@ -40,13 +40,26 @@ The app is designed around a Unidirectional Data Flow (UDF), similar to MVI (Sta
 
 📸 Screenshots
 <p align="center">
-  <img src="https://raw.githubusercontent.com/DivyansPathak/Zyra-Music-Streaming-App/bceb8693b98080c1ee1f64892e508e18b3d1d026/assests/login_screen.png" width="220" alt="Login Screen">
+  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/login_screen.png?raw=true" width="220" alt="Login Screen">
   &nbsp; &nbsp; &nbsp;
   <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/home_screen.png?raw=true" width="220" alt="Home Screen">
   &nbsp; &nbsp; &nbsp;
-  <img src="https://raw.githubusercontent.com/DivyansPathak/Zyra-Music-Streaming-App/bceb8693b98080c1ee1f64892e508e18b3d1d026/assests/library_screen.png" width="220" alt="Library Screen">
+  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/search_screen_suggestion.png?raw=true" width="220" alt="search Screen Suggestion">
   &nbsp; &nbsp; &nbsp;
-  <img src="https://raw.githubusercontent.com/DivyansPathak/Zyra-Music-Streaming-App/bceb8693b98080c1ee1f64892e508e18b3d1d026/assests/search_screen.png" width="220" alt="Search Screen">
+  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/search_screen_result.png?raw=true" width="220" alt="Search Screen result">
+   &nbsp; &nbsp; &nbsp;
+  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/player_screen.png?raw=true" width="220" alt="Player Screen">
+   &nbsp; &nbsp; &nbsp;
+  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/upnext.png?raw=true" width="220" alt="Upnxt">
+   &nbsp; &nbsp; &nbsp;
+  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/library_screen.png?raw=true" width="220" alt="Library Screen">
+   &nbsp; &nbsp; &nbsp;
+  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/playlist_detail_screen.png?raw=true" width="220" alt="Playlist Screen">
+   &nbsp; &nbsp; &nbsp;
+  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/save_playlist_sheet.png?raw=true" width="220" alt="save playlist sheet">
+   &nbsp; &nbsp; &nbsp;
+  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/profile_screen.png?raw=true" width="220" alt="Profile Screen">
+  
 </p>
 ## Supported Platforms
 
