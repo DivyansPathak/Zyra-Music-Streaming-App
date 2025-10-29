@@ -39,8 +39,15 @@ The app is designed around a Unidirectional Data Flow (UDF), similar to MVI (Sta
 ```
 
 📸 Screenshots
-<p align="center"> <img src="" width="220" alt="login_screen"> &nbsp; &nbsp; &nbsp; <img src="" width="220" alt="Player Screen"> &nbsp; &nbsp; &nbsp; <img src="" width="220" alt="Library Screen"> &nbsp; &nbsp; &nbsp; <img src="" width="220" alt="Search Screen"> </p>
-
+<p align="center">
+  <img src="https://raw.githubusercontent.com/DivyansPathak/Zyra-Music-Streaming-App/bceb8693b98080c1ee1f64892e508e18b3d1d026/assests/login_screen.png" width="220" alt="Login Screen">
+  &nbsp; &nbsp; &nbsp;
+  <img src="https://github.com/DivyansPathak/Zyra-Music-Streaming-App/blob/feature-improving-libraryUi/assests/home_screen.png?raw=true" width="220" alt="Home Screen">
+  &nbsp; &nbsp; &nbsp;
+  <img src="https://raw.githubusercontent.com/DivyansPathak/Zyra-Music-Streaming-App/bceb8693b98080c1ee1f64892e508e18b3d1d026/assests/library_screen.png" width="220" alt="Library Screen">
+  &nbsp; &nbsp; &nbsp;
+  <img src="https://raw.githubusercontent.com/DivyansPathak/Zyra-Music-Streaming-App/bceb8693b98080c1ee1f64892e508e18b3d1d026/assests/search_screen.png" width="220" alt="Search Screen">
+</p>
 ## Supported Platforms
 
 *   **Android**: API 21+
