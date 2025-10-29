@@ -1,8 +1,10 @@
 <p align="center"> <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-1.9.20-7F52FF?logo=kotlin&logoColor=white"/> <img alt="Jetpack Compose" src="https://img.shields.io/badge/Jetpack_Compose-1.6-4285F4?logo=jetpackcompose&logoColor=white"/> <img alt="Supabase" src="https://img.shields.io/badge/Supabase-1.162.4-3ECF8E?logo=supabase&logoColor=white"/> <img alt="Koin" src="https://img.shields.io/badge/Koin-3.5.0-5B2F91?logo=koin&logoColor=white"/> <img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg"/> </p>
 
-# Zyra Music Player
+<h1 align="center">🎵 Zyra Music Player</h1>
 
-A modern Android music player built with Jetpack Compose, offering seamless music playback, personalized playlists, and a rich user experience.
+Zyra is a feature-rich, modern music streaming application for Android. It's built entirely with a modern Kotlin-first tech stack, leveraging Jetpack Compose for a fully declarative UI and Supabase for a powerful, real-time backend.
+
+The app is designed around a Unidirectional Data Flow (UDF), similar to MVI (State -> Action -> ViewModel -> Screen), ensuring a predictable and maintainable state-driven architecture.
 
 ## Project Structure
 
@@ -35,6 +37,9 @@ A modern Android music player built with Jetpack Compose, offering seamless musi
 │       ├── profileScreen/
 │       └── searchScreen/
 ```
+
+📸 Screenshots
+<p align="center"> <img src="" width="220" alt="login_screen"> &nbsp; &nbsp; &nbsp; <img src="" width="220" alt="Player Screen"> &nbsp; &nbsp; &nbsp; <img src="" width="220" alt="Library Screen"> &nbsp; &nbsp; &nbsp; <img src="" width="220" alt="Search Screen"> </p>
 
 ## Supported Platforms
 
