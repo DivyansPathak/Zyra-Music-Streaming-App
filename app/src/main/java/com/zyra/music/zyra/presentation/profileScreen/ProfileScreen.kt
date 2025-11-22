@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.zyra.music.zyra.R
+import com.zyra.music.zyra.data.utils.APP_VERSION
 import com.zyra.music.zyra.presentation.profileScreen.common.NameChangeDialog
 import com.zyra.music.zyra.presentation.profileScreen.common.ProfileMenuItem
 import com.zyra.music.zyra.presentation.profileScreen.common.ProfileMenuUi
@@ -185,7 +186,7 @@ fun ComposeProfileScreen(
                             modifier = Modifier
                                 .padding(12.dp)
                                 .align(Alignment.CenterHorizontally),
-                            text = "Version 1.0.0"
+                            text = APP_VERSION
                         )
                         Box(
                             modifier = Modifier

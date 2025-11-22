@@ -44,9 +44,11 @@ class HomeViewModel(
                 repository.observePlaylists("Bollywood"),
                 repository.observePlaylists("Bollywood Romance"),
                 repository.observePlaylists("Bollywood Dance"),
-                repository.observePlaylists("Apne Bandon ka")
-            ) { featured, romance, dance, apne ->
+                repository.observePlaylists("Apne Bandon ka"),
+                repository.observePlaylists("Creator's Favorite"),
+            ) { featured, romance, dance, apne, creator ->
                 val sections = mutableListOf<HomeSection>()
+
                 if (featured.isNotEmpty()) {
                     sections.add(
                         HomeSection(
@@ -83,6 +85,15 @@ class HomeViewModel(
                         )
                     )
                 }
+                if (creator.isNotEmpty()){
+                    sections.add(
+                        HomeSection(
+                            id = "Eternal Joy",
+                            title = "Creator's Favorites",
+                            playLists = creator
+                        )
+                    )
+                }
 
                 HomeScreenState(
                     sections = sections,
@@ -107,7 +118,8 @@ class HomeViewModel(
                 "Bollywood",
                 "Bollywood Romance",
                 "Bollywood Dance",
-                "Apne Bandon ka"
+                "Apne Bandon ka",
+                "Creator's Favorite"
             )
             coroutineScope {
                 genre.map { genre ->

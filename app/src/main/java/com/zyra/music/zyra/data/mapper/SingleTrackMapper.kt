@@ -1,22 +1,10 @@
 package com.zyra.music.zyra.data.mapper
 
-import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
 import com.zyra.music.zyra.data.remote.dto.TrackDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.data.remote.dto.playlistDetails.PlaylistDetailSongs
-import com.zyra.music.zyra.domain.model.SingleTrack
 import com.zyra.music.zyra.domain.model.TrackFullOne
-import org.schabi.newpipe.extractor.timeago.patterns.vi
 
-private fun SingleTrackDto.toSingleTrack() = SingleTrack(
-    title = this.title,
-    artistName = this.artistName,
-    url = this.url,
-    thumbnail = this.thumbnail,
-    duration = this.duration,
-)
-
-fun List<SingleTrackDto>.toSingleTrackList() = map { it.toSingleTrack() }
 
 private fun TrackFullOneDto.toTrackFullOne() = TrackFullOne(
     title = this.title,

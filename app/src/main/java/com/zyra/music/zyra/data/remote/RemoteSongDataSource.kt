@@ -1,7 +1,6 @@
 package com.zyra.music.zyra.data.remote
 
 import com.zyra.music.zyra.data.remote.dto.PrePlaylistDto
-import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.data.remote.dto.favoriteDto.LibraryPlaylistDto
 import com.zyra.music.zyra.data.remote.dto.playlistDetails.PlaylistDetailSongs
@@ -12,10 +11,8 @@ import com.zyra.music.zyra.domain.utils.Result
 
 interface RemoteSongDataSource {
 
-    suspend fun searchSong(query: String): Result<List<SingleTrackDto>, DataError>
-    suspend fun searchSongs(queries: List<String>): Result<List<SingleTrackDto>, DataError>
-
     suspend fun searchSongFromYt(query : String) : Result<List<TrackFullOneDto>, DataError>
+    suspend fun searchSongFromYoutube(query: String) : Result<List<TrackFullOneDto>, DataError>
     suspend fun getUpNext(videoId : String) : Result<List<TrackFullOneDto>, DataError>
 //    suspend fun getRelated(videoId : String) : Result<List<SingleTrackDto>, DataError>
 

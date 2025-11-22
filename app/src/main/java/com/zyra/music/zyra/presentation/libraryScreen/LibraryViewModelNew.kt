@@ -18,9 +18,7 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "LibraryViewModelNew"
 
-class LibraryViewModelNew(
-    private val libraryRepo: LibraryRepositoryNew
-) : ViewModel() {
+class LibraryViewModelNew(private val libraryRepo: LibraryRepositoryNew) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LibraryState())
     val uiState = _uiState.asStateFlow()

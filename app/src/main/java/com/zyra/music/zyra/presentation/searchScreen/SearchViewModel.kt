@@ -5,6 +5,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.util.query
 import com.zyra.music.zyra.domain.repository.SongRepository
 import com.zyra.music.zyra.domain.utils.getErrorMessage
 import com.zyra.music.zyra.domain.utils.onFailure
@@ -165,6 +166,10 @@ class SearchViewModel(private val songRepository: SongRepository) : ViewModel() 
                             error = error.getErrorMessage()
                         )
                     }
+                }
+            songRepository.searchSongFromYoutube(query = query)
+                .onSuccess { songs ->
+                    Log.i(TAG,"1. Execute search query for $query")
                 }
 
         }

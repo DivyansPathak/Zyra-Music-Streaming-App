@@ -88,7 +88,10 @@ fun MainScreenWithBottomBar(
     val libraryViewModel: LibraryViewModelNew = koinViewModel()
     val profileViewModel: ProfileViewModel = koinViewModel()
     val mainState by mainViewModel.uiState.collectAsStateWithLifecycle()
-    val isMiniPlayerVisible = mainState.currentTrack != null
+    val currentScreen = mainBackStack.lastOrNull() as? MainScreens
+    val isBottomBarVisible = currentScreen !is ProfileScreen
+    val isMiniPlayerVisible = (mainState.currentTrack != null && isBottomBarVisible)
+
 
     var controlsHeight by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
@@ -306,8 +309,6 @@ fun MainScreenWithBottomBar(
                     }
 
                 }
-                val currentScreen = mainBackStack.lastOrNull() as? MainScreens
-                val isBottomBarVisible = currentScreen !is ProfileScreen
 
                 AnimatedVisibility(
                     visible = isBottomBarVisible,

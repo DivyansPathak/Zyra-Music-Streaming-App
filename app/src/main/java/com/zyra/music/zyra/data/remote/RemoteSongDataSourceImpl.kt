@@ -1,18 +1,14 @@
 package com.zyra.music.zyra.data.remote
 
-import android.util.Log
 import com.zyra.music.zyra.data.mapper.toPlaylistDetailSongs
 import com.zyra.music.zyra.data.remote.SupabaseClient.supabase
 import com.zyra.music.zyra.data.remote.dto.FavoriteDto
 import com.zyra.music.zyra.data.remote.dto.PrePlaylistDto
-import com.zyra.music.zyra.data.remote.dto.SearchRequestBody
-import com.zyra.music.zyra.data.remote.dto.SingleTrackDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.data.remote.dto.favoriteDto.LibraryPlaylistDto
 import com.zyra.music.zyra.data.remote.dto.playlistDetails.PlaylistDetailSongs
 import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistDto
 import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistSongDto
-import com.zyra.music.zyra.data.utils.BASE_URL
 import com.zyra.music.zyra.data.utils.PRE_PLAYLIST_URL
 import com.zyra.music.zyra.data.utils.YT_BASE_URL
 import com.zyra.music.zyra.domain.utils.DataError
@@ -25,8 +21,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.coroutines.Dispatchers
@@ -41,28 +35,6 @@ class RemoteSongDataSourceImpl(
     private val httpClient: HttpClient,
 ) : RemoteSongDataSource {
     private val TAG = "YTDL"
-    override suspend fun searchSong(query: String): Result<List<SingleTrackDto>, DataError> {
-        return withContext(Dispatchers.IO) {
-            safeCall<List<SingleTrackDto>> {
-                httpClient.get(urlString = "$BASE_URL/search") {
-                    parameter("query", "$query song")
-                }
-            }
-        }
-    }
-
-    override suspend fun searchSongs(queries: List<String>): Result<List<SingleTrackDto>, DataError> {
-        return withContext(Dispatchers.IO) {
-            safeCall<List<SingleTrackDto>> {
-                httpClient.post(urlString = "$BASE_URL/search-songs/") {
-                    setBody(SearchRequestBody(queries = queries))
-                }
-            }
-        }
-
-
-    }
-
     override suspend fun searchSongFromYt(query: String): Result<List<TrackFullOneDto>, DataError> {
         return withContext(Dispatchers.IO) {
             safeCall<List<TrackFullOneDto>> {
@@ -75,6 +47,16 @@ class RemoteSongDataSourceImpl(
 
     }
 
+    override suspend fun searchSongFromYoutube(query: String): Result<List<TrackFullOneDto>, DataError> {
+        return withContext(Dispatchers.IO){
+            safeCall<List<TrackFullOneDto>>{
+                httpClient.get(urlString = "$YT_BASE_URL/ytsearch"){
+                    parameter("query", query)
+                    parameter("limit", 10)
+                }
+            }
+        }
+    }
     override suspend fun getUpNext(videoId: String): Result<List<TrackFullOneDto>, DataError> {
         return withContext(Dispatchers.IO) {
             safeCall<List<TrackFullOneDto>> {

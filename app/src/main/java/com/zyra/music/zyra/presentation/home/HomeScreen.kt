@@ -86,6 +86,7 @@ fun HomeScreen(
         }
     }
     val firstImageUrl = state.sections.firstOrNull()?.playLists?.firstOrNull()?.thumbnail
+
         Box(modifier = Modifier.fillMaxSize()){
 
             GradientScreenContainer(
