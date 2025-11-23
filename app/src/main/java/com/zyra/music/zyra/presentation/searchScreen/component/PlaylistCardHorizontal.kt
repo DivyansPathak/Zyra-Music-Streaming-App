@@ -1,7 +1,6 @@
 package com.zyra.music.zyra.presentation.searchScreen.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,28 +19,30 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.getValue
 import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
+import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImageContent
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.zyra.music.zyra.R
+import com.zyra.music.zyra.data.utils.ERROR_IMAGE_URL_ONE
 import com.zyra.music.zyra.domain.model.playlistData.PlaylistYT
 import com.zyra.music.zyra.presentation.common.rememberDominantColorState
 
@@ -79,7 +80,7 @@ fun PlaylistCardHorizontal(
                 contentDescription = null,
                 modifier = Modifier
                     .matchParentSize()
-                    .blur(24.dp)
+                    .blur(16.dp)
                     .alpha(0.9f)
             )
             Box(
@@ -104,16 +105,25 @@ fun PlaylistCardHorizontal(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
 
-                AsyncImage(
+                SubcomposeAsyncImage(
                     model = image,
-                    contentDescription = playlistYt.title,
-                    placeholder = painterResource(R.drawable.preview_pager),
-                    error = painterResource(R.drawable.error_image),
-                    contentScale = ContentScale.Crop,
+                    contentDescription = "playlist thumbnail",
                     modifier = Modifier
                         .size(120.dp)
-                        .clip(MaterialTheme.shapes.medium)
-                )
+                        .clip(MaterialTheme.shapes.medium),
+                    contentScale = ContentScale.Crop
+                ) {
+                    val state by painter.state.collectAsState()
+                    if (state is AsyncImagePainter.State.Error) {
+                        AsyncImage(
+                            model = ERROR_IMAGE_URL_ONE,
+                            contentDescription = "error image",
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        SubcomposeAsyncImageContent()
+                    }
+                }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(
                     modifier = Modifier.fillMaxWidth(),

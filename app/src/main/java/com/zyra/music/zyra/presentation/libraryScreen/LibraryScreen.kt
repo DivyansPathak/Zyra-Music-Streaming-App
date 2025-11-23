@@ -149,25 +149,3 @@ private fun PlaylistItem(playlist: LibraryPlaylist, onClick: () -> Unit) {
         }
     }
 }
-
-
-@Preview
-@Composable
-private fun PreviewLibraryScreen() {
-    ZyraTheme {
-        // The preview now holds and manages the state
-        var state by remember { mutableStateOf(LibraryState()) }
-
-        LibraryScreen(
-            onPlaylistClick = {playlist, playlistType  ->
-
-            },
-            state = state,
-            // --- FIX 5: Uncomment this block to make the preview interactive ---
-            onScreenTypeSelected = { newType ->
-                // When a new type is selected, update the state for the preview
-                state = state.copy(selectedScreen = newType)
-            }
-        )
-    }
-}

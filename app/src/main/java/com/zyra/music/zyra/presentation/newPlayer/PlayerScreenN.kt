@@ -455,13 +455,9 @@ fun ControlPanel(
                 )
             }
             DropdownMenu(
-                modifier = Modifier.background(
-                    color = MaterialTheme.colorScheme.background.copy(
-                        alpha = 0.5f
-                    )
-                ),
                 expanded = showDropMenu,
-                onDismissRequest = { showDropMenu = false }
+                onDismissRequest = { showDropMenu = false },
+                containerColor = MaterialTheme.colorScheme.surface.copy(0.7f)
             ) {
                 DropdownMenuItem(
                     text = { Text(text = "Off") },

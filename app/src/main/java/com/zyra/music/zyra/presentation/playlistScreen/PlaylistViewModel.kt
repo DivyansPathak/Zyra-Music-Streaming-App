@@ -116,6 +116,7 @@ class PlaylistViewModel(
                 PlayListType.YOUTUBE_PLAYLIST -> {
                     songRepo.getSongsFromYoutubePlaylist(playlistId = playlistId)
                         .onSuccess { songs ->
+                            Log.d(TAG,"Songs from playlist is fetched : $songs")
                             _uiState.update { it.copy(
                                 isLoading = false,
                                 playlistDetails = PlaylistDetails(
@@ -127,6 +128,10 @@ class PlaylistViewModel(
                                     type = PlayListType.YOUTUBE_PLAYLIST
                                 )
                             ) }
+                        }
+                        .onFailure { error ->
+                            Log.e(TAG,"Error in fetching songs from playlist : $error")
+                            _uiState.update { it.copy(isLoading = false, error = error.getErrorMessage()) }
                         }
                 }
             }

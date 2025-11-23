@@ -41,7 +41,8 @@ fun MenuItems(
 
         DropdownMenu(
             expanded = isMenuExpanded,
-            onDismissRequest = { isMenuExpanded = false }
+            onDismissRequest = { isMenuExpanded = false },
+            containerColor = MaterialTheme.colorScheme.surface.copy(0.7f)
         ) {
             DropdownMenuItem(
                 text = { Text("Start Radio") },

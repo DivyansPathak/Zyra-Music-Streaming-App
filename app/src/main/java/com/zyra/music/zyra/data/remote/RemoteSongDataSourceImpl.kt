@@ -72,6 +72,7 @@ class RemoteSongDataSourceImpl(private val httpClient: HttpClient, ) : RemoteSon
                 httpClient.get(urlString = "$YT_BASE_URL/search/playlists") {
                     parameter("query",query)
                     parameter("limit", 10)
+                    parameter("min_songs", 5)
                 }
             }
         }

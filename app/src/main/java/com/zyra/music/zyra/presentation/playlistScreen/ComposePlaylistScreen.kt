@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +39,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,8 +57,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.media3.common.util.UnstableApi
-import coil3.compose.rememberAsyncImagePainter
+import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
+import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImageContent
+import coil3.compose.SubcomposeAsyncImageScope
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.zyra.music.zyra.R
+import com.zyra.music.zyra.data.utils.ERROR_IMAGE_URL_ONE
 import com.zyra.music.zyra.domain.model.PlaylistDetails
 import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.presentation.common.commonThingForWholeApp.MenuItems
@@ -67,6 +75,7 @@ import com.zyra.music.zyra.presentation.newPlayer.MainMusicViewModel
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerAction
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerState
 import com.zyra.music.zyra.presentation.playlistScreen.common.SongListItem
+import kotlinx.coroutines.flow.StateFlow
 import kotlin.math.pow
 
 private val headerHeight = 420.dp
@@ -345,6 +354,7 @@ private fun AnimatedThumbnail(
     playlist: PlaylistDetails,
     transitionProgress: Float
 ) {
+    val context = LocalContext.current
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 
     val imageSize = lerp(250.dp, 40.dp, transitionProgress)
@@ -353,19 +363,34 @@ private fun AnimatedThumbnail(
     val endPaddingStart = 72.dp
     val paddingStart = lerp(startPaddingStart, endPaddingStart, transitionProgress)
 
+
+    val image = ImageRequest.Builder(context)
+        .data(playlist.coverImageUrl)
+        .crossfade(true)
+        .build()
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = paddingTop, start = paddingStart)
     ) {
-        Image(
-            painter = rememberAsyncImagePainter(model = playlist.coverImageUrl),
-            contentDescription = "Playlist thumbnail",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(imageSize)
-
-        )
+        SubcomposeAsyncImage(
+            model = image,
+            contentDescription = "playlist thumbnail",
+            modifier = Modifier.size(imageSize),
+            contentScale = ContentScale.Crop
+        ){
+            val state by painter.state.collectAsState()
+            if (state is AsyncImagePainter.State.Error){
+                AsyncImage(
+                    model = ERROR_IMAGE_URL_ONE,
+                    contentDescription = "error image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else{
+                SubcomposeAsyncImageContent()
+            }
+        }
     }
 }
 

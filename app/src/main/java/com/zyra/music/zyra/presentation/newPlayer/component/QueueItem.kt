@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,6 +24,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,7 +35,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
+import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImageContent
 import com.zyra.music.zyra.R
+import com.zyra.music.zyra.data.utils.ERROR_IMAGE_URL_ONE
 import com.zyra.music.zyra.domain.model.TrackFullOne
 
 @Composable
@@ -64,16 +71,26 @@ fun QueueItem(
             modifier = Modifier,
             contentAlignment = Alignment.Center
         ) {
-            AsyncImage(
+            SubcomposeAsyncImage(
                 model = song.thumbnail,
-                placeholder = painterResource(id = R.drawable.preview_pager),
-                error = painterResource(R.drawable.error_image),
-                contentDescription = "Song thumbnail for ${song.title}",
+                contentDescription = "playlist thumbnail",
                 modifier = Modifier
                     .size(56.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                contentScale = ContentScale.Crop,
-            )
+                    .clip(MaterialTheme.shapes.small),
+                contentScale = ContentScale.Crop
+            ) {
+                val state by painter.state.collectAsState()
+                if (state is AsyncImagePainter.State.Error) {
+                    AsyncImage(
+                        model = ERROR_IMAGE_URL_ONE,
+                        contentDescription = "error image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    SubcomposeAsyncImageContent()
+                }
+            }
         }
 
         // Title and Artist

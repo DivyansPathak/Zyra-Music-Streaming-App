@@ -11,3 +11,5 @@ const val   LIBRARY_PLAYLIST_TABLE_ENTITY = "library_playlists"
 const val   DATABASE_NAME = "music.db"
 
 const val APP_VERSION = "1.0.0"
+
+const val ERROR_IMAGE_URL_ONE = "https://kjegpczagrbhbgtubhxa.supabase.co/storage/v1/object/public/Image%20Url/error_image.png"

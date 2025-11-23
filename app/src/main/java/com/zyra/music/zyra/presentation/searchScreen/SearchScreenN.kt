@@ -166,27 +166,35 @@ fun SearchScreenN(
                         item {
                             Column(modifier = Modifier.padding(vertical = 16.dp)) {
                                 Text(
-                                    text = "More Results", // or "From YouTube"
+                                    text = "More Results - Youtube",
                                     style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                                 )
-
-                                // Horizontal Scroll Container
                                 LazyRow(
-                                    contentPadding = PaddingValues(start = 16.dp, end = 56.dp),
+                                    contentPadding = PaddingValues(start = 16.dp, end = 24.dp),
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
                                     items(state.searchResultsFromYoutube) { song ->
+                                        val isTrackFavorite = mainState.favoriteIds.contains(song.videoId)
                                         SongCardHorizontal(
                                             track = song,
-                                            onClick = { onSongClick(song) }
+                                            onClick = { onSongClick(song) },
+                                            trailingContent = {
+                                                MenuItems(
+                                                    isFavorite = isTrackFavorite,
+                                                    onPlayAsRadioClick = { onSongClick(song) },
+                                                    onAddToNextPlay = { onNextPlayClick(song) },
+                                                    onAddToQueue = { addToQueueClick(song) },
+                                                    onAddToPlaylist = { addToPlaylistClick(song) },
+                                                    onToggleFavorite = { addToFavoriteClick(song) }
+                                                )
+                                            }
                                         )
                                     }
                                 }
                             }
                         }
                     }
-
                     items(remainingResult) { song ->
                         val isTrackFavorite = mainState.favoriteIds.contains(song.videoId)
                         SongListItemForSearch(
@@ -209,12 +217,11 @@ fun SearchScreenN(
                         item {
                             Column(modifier = Modifier.padding(vertical = 16.dp)) {
                                 Text(
-                                    text = "Playlists",
+                                    text = "Playlists From Youtube",
                                     style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                                 )
 
-                                // Horizontal Scroll Container
                                 LazyRow(
                                     contentPadding = PaddingValues(start = 16.dp, end = 56.dp),
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
