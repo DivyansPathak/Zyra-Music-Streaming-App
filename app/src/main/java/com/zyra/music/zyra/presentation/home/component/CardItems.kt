@@ -30,7 +30,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.zyra.music.zyra.R
 import com.zyra.music.zyra.domain.model.PlayList
-import com.zyra.music.zyra.navigation.PlayListType
+import com.zyra.music.zyra.presentation.playlistScreen.PlayListType
 import com.zyra.music.zyra.presentation.ui.theme.ZyraTheme
 
 @Composable

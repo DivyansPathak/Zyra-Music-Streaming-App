@@ -1,7 +1,7 @@
 package com.zyra.music.zyra.data.remote.dto.playlistDetails
 
 import com.zyra.music.zyra.domain.model.TrackFullOne
-import com.zyra.music.zyra.navigation.PlayListType
+import com.zyra.music.zyra.presentation.playlistScreen.PlayListType
 import kotlinx.serialization.Serializable
 
 @Serializable

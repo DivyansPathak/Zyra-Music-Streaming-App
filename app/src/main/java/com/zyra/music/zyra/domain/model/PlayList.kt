@@ -1,6 +1,6 @@
 package com.zyra.music.zyra.domain.model
 
-import com.zyra.music.zyra.navigation.PlayListType
+import com.zyra.music.zyra.presentation.playlistScreen.PlayListType
 
 data class PlayList(
     val id : String,

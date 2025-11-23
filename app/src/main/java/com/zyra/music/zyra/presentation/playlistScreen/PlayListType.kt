@@ -1,4 +1,4 @@
-package com.zyra.music.zyra.navigation
+package com.zyra.music.zyra.presentation.playlistScreen
 
 import kotlinx.serialization.Serializable
 
@@ -9,5 +9,6 @@ enum class PlayListType {
 
     // Fetched from Supabase for the logged-in user
     FAVORITES,
-    USER_CREATED
+    USER_CREATED,
+    YOUTUBE_PLAYLIST
 }

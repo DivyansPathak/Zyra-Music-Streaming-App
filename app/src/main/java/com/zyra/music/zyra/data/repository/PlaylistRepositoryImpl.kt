@@ -14,10 +14,7 @@ import kotlinx.coroutines.flow.map
 
 private const val TAG = "PlaylistRepositoryImpl"
 
-class PlaylistRepositoryImpl(
-    private val remoteSongDataSource: RemoteSongDataSource,
-    private val playlistDao : PrePlaylistDao
-) : PlaylistRepository {
+class PlaylistRepositoryImpl(private val remoteSongDataSource: RemoteSongDataSource, private val playlistDao : PrePlaylistDao) : PlaylistRepository {
 
     override fun observePlaylists(genre: String): Flow<List<PlayList>> {
         return playlistDao.observePlaylistByGenre(genre = genre).map { entities -> entities.map { it.toPlaylist() } }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -31,34 +32,38 @@ import androidx.compose.ui.unit.dp
 import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.presentation.common.commonThingForWholeApp.MenuItems
 import com.zyra.music.zyra.presentation.newPlayer.NewPlayerState
+import com.zyra.music.zyra.presentation.searchScreen.component.PlaylistCardHorizontal
 import com.zyra.music.zyra.presentation.searchScreen.component.SearchTopBar
 import com.zyra.music.zyra.presentation.searchScreen.component.ShimmerEffectSearch
+import com.zyra.music.zyra.presentation.searchScreen.component.SongCardHorizontal
 import com.zyra.music.zyra.presentation.searchScreen.component.SongListItemForSearch
 import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun SearchScreenN(
     state: SearchState,
-    mainState : NewPlayerState,
+    mainState: NewPlayerState,
     onAction: (SearchAction) -> Unit,
     onBackClick: () -> Unit,
     onSongClick: (TrackFullOne) -> Unit,
     onNextPlayClick: (TrackFullOne) -> Unit,
     addToQueueClick: (TrackFullOne) -> Unit,
-    addToPlaylistClick : (TrackFullOne) -> Unit,
-    addToFavoriteClick : (TrackFullOne) -> Unit,
-    eventFlow : Flow<SearchEvent>,
-    contentPadding : Dp = 0.dp
+    addToPlaylistClick: (TrackFullOne) -> Unit,
+    addToFavoriteClick: (TrackFullOne) -> Unit,
+    onPlaylistClick : (String) -> Unit,
+    eventFlow: Flow<SearchEvent>,
+    contentPadding: Dp = 0.dp
 ) {
 
     val controller = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(Unit) {
         eventFlow.collect { event ->
-            when(event){
+            when (event) {
                 is SearchEvent.HideKeyboard -> {
                     controller?.hide()
                 }
+
                 is SearchEvent.NavigateToBack -> {
                     onBackClick()
                 }
@@ -76,7 +81,7 @@ fun SearchScreenN(
             query = state.query,
             onQueryChange = { newQuery -> onAction(SearchAction.OnQueryChange(newQuery)) },
             onTrailingIconClick = { onAction(SearchAction.OnClearQuery); controller?.show() },
-            onBackClick = {onBackClick() },
+            onBackClick = { onBackClick() },
             onImeSearchClick = { newQuery -> onAction(SearchAction.OnImeSearchClick(newQuery)) }
         )
         HorizontalDivider(
@@ -131,26 +136,100 @@ fun SearchScreenN(
             else -> {
                 LazyColumn(
                     contentPadding = PaddingValues(bottom = contentPadding),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(state.searchResultsFromYT) { song ->
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val primaryList = state.searchResultsFromYT
+                    val firstTwoResult = primaryList.take(2)
+                    val remainingResult = primaryList.drop(2)
+                    items(firstTwoResult) { song ->
                         val isTrackFavorite = mainState.favoriteIds.contains(song.videoId)
                         SongListItemForSearch(
                             track = song,
-                            modifier = Modifier.clickable{
+                            modifier = Modifier.clickable {
                                 onSongClick(song)
                             },
                             isPlaying = false,
                             trailingContent = {
                                 MenuItems(
                                     isFavorite = isTrackFavorite,
-                                    onPlayAsRadioClick = {onSongClick(song)},
-                                    onAddToNextPlay = {onNextPlayClick(song)},
-                                    onAddToQueue = {addToQueueClick(song)},
-                                    onAddToPlaylist = {addToPlaylistClick(song)},
-                                    onToggleFavorite = {addToFavoriteClick(song)}
+                                    onPlayAsRadioClick = { onSongClick(song) },
+                                    onAddToNextPlay = { onNextPlayClick(song) },
+                                    onAddToQueue = { addToQueueClick(song) },
+                                    onAddToPlaylist = { addToPlaylistClick(song) },
+                                    onToggleFavorite = { addToFavoriteClick(song) }
                                 )
                             }
                         )
+                    }
+
+                    if (state.searchResultsFromYoutube.isNotEmpty()) {
+                        item {
+                            Column(modifier = Modifier.padding(vertical = 16.dp)) {
+                                Text(
+                                    text = "More Results", // or "From YouTube"
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+
+                                // Horizontal Scroll Container
+                                LazyRow(
+                                    contentPadding = PaddingValues(start = 16.dp, end = 56.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    items(state.searchResultsFromYoutube) { song ->
+                                        SongCardHorizontal(
+                                            track = song,
+                                            onClick = { onSongClick(song) }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    items(remainingResult) { song ->
+                        val isTrackFavorite = mainState.favoriteIds.contains(song.videoId)
+                        SongListItemForSearch(
+                            track = song,
+                            modifier = Modifier.clickable { onSongClick(song) },
+                            isPlaying = false,
+                            trailingContent = {
+                                MenuItems(
+                                    isFavorite = isTrackFavorite,
+                                    onPlayAsRadioClick = { onSongClick(song) },
+                                    onAddToNextPlay = { onNextPlayClick(song) },
+                                    onAddToQueue = { addToQueueClick(song) },
+                                    onAddToPlaylist = { addToPlaylistClick(song) },
+                                    onToggleFavorite = { addToFavoriteClick(song) }
+                                )
+                            }
+                        )
+                    }
+                    if (state.playlistFromYoutube.isNotEmpty()){
+                        item {
+                            Column(modifier = Modifier.padding(vertical = 16.dp)) {
+                                Text(
+                                    text = "Playlists",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+
+                                // Horizontal Scroll Container
+                                LazyRow(
+                                    contentPadding = PaddingValues(start = 16.dp, end = 56.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    items(state.playlistFromYoutube) { playlist ->
+                                        PlaylistCardHorizontal(
+                                            playlistYt = playlist,
+                                            onClick = {playlistId ->
+                                                    onPlaylistClick(playlistId)
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -188,4 +267,5 @@ fun SuggestionRow(
     }
 
 }
+
 

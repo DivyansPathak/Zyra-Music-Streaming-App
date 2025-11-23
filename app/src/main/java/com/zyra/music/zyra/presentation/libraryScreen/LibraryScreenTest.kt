@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zyra.music.zyra.navigation.PlayListType
+import com.zyra.music.zyra.presentation.playlistScreen.PlayListType
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 

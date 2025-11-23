@@ -39,7 +39,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
 import com.zyra.music.zyra.domain.model.LibraryPlaylist
-import com.zyra.music.zyra.navigation.PlayListType
+import com.zyra.music.zyra.presentation.playlistScreen.PlayListType
 import com.zyra.music.zyra.presentation.ui.theme.ZyraTheme
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel

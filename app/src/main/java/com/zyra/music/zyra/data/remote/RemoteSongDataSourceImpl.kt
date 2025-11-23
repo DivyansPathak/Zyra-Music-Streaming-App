@@ -7,6 +7,7 @@ import com.zyra.music.zyra.data.remote.dto.PrePlaylistDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.data.remote.dto.favoriteDto.LibraryPlaylistDto
 import com.zyra.music.zyra.data.remote.dto.playlistDetails.PlaylistDetailSongs
+import com.zyra.music.zyra.data.remote.dto.playlistFromYoutubeDto.PlaylistDto
 import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistDto
 import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistSongDto
 import com.zyra.music.zyra.data.utils.PRE_PLAYLIST_URL
@@ -31,10 +32,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import java.net.UnknownHostException
 
 
-class RemoteSongDataSourceImpl(
-    private val httpClient: HttpClient,
-) : RemoteSongDataSource {
-    private val TAG = "YTDL"
+class RemoteSongDataSourceImpl(private val httpClient: HttpClient, ) : RemoteSongDataSource {
     override suspend fun searchSongFromYt(query: String): Result<List<TrackFullOneDto>, DataError> {
         return withContext(Dispatchers.IO) {
             safeCall<List<TrackFullOneDto>> {
@@ -51,7 +49,7 @@ class RemoteSongDataSourceImpl(
         return withContext(Dispatchers.IO){
             safeCall<List<TrackFullOneDto>>{
                 httpClient.get(urlString = "$YT_BASE_URL/ytsearch"){
-                    parameter("query", query)
+                    parameter("query", "$query song")
                     parameter("limit", 10)
                 }
             }
@@ -63,6 +61,27 @@ class RemoteSongDataSourceImpl(
                 httpClient.get(urlString = "$YT_BASE_URL/upnext") {
                     parameter("video_id", videoId)
                     parameter("limit", 15)
+                }
+            }
+        }
+    }
+
+    override suspend fun getPlaylistFromYoutube(query: String): Result<List<PlaylistDto>, DataError> {
+        return withContext(Dispatchers.IO){
+            safeCall<List<PlaylistDto>> {
+                httpClient.get(urlString = "$YT_BASE_URL/search/playlists") {
+                    parameter("query",query)
+                    parameter("limit", 10)
+                }
+            }
+        }
+    }
+
+    override suspend fun getSongsFromPlaylist(playlistId: String): Result<List<TrackFullOneDto>, DataError> {
+        return withContext(Dispatchers.IO){
+            safeCall <List<TrackFullOneDto>>{
+                httpClient.get(urlString = "$YT_BASE_URL/playlist/$playlistId/songs"){
+                    parameter("limit", 10)
                 }
             }
         }

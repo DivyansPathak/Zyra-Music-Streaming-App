@@ -42,7 +42,7 @@ import com.zyra.music.zyra.navigation.HomeScreen
 import com.zyra.music.zyra.navigation.LibraryScreen
 import com.zyra.music.zyra.navigation.LoginScreen
 import com.zyra.music.zyra.navigation.MainScreens
-import com.zyra.music.zyra.navigation.PlayListType
+import com.zyra.music.zyra.presentation.playlistScreen.PlayListType
 import com.zyra.music.zyra.navigation.PlayerScreen
 import com.zyra.music.zyra.navigation.PlaylistScreen
 import com.zyra.music.zyra.navigation.ProfileScreen
@@ -196,6 +196,14 @@ fun MainScreenWithBottomBar(
                             onSongClick = { track ->
                                 mainViewModel.playRadioForSong(track)
                                 appTopBackStack.add(PlayerScreen)
+                            },
+                            onPlaylistClick = {playlistId ->
+                                mainBackStack.add(
+                                    PlaylistScreen(
+                                        id = playlistId,
+                                        type = PlayListType.YOUTUBE_PLAYLIST
+                                    )
+                                )
                             },
                             onNextPlayClick = { track -> mainViewModel.addSongToPlayNext(track) },
                             addToQueueClick = { track -> mainViewModel.addSongToQueue(track) },

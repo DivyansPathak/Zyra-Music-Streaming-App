@@ -1,10 +1,13 @@
 package com.zyra.music.zyra.data.repository
 
 import android.util.Log
+import com.zyra.music.zyra.data.mapper.toPlaylistYts
 import com.zyra.music.zyra.data.mapper.toTrackFullOneList
 import com.zyra.music.zyra.data.remote.RemoteSongDataSource
+import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.domain.model.SongResult
 import com.zyra.music.zyra.domain.model.TrackFullOne
+import com.zyra.music.zyra.domain.model.playlistData.PlaylistYT
 import com.zyra.music.zyra.domain.repository.SongRepository
 import com.zyra.music.zyra.domain.utils.DataError
 import com.zyra.music.zyra.domain.utils.Result
@@ -15,38 +18,6 @@ import org.schabi.newpipe.extractor.stream.StreamInfo
 private const val TAG = "SongRepository"
 
 class SongRepositoryImpl(private val remoteSongDataSource: RemoteSongDataSource) : SongRepository {
-//    override suspend fun searchSong(query: String): Result<List<SingleTrack>, DataError> {
-//
-//        Log.d(TAG, "2. Asking DataSource for songs with query: '$query'")
-//
-//        val result = remoteSongDataSource.searchSong(query = query)
-//        Log.d(TAG, "3. Got result from DataSource: $result")
-//        return when (result) {
-//            is Result.Success -> {
-//                val singleTrackDto = result.data
-//                Log.i(TAG, "3.1. Mapped ${singleTrackDto.size} DTOs to Domain models successfully.")
-//                Result.Success(singleTrackDto.toSingleTrackList())
-//            }
-//
-//            is Result.Failure -> result
-//
-//        }
-//    }
-
-//    override suspend fun searchSongs(queries: List<String>): Result<List<SingleTrack>, DataError> {
-//        Log.d(TAG, "2. Asking DataSource for songs with queries: '$queries'")
-//        val result = remoteSongDataSource.searchSongs(queries = queries)
-//        Log.d(TAG, "3. Got result from DataSource: $result")
-//        return when(result){
-//            is Result.Failure -> result
-//            is Result.Success -> {
-//                val singleTrackDto = result.data
-//                Log.i(TAG, "3.1. Mapped ${singleTrackDto.size} DTOs to Domain models successfully.")
-//                Result.Success(singleTrackDto.toSingleTrackList())
-//            }
-//        }
-//    }
-
     override suspend fun getSong(url: String): Result<SongResult, DataError> {
         return withContext(Dispatchers.IO) {
             try {
@@ -119,6 +90,38 @@ class SongRepositoryImpl(private val remoteSongDataSource: RemoteSongDataSource)
                 Result.Success(trackFullOneDto.toTrackFullOneList())
             }
             is Result.Failure -> result
+        }
+    }
+
+    override suspend fun searchPlaylistFromYoutube(query: String): Result<List<PlaylistYT>, DataError> {
+        val result = remoteSongDataSource.getPlaylistFromYoutube(query = query)
+        Log.d(TAG,"Playlists from Youtube Playlist for $query is $result ")
+        return when(result){
+            is Result.Success ->{
+                val playlistDto = result.data
+                Log.d(TAG,"Playlists from the $query is $playlistDto")
+                Result.Success(playlistDto.toPlaylistYts())
+            }
+            is Result.Failure -> {
+                Log.e(TAG,"we got some error : ${result.error}")
+                result
+            }
+        }
+    }
+
+    override suspend fun getSongsFromYoutubePlaylist(playlistId: String): Result<List<TrackFullOne>, DataError> {
+        val result = remoteSongDataSource.getSongsFromPlaylist(playlistId = playlistId)
+        Log.d(TAG,"Result for playlist id $playlistId is fetching")
+        return when(result){
+            is Result.Success -> {
+                val trackDto = result.data
+                Log.d(TAG,"list of tracks for playlist : $trackDto")
+                Result.Success(trackDto.toTrackFullOneList())
+            }
+            is Result.Failure ->{
+                Log.e(TAG,"error in getting songs : ${result.error}")
+                result
+            }
         }
     }
 

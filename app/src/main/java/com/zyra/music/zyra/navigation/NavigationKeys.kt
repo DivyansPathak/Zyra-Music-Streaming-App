@@ -1,6 +1,7 @@
 package com.zyra.music.zyra.navigation
 
 import androidx.navigation3.runtime.NavKey
+import com.zyra.music.zyra.presentation.playlistScreen.PlayListType
 import kotlinx.serialization.Serializable
 
 sealed interface AppScreens : NavKey

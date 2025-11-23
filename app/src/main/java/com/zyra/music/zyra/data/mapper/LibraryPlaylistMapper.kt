@@ -7,7 +7,7 @@ import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistSongDto
 import com.zyra.music.zyra.domain.model.LibraryPlaylist
 import com.zyra.music.zyra.domain.model.playlistData.UserPlaylist
 import com.zyra.music.zyra.domain.model.playlistData.UserPlaylistSong
-import com.zyra.music.zyra.navigation.PlayListType
+import com.zyra.music.zyra.presentation.playlistScreen.PlayListType
 
 fun LibraryPlaylistDto.toLibraryPlaylists(
     userName : String?  = "You"

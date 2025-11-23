@@ -31,7 +31,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
-import com.zyra.music.zyra.navigation.PlayListType
+import com.zyra.music.zyra.presentation.playlistScreen.PlayListType
 import com.zyra.music.zyra.presentation.common.GradientScreenContainer
 import com.zyra.music.zyra.presentation.home.component.CardItems
 import com.zyra.music.zyra.presentation.home.component.HomeTopBarNew
@@ -43,10 +43,10 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     modifier: Modifier = Modifier,
     state: HomeScreenState,
-    onPlaylistClick: (playlistId: String,playlistType : PlayListType) -> Unit,
-    onSearchClick : () -> Unit,
+    onPlaylistClick: (playlistId: String, playlistType: PlayListType) -> Unit,
+    onSearchClick: () -> Unit,
     onRefresh: suspend () -> Unit,
-    contentPadding : Dp = 0.dp
+    contentPadding: Dp = 0.dp
 
 ) {
 
@@ -85,80 +85,81 @@ fun HomeScreen(
             }
         }
     }
+
     val firstImageUrl = state.sections.firstOrNull()?.playLists?.firstOrNull()?.thumbnail
 
-        Box(modifier = Modifier.fillMaxSize()){
+    Box(modifier = Modifier.fillMaxSize()) {
 
-            GradientScreenContainer(
-                modifier = modifier,
-                imagerUrl = firstImageUrl,
-                alphaValue = gradientAlpha * 0.4f
-            ) {}
-            PullToRefreshBox(
-                modifier = Modifier
-                    .fillMaxSize(),
-                isRefreshing = state.isLoading,
-                onRefresh = {
-                    scope.launch {
-                        onRefresh()
-                    }
+        GradientScreenContainer(
+            modifier = modifier,
+            imagerUrl = firstImageUrl,
+            alphaValue = gradientAlpha * 0.4f
+        ) {}
+        PullToRefreshBox(
+            modifier = Modifier
+                .fillMaxSize(),
+            isRefreshing = state.isLoading,
+            onRefresh = {
+                scope.launch {
+                    onRefresh()
                 }
+            }
+        ) {
+            LazyColumn(
+                state = lazyListState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = contentPadding, top = expandedHeaderHeight)
             ) {
-                    LazyColumn(
-                        state = lazyListState,
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = contentPadding, top = expandedHeaderHeight)
-                    ) {
-                        if (state.isLoading && state.sections.isEmpty()) {
-                            items(3) {
-                                ShimmeringSectionPlaceholder()
-                            }
-                        } else {
-                            items(state.sections, key = { it.id }) { section ->
-                                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                                    Text(
-                                        text = section.title,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        modifier = Modifier.padding(horizontal = 16.dp)
-                                    )
+                if (state.isLoading && state.sections.isEmpty()) {
+                    items(3) {
+                        ShimmeringSectionPlaceholder()
+                    }
+                } else {
+                    items(state.sections, key = { it.id }) { section ->
+                        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                            Text(
+                                text = section.title,
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
 
-                                    LazyRow(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentPadding = PaddingValues(
-                                            horizontal = 16.dp,
-                                            vertical = 12.dp
-                                        ),
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                    ) {
-                                        items(section.playLists, key = { it.id }) { playlists ->
-                                            CardItems(
-                                                modifier = Modifier
-                                                    .fillParentMaxWidth(0.4f)
-                                                    .aspectRatio(0.75f),
-                                                playlists = playlists,
-                                                onCardItemClick = { playlistId,playlistType ->
-                                                    onPlaylistClick(playlistId,playlistType)
-                                                }
-                                            )
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentPadding = PaddingValues(
+                                    horizontal = 16.dp,
+                                    vertical = 12.dp
+                                ),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                items(section.playLists, key = { it.id }) { playlists ->
+                                    CardItems(
+                                        modifier = Modifier
+                                            .fillParentMaxWidth(0.4f)
+                                            .aspectRatio(0.75f),
+                                        playlists = playlists,
+                                        onCardItemClick = { playlistId, playlistType ->
+                                            onPlaylistClick(playlistId, playlistType)
                                         }
-                                    }
+                                    )
                                 }
                             }
                         }
                     }
-
+                }
             }
 
-            HomeTopBarNew(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(currentHeaderHeight) // Height animates
-                    .align(Alignment.TopCenter),
-                collapseFraction = collapseFraction,
-                onSearchClick = onSearchClick // Pass the click handler
-            )
-
         }
+
+        HomeTopBarNew(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(currentHeaderHeight) // Height animates
+                .align(Alignment.TopCenter),
+            collapseFraction = collapseFraction,
+            onSearchClick = onSearchClick // Pass the click handler
+        )
+
+    }
 
 
 }

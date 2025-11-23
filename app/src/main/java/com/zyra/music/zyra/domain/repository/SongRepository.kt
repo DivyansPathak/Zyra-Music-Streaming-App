@@ -1,7 +1,9 @@
 package com.zyra.music.zyra.domain.repository
 
+import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.domain.model.SongResult
 import com.zyra.music.zyra.domain.model.TrackFullOne
+import com.zyra.music.zyra.domain.model.playlistData.PlaylistYT
 import com.zyra.music.zyra.domain.utils.DataError
 import com.zyra.music.zyra.domain.utils.Result
 
@@ -12,6 +14,8 @@ interface SongRepository{
     suspend fun searchSongFromYt(query : String) : Result<List<TrackFullOne>, DataError>
     suspend fun searchSongFromYoutube(query: String) : Result<List<TrackFullOne>, DataError>
     suspend fun getUpNext(videoId : String) : Result<List<TrackFullOne>, DataError>
+    suspend fun searchPlaylistFromYoutube(query: String) : Result<List<PlaylistYT>, DataError>
+    suspend fun getSongsFromYoutubePlaylist(playlistId : String) : Result<List<TrackFullOne>, DataError>
 
 
     suspend fun getSearchSuggestions(query : String) : Result<List<String>, DataError>

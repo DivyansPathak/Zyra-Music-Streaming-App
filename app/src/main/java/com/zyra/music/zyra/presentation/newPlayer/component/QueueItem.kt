@@ -66,12 +66,13 @@ fun QueueItem(
         ) {
             AsyncImage(
                 model = song.thumbnail,
+                placeholder = painterResource(id = R.drawable.preview_pager),
+                error = painterResource(R.drawable.error_image),
                 contentDescription = "Song thumbnail for ${song.title}",
                 modifier = Modifier
                     .size(56.dp)
                     .clip(RoundedCornerShape(4.dp)),
                 contentScale = ContentScale.Crop,
-                placeholder = painterResource(id = R.drawable.preview_pager)
             )
         }
 

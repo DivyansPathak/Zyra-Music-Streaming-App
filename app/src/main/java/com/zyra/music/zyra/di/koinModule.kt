@@ -63,6 +63,7 @@ val koinModule = module {
 
        PlaylistViewModel(get(),
            get(),
+           get(),
            playlistId = param.get(),
            playlistType = param.get()
        )

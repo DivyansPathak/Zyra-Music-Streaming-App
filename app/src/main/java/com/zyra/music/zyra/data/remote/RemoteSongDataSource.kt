@@ -4,8 +4,10 @@ import com.zyra.music.zyra.data.remote.dto.PrePlaylistDto
 import com.zyra.music.zyra.data.remote.dto.TrackFullOneDto
 import com.zyra.music.zyra.data.remote.dto.favoriteDto.LibraryPlaylistDto
 import com.zyra.music.zyra.data.remote.dto.playlistDetails.PlaylistDetailSongs
+import com.zyra.music.zyra.data.remote.dto.playlistFromYoutubeDto.PlaylistDto
 import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistDto
 import com.zyra.music.zyra.data.remote.dto.userPlaylist.UserPlaylistSongDto
+import com.zyra.music.zyra.domain.model.TrackFullOne
 import com.zyra.music.zyra.domain.utils.DataError
 import com.zyra.music.zyra.domain.utils.Result
 
@@ -14,6 +16,9 @@ interface RemoteSongDataSource {
     suspend fun searchSongFromYt(query : String) : Result<List<TrackFullOneDto>, DataError>
     suspend fun searchSongFromYoutube(query: String) : Result<List<TrackFullOneDto>, DataError>
     suspend fun getUpNext(videoId : String) : Result<List<TrackFullOneDto>, DataError>
+    suspend fun getPlaylistFromYoutube(query: String) : Result<List<PlaylistDto>, DataError>
+    suspend fun getSongsFromPlaylist(playlistId : String) : Result<List<TrackFullOneDto>, DataError>
+
 //    suspend fun getRelated(videoId : String) : Result<List<SingleTrackDto>, DataError>
 
     suspend fun getSearchSuggestions(query : String) : Result<List<String>, DataError>

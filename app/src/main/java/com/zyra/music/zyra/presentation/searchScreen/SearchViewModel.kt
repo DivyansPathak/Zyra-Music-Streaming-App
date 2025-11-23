@@ -11,6 +11,7 @@ import com.zyra.music.zyra.domain.utils.getErrorMessage
 import com.zyra.music.zyra.domain.utils.onFailure
 import com.zyra.music.zyra.domain.utils.onSuccess
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -41,7 +42,14 @@ class SearchViewModel(private val songRepository: SongRepository) : ViewModel() 
         searchJob?.cancel()
         val cleanQuery = query.text.trim()
         if (cleanQuery.isBlank()) {
-            _uiState.update { it.copy(searchResults = emptyList(), error = null) }
+            _uiState.update {
+                it.copy(
+                    searchResultsFromYT = emptyList(),
+                    searchResultsFromYoutube = emptyList(),
+                    playlistFromYoutube = emptyList(),
+                    error = null
+                )
+            }
             return
         }
 
@@ -104,12 +112,6 @@ class SearchViewModel(private val songRepository: SongRepository) : ViewModel() 
                 executeSearch(action.suggestion)
             }
 
-            is SearchAction.OnTrackClick -> {
-                // Handle track click
-                Log.i(TAG, "Track clicked: ${action.track.title}")
-
-            }
-
             is SearchAction.OnImeSearchClick -> {
                 val cleanQuery = action.query.trim()
                 if (cleanQuery.isNotBlank()) {
@@ -129,7 +131,8 @@ class SearchViewModel(private val songRepository: SongRepository) : ViewModel() 
             is SearchAction.OnClearQuery -> {
                 onQueryChange(query = TextFieldValue(""))
             }
-            is SearchAction.OnBackClick ->{
+
+            is SearchAction.OnBackClick -> {
                 viewModelScope.launch {
                     _uiEvent.send(SearchEvent.NavigateToBack)
                 }
@@ -144,33 +147,50 @@ class SearchViewModel(private val songRepository: SongRepository) : ViewModel() 
                 it.copy(
                     isLoading = true,
                     searchSuggestions = emptyList(),
-                    searchResultsFromYT = emptyList(), error = null
+                    searchResultsFromYT = emptyList(),
+                    searchResultsFromYoutube = emptyList(),
+                    error = null
                 )
             }
-            songRepository.searchSongFromYt(query = query)
+
+            val ytMusicJob = async {
+                songRepository.searchSongFromYt(query = query)
+            }
+            val youtubeJob = async {
+                songRepository.searchSongFromYoutube(query = query)
+            }
+            val ytPlaylistJob = async {
+                songRepository.searchPlaylistFromYoutube(query = query)
+            }
+
+            ytMusicJob.await()
                 .onSuccess { songs ->
-                    Log.i(TAG, "5. SUCCESS: Found ${songs.size} songs.")
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            searchResultsFromYT = songs,
-                            error = null,
-                        )
-                    }
+                    _uiState.update { it.copy(searchResultsFromYT = songs, error = null) }
                 }
                 .onFailure { error ->
-                    Log.e(TAG, "5. FAILURE: Search failed. Error: $error")
+                    _uiState.update { it.copy(error = error.getErrorMessage()) }
+                }
+            youtubeJob.await()
+                .onSuccess { songs ->
+                    _uiState.update { it.copy(searchResultsFromYoutube = songs, error = null) }
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(error = error.getErrorMessage()) }
+                }
+            ytPlaylistJob.await()
+                .onSuccess { playlistYTS ->
+                    Log.d(TAG,"playlist for query is $playlistYTS")
+                    _uiState.update { it.copy(playlistFromYoutube = playlistYTS, error = null) }
+                }
+                .onFailure { error ->
+                    Log.e(TAG,"Error in fetching playlist $error")
                     _uiState.update {
                         it.copy(
-                            isLoading = false,
                             error = error.getErrorMessage()
                         )
                     }
                 }
-            songRepository.searchSongFromYoutube(query = query)
-                .onSuccess { songs ->
-                    Log.i(TAG,"1. Execute search query for $query")
-                }
+            _uiState.update { it.copy(isLoading = false) }
 
         }
 
