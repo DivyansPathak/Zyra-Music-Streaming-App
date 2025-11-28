@@ -27,7 +27,8 @@ class PlaylistViewModel(
     private val playlistRep: PlaylistRepository,
     private val songRepo : SongRepository,
     playlistId: String,
-    playlistType: PlayListType
+    playlistType: PlayListType,
+    coverImage : String?
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PlaylistState())
@@ -38,10 +39,10 @@ class PlaylistViewModel(
 
     init {
         Log.d(TAG, "PlaylistViewModel initiated")
-        getPlaylistSongsDetails(playlistId, playlistType)
+        getPlaylistSongsDetails(playlistId, playlistType,coverImage)
     }
 
-    fun getPlaylistSongsDetails(playlistId: String, playlistType: PlayListType) {
+    fun getPlaylistSongsDetails(playlistId: String, playlistType: PlayListType,coverImage: String?) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
@@ -116,6 +117,13 @@ class PlaylistViewModel(
                 PlayListType.YOUTUBE_PLAYLIST -> {
                     songRepo.getSongsFromYoutubePlaylist(playlistId = playlistId)
                         .onSuccess { songs ->
+                            val uniqueSongs = songs.distinctBy{it.videoId}
+                            Log.d(TAG,"the image url is : $")
+                            val finalCoverUrl = if (!coverImage.isNullOrBlank()) {
+                                coverImage
+                            } else {
+                                songs.firstOrNull()?.thumbnail
+                            }
                             Log.d(TAG,"Songs from playlist is fetched : $songs")
                             _uiState.update { it.copy(
                                 isLoading = false,
@@ -123,8 +131,8 @@ class PlaylistViewModel(
                                     id = playlistId,
                                     title = "playlist from Youtube",
                                     description = "this is the playlist from youtube",
-                                    coverImageUrl = songs.firstOrNull()?.thumbnail,
-                                    tracks = songs,
+                                    coverImageUrl = finalCoverUrl,
+                                    tracks = uniqueSongs,
                                     type = PlayListType.YOUTUBE_PLAYLIST
                                 )
                             ) }

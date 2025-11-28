@@ -33,5 +33,6 @@ data object ProfileScreen : MainScreens
 @Serializable
 data class PlaylistScreen(
     val id: String,
-    val type: PlayListType
+    val type: PlayListType,
+    val coverImage : String? = null
 ) : MainScreens

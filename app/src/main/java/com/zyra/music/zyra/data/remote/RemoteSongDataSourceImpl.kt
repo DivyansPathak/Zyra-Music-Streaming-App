@@ -71,7 +71,7 @@ class RemoteSongDataSourceImpl(private val httpClient: HttpClient, ) : RemoteSon
             safeCall<List<PlaylistDto>> {
                 httpClient.get(urlString = "$YT_BASE_URL/search/playlists") {
                     parameter("query",query)
-                    parameter("limit", 10)
+                    parameter("limit", 20)
                     parameter("min_songs", 5)
                 }
             }

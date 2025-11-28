@@ -7,12 +7,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import coil3.Uri
 import com.google.common.util.concurrent.MoreExecutors
 import com.zyra.music.zyra.data.remote.SupabaseClient.supabase
 import com.zyra.music.zyra.domain.model.TrackFullOne
@@ -26,6 +24,7 @@ import com.zyra.music.zyra.presentation.newPlayer.component.RepeatMode
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,12 +32,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 private const val TAG = "NewMusicViewModel"
 private const val KEY_INSTANCE_ID = "com.zyra.music.INSTANCE_ID"
+
 @androidx.media3.common.util.UnstableApi
-class MainMusicViewModel(private val repository: SongRepository, private val queueManager: NewMusicQueueManager, context: Context) : ViewModel() {
+class MainMusicViewModel(
+    private val repository: SongRepository,
+    private val queueManager: NewMusicQueueManager,
+    context: Context
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NewPlayerState())
     val uiState = _uiState.asStateFlow()
@@ -50,7 +55,9 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
 
     private var sleepTimer: CountDownTimer? = null
 
-    private var needToFetchUpNext : Boolean = false
+    private var needToFetchUpNext: Boolean = false
+
+    private var positionUpdateJob: Job? = null
 
     init {
         Log.d(TAG, "ViewModel init")
@@ -66,22 +73,6 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
             MoreExecutors.directExecutor()
         )
 
-        viewModelScope.launch {
-            Log.d(TAG, "Start")
-            while (true) {
-                if (_uiState.value.isPlaying) {
-                    _uiState.update {
-                        it.copy(
-                            currentPosition = mediaController?.currentPosition?.coerceAtLeast(0L)
-                                ?: 0L,
-                            bufferPosition = mediaController?.bufferedPosition?.coerceAtLeast(0L)
-                                ?: 0L
-                        )
-                    }
-                }
-                delay(1000L)
-            }
-        }
         viewModelScope.launch {
             supabase.auth.sessionStatus.collect { status ->
                 when (status) {
@@ -103,6 +94,27 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
 
     }
 
+    private fun startPositionUpdates() {
+        if (positionUpdateJob != null) return
+
+        positionUpdateJob = viewModelScope.launch {
+            while (mediaController?.isPlaying == true) {
+                _uiState.update {
+                    it.copy(
+                        currentPosition = mediaController?.currentPosition ?: 0L,
+                        bufferPosition = mediaController?.bufferedPosition ?: 0L
+                    )
+                }
+                delay(1000L)
+            }
+        }
+    }
+
+    private fun stopPositionUpdates() {
+        positionUpdateJob?.cancel()
+        positionUpdateJob = null
+    }
+
     fun playPlayList(tracks: List<TrackFullOne>, startIndex: Int = 0, shuffle: Boolean) {
         _uiState.update {
             it.copy(
@@ -120,14 +132,17 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
     }
 
     fun playRadioForSong(clickedTrack: TrackFullOne) {
-        _uiState.update { it.copy(playbackMode = PlaybackMode.RADIO, isManuallyTriggered = true, toggleAutoPlay = true) }
+        _uiState.update {
+            it.copy(
+                playbackMode = PlaybackMode.RADIO,
+                isManuallyTriggered = true,
+                toggleAutoPlay = true
+            )
+        }
         queueManager.setQueueAndPlay(mediaController, tracks = listOf(clickedTrack), startIndex = 0)
 
         needToFetchUpNext = true
 
-//        viewModelScope.launch {
-//            fetchRecommendationsAndUpdateQueue(clickedTrack)
-//        }
     }
 
     fun addSongToPlayNext(track: TrackFullOne) {
@@ -146,7 +161,6 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
 
 
     private fun startSleepTimer(durationInMillis: Long) {
-        // Cancel any previous timer before starting a new one.
         sleepTimer?.cancel()
 
         sleepTimer = object : CountDownTimer(durationInMillis, 1000) {
@@ -196,7 +210,7 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
                 }
             }
 
-            is NewPlayerAction.MoveQueueItem ->{
+            is NewPlayerAction.MoveQueueItem -> {
                 queueManager.moveSongInQueue(
                     controller = mediaController,
                     fromIndex = action.fromIndex,
@@ -222,12 +236,13 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
             NewPlayerAction.ToggleAutoPlay -> {
                 val newState = !_uiState.value.toggleAutoPlay
 
-               _uiState.update { it.copy(toggleAutoPlay = newState) }
+                _uiState.update { it.copy(toggleAutoPlay = newState) }
                 val message = if (newState) "AutoPlay enable" else "AutoPlay disable"
                 viewModelScope.launch {
                     _uiEvent.send(NewPlayerEvent.ShowMessage(message = message))
                 }
             }
+
             is NewPlayerAction.PlayFromQueue -> queueManager.playSongAtIndex(
                 mediaController,
                 action.index
@@ -237,6 +252,7 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
                 mediaController,
                 action.index
             )
+
             NewPlayerAction.Back -> {
                 viewModelScope.launch { _uiEvent.send(NewPlayerEvent.NavigateToBack) }
             }
@@ -279,10 +295,8 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
     }
 
     private fun resetSleepTimerIfNeeded() {
-        // Check if the special "End of Track" timer is active
         if (uiState.value.isEndTrackTimerActive) {
             Log.d(TAG, "Track changed with an active end-of-track timer. Resetting timer now.")
-            // Re-calculate and start the timer for the NEW track
             setTimerToEndOfTrack()
         }
     }
@@ -302,19 +316,25 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
         }
 
         override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-            Log.d(TAG, "Queue is updating MediaItem : ${_uiState.value.currentTrack?.queueInstanceId}")
+            Log.d(
+                TAG,
+                "Queue is updating MediaItem : ${_uiState.value.currentTrack?.queueInstanceId}"
+            )
             updateStateFromController()
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             updateStateFromController()
 
-            if(isPlaying && needToFetchUpNext){
+            if (isPlaying) {
+                startPositionUpdates()
+            } else {
+                stopPositionUpdates()
+            }
+            if (isPlaying && needToFetchUpNext) {
 
                 Log.d(TAG, "Player is stable and playing. Now fetching recommendations.")
                 _uiState.value.currentTrack?.let { fetchRecommendationsAndUpdateQueue(it) }
-
-                // Reset the flag so this doesn't run again on a simple pause/resume.
                 needToFetchUpNext = false
             }
         }
@@ -389,9 +409,13 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
                     albumName = it.mediaMetadata.albumTitle?.toString() ?: "Unknown Album",
                     albumId = it.mediaMetadata.albumTitle?.toString() ?: "",
 
-                    queueInstanceId = it.requestMetadata.extras?.getString(KEY_INSTANCE_ID) ?: UUID.randomUUID().toString()
-                    )
+                    queueInstanceId = it.requestMetadata.extras?.getString(KEY_INSTANCE_ID)
+                        ?: UUID.randomUUID().toString()
+                )
             }
+            viewModelScope.launch {
+
+
             val currentQueue = (0 until controller.mediaItemCount).map { index ->
                 val item = controller.getMediaItemAt(index)
                 TrackFullOne(
@@ -405,12 +429,10 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
                     albumName = item.mediaMetadata.albumTitle?.toString() ?: "Unknown Album",
 
                     queueInstanceId = item.requestMetadata.extras?.getString(KEY_INSTANCE_ID)
-                    ?: UUID.randomUUID().toString()
+                        ?: UUID.randomUUID().toString()
                 )
             }
-            val currentDownloadStatus = controller?.let {
 
-            }
 
             _uiState.update {
                 val isCurrentlyFavorite = it.favoriteIds.contains(currentTrack?.videoId)
@@ -433,6 +455,7 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
                     isFavorite = isCurrentlyFavorite
 
                 )
+            }
             }
 
         }
@@ -484,9 +507,9 @@ class MainMusicViewModel(private val repository: SongRepository, private val que
             }
 
             result.onSuccess {
-                val message = if (isCurrentlyFavorite){
+                val message = if (isCurrentlyFavorite) {
                     "Removed from favorites"
-                } else{
+                } else {
                     "Added to favorites"
                 }
                 _uiEvent.send(NewPlayerEvent.ShowMessage(message = message))

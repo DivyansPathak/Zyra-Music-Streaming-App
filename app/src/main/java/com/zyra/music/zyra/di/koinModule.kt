@@ -65,7 +65,8 @@ val koinModule = module {
            get(),
            get(),
            playlistId = param.get(),
-           playlistType = param.get()
+           playlistType = param.get(),
+           coverImage = param.get()
        )
    }
 

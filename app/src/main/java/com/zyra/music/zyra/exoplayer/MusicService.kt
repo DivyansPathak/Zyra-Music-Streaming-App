@@ -35,7 +35,6 @@ class MusicService : MediaSessionService() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    // The MediaSession.Callback is the key to linking our repository to the player.
     private val callback = object : MediaSession.Callback {
         override fun onAddMediaItems(
             mediaSession: MediaSession,
@@ -90,7 +89,6 @@ class MusicService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
-        // --- CACHING SETUP ---
         val mediaCache = CacheUtils.getInstance(this)
         val cacheDataSourceFactory = CacheDataSource.Factory()
             .setCache(mediaCache)
@@ -100,14 +98,13 @@ class MusicService : MediaSessionService() {
             .setDataSourceFactory(cacheDataSourceFactory)
 
 
-        // 1. Create a custom LoadControl with larger buffer sizes
         val loadControl = DefaultLoadControl.Builder()
             .setAllocator(DefaultAllocator(true, 16 * 1024))
             .setBufferDurationsMs(
-                32 * 1024,  // minBufferMs - Minimum duration of media that must be buffered.
-                64 * 1024,  // maxBufferMs - Maximum duration of media that can be buffered.
-                1500,       // bufferForPlaybackMs - Duration of media needed to start playback.
-                2000        // bufferForPlaybackAfterRebufferMs - Duration needed to resume after a rebuffer.
+                10_000,
+                30_000,
+                1000,
+                2000
             )
             .setTargetBufferBytes(-1)
             .setPrioritizeTimeOverSizeThresholds(true)

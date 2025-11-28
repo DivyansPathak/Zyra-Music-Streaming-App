@@ -50,7 +50,7 @@ fun SearchScreenN(
     addToQueueClick: (TrackFullOne) -> Unit,
     addToPlaylistClick: (TrackFullOne) -> Unit,
     addToFavoriteClick: (TrackFullOne) -> Unit,
-    onPlaylistClick : (String) -> Unit,
+    onPlaylistClick : (String,String) -> Unit,
     eventFlow: Flow<SearchEvent>,
     contentPadding: Dp = 0.dp
 ) {
@@ -230,7 +230,7 @@ fun SearchScreenN(
                                         PlaylistCardHorizontal(
                                             playlistYt = playlist,
                                             onClick = {playlistId ->
-                                                    onPlaylistClick(playlistId)
+                                                    onPlaylistClick(playlistId, playlist.thumbnail)
                                             }
                                         )
                                     }

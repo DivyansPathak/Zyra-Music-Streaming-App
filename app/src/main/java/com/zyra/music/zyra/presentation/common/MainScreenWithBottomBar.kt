@@ -197,11 +197,13 @@ fun MainScreenWithBottomBar(
                                 mainViewModel.playRadioForSong(track)
                                 appTopBackStack.add(PlayerScreen)
                             },
-                            onPlaylistClick = {playlistId ->
+                            onPlaylistClick = {playlistId, coverImage ->
+                                Log.d(TAG,"the image url is $coverImage")
                                 mainBackStack.add(
                                     PlaylistScreen(
                                         id = playlistId,
-                                        type = PlayListType.YOUTUBE_PLAYLIST
+                                        type = PlayListType.YOUTUBE_PLAYLIST,
+                                        coverImage = coverImage
                                     )
                                 )
                             },
@@ -244,7 +246,7 @@ fun MainScreenWithBottomBar(
                         )
                         val state by playlistViewModel.uiState.collectAsStateWithLifecycle()
                         LaunchedEffect(Unit) {
-                            playlistViewModel.getPlaylistSongsDetails(screen.id, screen.type)
+                            playlistViewModel.getPlaylistSongsDetails(screen.id, screen.type, screen.coverImage)
                         }
                         val removeFun: ((TrackFullOne) -> Unit)? =
                             if (state.playlistDetails?.type == PlayListType.USER_CREATED) {
